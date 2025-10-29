@@ -200,10 +200,10 @@ module.exports = function (app, passport) {
       }
 
       // Find the user by any stored social token
-      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'linkedin.token': token }] }, (err, user) => {
+      User.findOne({ $or: [{ 'Extensiontoken': token },{'google.token':token}, { 'linkedin.token': token }] }, (err, user) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found.' });
-          console.log("HERE");
+         
           const profileData = {
           user: user._id,
           profileUrl: payload.profileUrl || '',
