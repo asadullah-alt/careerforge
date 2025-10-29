@@ -193,7 +193,7 @@ module.exports = function (app, passport) {
     try {
       const payload = req.body || {};
       const token = payload.token || (req.headers && (req.headers.authorization || req.headers.Authorization) ? (req.headers.authorization || req.headers.Authorization).replace(/^Bearer\s+/i, '') : null);
-      console.log(payload);
+      
       
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token in request body or Authorization header.' });
@@ -219,7 +219,7 @@ module.exports = function (app, passport) {
           rawProjects: payload.details_projects_main || '',
           skills: Array.isArray(payload.skills) ? payload.skills : []
         };
-        
+        console.log("user found for profile save:", user._id);
         // Upsert profile by user + profileUrl
         Profile.findOneAndUpdate({ user: user._id, profileUrl: profileData.profileUrl }, profileData, { upsert: true, new: true, setDefaultsOnInsert: true }, (err2, savedProfile) => {
           if (err2) return res.status(500).json({ success: false, message: err2.message });

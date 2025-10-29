@@ -16,7 +16,7 @@ const title = process.env.TITLE || 'Passport App';
 
 // DB config
 let configDB = require('./config/database.js');
-mongoose.connect(configDB.url, {useNewUrlParser: true, useUnifiedTopology: true}).then(() => {
+mongoose.connect(configDB.url, {useNewUrlParser: true, useUnifiedTopology: true,useFindAndModify: false}).then(() => {
     console.log("Connected to mongoDB");
   })
   .catch((e) => {
