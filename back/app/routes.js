@@ -243,12 +243,12 @@ module.exports = function (app, passport) {
       const systemPromptData = {"system_prompt":"using the schema above convert the information into the JSON object","user_input":"{ \"jobId\": \"\", \"title\": \"\", \"companyName\": \"\", \"companyLogoUrl\": \"\", \"companyWebsite\": \"\", \"companyDescription\": \"\", \"description\": \"\", \"responsibilities\": [], \"requirements\": { \"mustHave\": [], \"niceToHave\": [] }, \"location\": { \"city\": \"\", \"state\": \"\", \"country\": \"\", \"postalCode\": \"\", \"address\": \"\", \"locationType\": \"\" }, \"employmentType\": \"\", \"schedule\": \"\", \"salary\": { \"min\": null, \"max\": null, \"currency\": \"\", \"payPeriod\": \"\", \"details\": \"\" }, \"benefits\": [], \"howToApply\": \"\", \"applyUrl\": \"\", \"contactEmail\": \"\", \"datePosted\": \"\", \"validThrough\": \"\", \"department\": \"\", \"experienceLevel\": \"\", \"industry\": \"\" }"};
 
 let cleanedHTML = cleanHTML(html);
-      const responseGemini = await ollamaClient.generate({
+      const response = await ollamaClient.generate({
     model: 'gpt-oss:latest',
     prompt: cleanedHTML+systemPromptData.user_input+systemPromptData.system_prompt,
     stream: false
   });
-
+responseGemini = response.response;
   // responseGemini = await runGeminiFlash('gemini-2.5-flash', cleanedHTML+systemPromptData.user_input+systemPromptData.system_prompt);
   console.log(responseGemini);
       if (!token) {
@@ -301,7 +301,7 @@ let cleanedHTML = cleanHTML(html);
           user: user ? user._id : undefined,
           url,
           html,
-          parsed,
+          parsed: parsed? JSON.stringify(parsed) : null,
         });
 
         doc.save((saveErr, saved) => {
