@@ -244,7 +244,7 @@ module.exports = function (app, passport) {
 
 let cleanedHTML = cleanHTML(html);
       const response = await ollamaClient.generate({
-    model: 'llama3.2:3b',
+    model: 'llama3.1:8b',
     prompt: cleanedHTML+systemPromptData.user_input+systemPromptData.system_prompt,
     stream: false
   });
