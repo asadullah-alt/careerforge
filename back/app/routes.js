@@ -222,7 +222,9 @@ module.exports = function (app, passport) {
         console.log("user found for profile save:", user._id);
         // Upsert profile by user + profileUrl
         Profile.findOneAndUpdate({ user: user._id }, profileData, { upsert: true, new: true, setDefaultsOnInsert: true }, (err2, savedProfile) => {
-          if (err2) return res.status(500).json({ success: false, message: err2.message });
+          if (err2) {console.log(err2.message);
+            return res.status(500).json({ success: false, message: err2.message });}
+            console.log("Profile saved for user:", user._id);
           return res.json({ success: true, message: 'Profile saved successfully.', profile: savedProfile });
         });
       });
