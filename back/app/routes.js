@@ -240,14 +240,16 @@ module.exports = function (app, passport) {
 
       const url = payload.url || '';
       const html = payload.html || '';
-// const response = await ollamaClient.generate({
-//     model: 'gpt-oss:latest',
-//     prompt: html+"\n\nIndeed, LinkedIn, Glassdoor, ZipRecruiter, Google for Jobs, FlexJobs, Monster, CareerBuilder, Dice, Upwork, Rozee.pk, Mustakbil.com, Bayt.com Which job portal is this job from ? Give answer in json format like {\"portal\": \"PortalName\"}",
-//     stream: false
-//   });
+      const systemPromptData = {"system_prompt":"using the schema above convert the information into the JSON object","user_input":"{ \"jobId\": \"\", \"title\": \"\", \"companyName\": \"\", \"companyLogoUrl\": \"\", \"companyWebsite\": \"\", \"companyDescription\": \"\", \"description\": \"\", \"responsibilities\": [], \"requirements\": { \"mustHave\": [], \"niceToHave\": [] }, \"location\": { \"city\": \"\", \"state\": \"\", \"country\": \"\", \"postalCode\": \"\", \"address\": \"\", \"locationType\": \"\" }, \"employmentType\": \"\", \"schedule\": \"\", \"salary\": { \"min\": null, \"max\": null, \"currency\": \"\", \"payPeriod\": \"\", \"details\": \"\" }, \"benefits\": [], \"howToApply\": \"\", \"applyUrl\": \"\", \"contactEmail\": \"\", \"datePosted\": \"\", \"validThrough\": \"\", \"department\": \"\", \"experienceLevel\": \"\", \"industry\": \"\" }"};
+
 let cleanedHTML = cleanHTML(html);
-const systemPromptData = {"system_prompt":"using the schema above convert the information into the JSON object","user_input":"{ \"jobId\": \"\", \"title\": \"\", \"companyName\": \"\", \"companyLogoUrl\": \"\", \"companyWebsite\": \"\", \"companyDescription\": \"\", \"description\": \"\", \"responsibilities\": [], \"requirements\": { \"mustHave\": [], \"niceToHave\": [] }, \"location\": { \"city\": \"\", \"state\": \"\", \"country\": \"\", \"postalCode\": \"\", \"address\": \"\", \"locationType\": \"\" }, \"employmentType\": \"\", \"schedule\": \"\", \"salary\": { \"min\": null, \"max\": null, \"currency\": \"\", \"payPeriod\": \"\", \"details\": \"\" }, \"benefits\": [], \"howToApply\": \"\", \"applyUrl\": \"\", \"contactEmail\": \"\", \"datePosted\": \"\", \"validThrough\": \"\", \"department\": \"\", \"experienceLevel\": \"\", \"industry\": \"\" }"};
-   responseGemini = await runGeminiFlash('gemini-2.5-flash', cleanedHTML+systemPromptData.user_input+systemPromptData.system_prompt);
+      const responseGemini = await ollamaClient.generate({
+    model: 'gpt-oss:latest',
+    prompt: cleanedHTML+systemPromptData.user_input+systemPromptData.system_prompt,
+    stream: false
+  });
+
+  // responseGemini = await runGeminiFlash('gemini-2.5-flash', cleanedHTML+systemPromptData.user_input+systemPromptData.system_prompt);
   console.log(responseGemini);
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token' });
