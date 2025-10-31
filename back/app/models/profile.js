@@ -22,7 +22,7 @@ const ProfileSchema = new mongoose.Schema({
   experience: { type: [ExperienceSchema], default: [] },
   rawExperience: { type: String, default: '' },
   rawEducation: { type: String, default: '' },
-  rawSkills: { type: String, default: '' },
+  rawSkills: { type: Array, default: '' },
   rawProjects: { type: String, default: '' },
   education: { type: [EducationSchema], default: [] },
   skills: { type: [String], default: [] }
