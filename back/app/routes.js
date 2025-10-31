@@ -18,7 +18,8 @@ function cleanHTML(htmlContent, options = {}) {
     removeIframe: true,
     removeClasses: true,
     removeATags: true,
-    removeMeta: true
+    removeMeta: true,
+    removeNewlines: true
   };
 
   // Merge user options with defaults
@@ -74,6 +75,11 @@ function cleanHTML(htmlContent, options = {}) {
   // Remove <meta> tags
   if (opts.removeMeta) {
     cleaned = cleaned.replace(/<meta\b[^>]*>/gi, '');
+  }
+
+  // Remove newlines
+  if (opts.removeNewlines) {
+    cleaned = cleaned.replace(/\n/g, '');
   }
 
   return cleaned;
