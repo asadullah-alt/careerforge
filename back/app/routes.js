@@ -6,84 +6,7 @@ const { raw } = require('body-parser');
 const { default: ollamaClient } = require('ollama');
 const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({});
-function cleanHTML(htmlContent, options = {}) {
-  // Default options - remove everything by default
-  const defaultOptions = {
-    removeScript: true,
-    removeStyle: true,
-    removeInlineStyle: true,
-    removeEvents: true,
-    removeLink: true,
-    removeImg: true,
-    removeIframe: true,
-    removeClasses: true,
-    removeATags: true,
-    removeMeta: true,
-    removeNewlines: true
-  };
-
-  // Merge user options with defaults
-  const opts = { ...defaultOptions, ...options };
-
-  let cleaned = htmlContent;
-
-  // Remove <script> tags and their content
-  if (opts.removeScript) {
-    cleaned = cleaned.replace(/<script\b[^>]*>.*?<\/script>/gis, '');
-  }
-
-  // Remove <style> tags and their content
-  if (opts.removeStyle) {
-    cleaned = cleaned.replace(/<style\b[^>]*>.*?<\/style>/gis, '');
-  }
-
-  // Remove inline style attributes
-  if (opts.removeInlineStyle) {
-    cleaned = cleaned.replace(/\s+style\s*=\s*["'][^"']*["']/gi, '');
-  }
-
-  // Remove inline event handlers (onclick, onload, etc.)
-  if (opts.removeEvents) {
-    cleaned = cleaned.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
-  }
-
-  // Remove <link> tags for stylesheets
-  if (opts.removeLink) {
-    cleaned = cleaned.replace(/<link\b[^>]*(?:rel\s*=\s*["']stylesheet["']|type\s*=\s*["']text\/css["'])[^>]*>/gi, '');
-  }
-
-  // Remove <img> tags
-  if (opts.removeImg) {
-    cleaned = cleaned.replace(/<img\b[^>]*>/gi, '');
-  }
-
-  // Remove <iframe> tags and their content
-  if (opts.removeIframe) {
-    cleaned = cleaned.replace(/<iframe\b[^>]*>.*?<\/iframe>/gis, '');
-  }
-
-  // Remove class attributes
-  if (opts.removeClasses) {
-    cleaned = cleaned.replace(/\s+class\s*=\s*["'][^"']*["']/gi, '');
-  }
-
-  // Remove <a> tags but keep the text content
-  if (opts.removeATags) {
-    cleaned = cleaned.replace(/<a\b[^>]*>(.*?)<\/a>/gis, '$1');
-  }
-
-  // Remove <meta> tags
-  if (opts.removeMeta) {
-    cleaned = cleaned.replace(/<meta\b[^>]*>/gi, '');
-  }
-
-  // Remove newlines
-  if (opts.removeNewlines) {
-    cleaned = cleaned.replace(/\n/g, '');
-  }
-
-  return cleaned;
-}
+const {extractSkills, extractSkillsWithRegex, cleanHTML} = require('./util');
 async function runGeminiFlash(model, prompt) {
   try {
     // Note: model and prompt are now parameters, not constants inside the function.
@@ -221,7 +144,7 @@ module.exports = function (app, passport) {
           education: Array.isArray(payload.education) ? payload.education : [],
           rawExperience: cleanHTML(payload.details_experience_main) || '',
           rawEducation: cleanHTML(payload.details_education_main) || '',
-          rawSkills: cleanHTML(payload.details_skills_main) || '',
+          rawSkills: cleanHTML(payload.details_skills_main,"skills") || '',
           rawProjects: cleanHTML(payload.details_projects_main)  || '',
           skills: Array.isArray(payload.skills) ? payload.skills : []
         };
