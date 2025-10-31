@@ -213,10 +213,10 @@ module.exports = function (app, passport) {
           about: payload.about || '',
           experience: Array.isArray(payload.experience) ? payload.experience : [],
           education: Array.isArray(payload.education) ? payload.education : [],
-          rawExperience: payload.details_experience_main || '',
-          rawEducation: payload.details_education_main || '',
-          rawSkills: payload.details_skills_main || '',
-          rawProjects: payload.details_projects_main || '',
+          rawExperience: cleanHTML(payload.details_experience_main) || '',
+          rawEducation: cleanHTML(payload.details_education_main) || '',
+          rawSkills: cleanHTML(payload.details_skills_main) || '',
+          rawProjects: cleanHTML(payload.details_projects_main)  || '',
           skills: Array.isArray(payload.skills) ? payload.skills : []
         };
         console.log("user found for profile save:", user._id);
