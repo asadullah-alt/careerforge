@@ -55,7 +55,7 @@ function extractSkillsWithRegex(html) {
   return Array.from(skills);
 }
 
-function cleanHTML(htmlContent, options = {},moduleTypeCV) {
+function cleanHTML(htmlContent,moduleTypeCV='default') {
   // Default options - remove everything by default
   const defaultOptions = {
     removeScript: true,
@@ -72,7 +72,7 @@ function cleanHTML(htmlContent, options = {},moduleTypeCV) {
   };
 
   // Merge user options with defaults
-  const opts = { ...defaultOptions, ...options };
+  const opts = { ...defaultOptions };
 
   let cleaned = htmlContent;
 
@@ -131,6 +131,7 @@ function cleanHTML(htmlContent, options = {},moduleTypeCV) {
     cleaned = cleaned.replace(/\n/g, '');
   }
   if(moduleTypeCV==='skills'){
+    
  skillsArray = extractSkillsWithRegex(cleaned);
   return skillsArray;
 }
