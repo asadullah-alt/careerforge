@@ -86,23 +86,15 @@ export default function LinkedinModal({ open, onOpenChange }: { open: boolean; o
               </div>
 
               <div className="mt-6">
-                <p className="text-sm">Once the extension is installed, open your LinkedIn profile in Chrome and click the extension to extract your profile. Then return here to continue.</p>
+                <p className="text-sm">Once the extension is installed, open your LinkedIn profile in Chrome and click the extension to extract your profile.</p>
               </div>
 
-              <div className="mt-6 p-4 border rounded">
-                <h3 className="font-medium">Extension token</h3>
-                <p className="text-sm text-muted-foreground mt-2">Your extension token lets the Chrome extension identify you. Create one if you don&apos;t have it, then copy it into the extension.</p>
-                <div className="mt-4 flex gap-2 items-center">
-                  <input readOnly value={token ?? ''} placeholder={loading ? 'Loading...' : 'No token yet'} className="flex-1 p-2 border rounded bg-muted/10" />
-                  <Button size="sm" onClick={createToken} disabled={loading}>{token ? 'Refresh' : 'Create'}</Button>
-                  <Button size="sm" onClick={handleCopy} disabled={!token}>{copied ? 'Copied' : 'Copy'}</Button>
-                </div>
-              </div>
+           
             </div>
 
             <SheetFooter>
               <div className="flex items-center justify-between w-full">
-                <div className="text-xs text-muted-foreground">We don&apos;t store anything on the server in this demo.</div>
+              
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
                 </div>

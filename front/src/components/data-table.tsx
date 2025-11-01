@@ -108,12 +108,15 @@ import {
 
 export const schema = z.object({
   id: z.number(),
-  header: z.string(),
-  type: z.string(),
+  jobPosition: z.string(),
+  company: z.string(),
+  maxSalary: z.string(),
+  location: z.string(),
   status: z.string(),
-  target: z.string(),
-  limit: z.string(),
-  reviewer: z.string(),
+  dateSaved: z.string(),
+  deadline: z.string(),
+  dateApplied: z.string(),
+  followUp: z.string(),
 })
 
 // Create a separate component for the drag handle
@@ -169,21 +172,37 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "header",
-    header: "Header",
+    accessorKey: "jobPosition",
+    header: "Position",
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />
     },
     enableHiding: false,
   },
   {
-    accessorKey: "type",
-    header: "Section Type",
+    accessorKey: "company",
+    header: "Company",
     cell: ({ row }) => (
       <div className="w-32">
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
-          {row.original.type}
-        </Badge>
+        <span className="font-medium">{row.original.company}</span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "maxSalary",
+    header: "Max Salary",
+    cell: ({ row }) => (
+      <div className="w-24">
+        <span className="text-muted-foreground">{row.original.maxSalary}</span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "location",
+    header: "Location",
+    cell: ({ row }) => (
+      <div className="w-32">
+        <span className="text-muted-foreground">{row.original.location}</span>
       </div>
     ),
   },
@@ -191,99 +210,50 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5">
-        {row.original.status === "Done" ? (
-          <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-        ) : (
-          <IconLoader />
-        )}
+      <Badge variant="outline" className={`text-muted-foreground px-1.5 ${
+        row.original.status === "Interviewing" ? "bg-green-100 text-green-800" :
+        row.original.status === "Applied" ? "bg-blue-100 text-blue-800" :
+        "bg-gray-100 text-gray-800"
+      }`}>
         {row.original.status}
       </Badge>
     ),
   },
   {
-    accessorKey: "target",
-    header: () => <div className="w-full text-right">Target</div>,
+    accessorKey: "dateSaved",
+    header: "Date Saved",
     cell: ({ row }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.header}`,
-            success: "Done",
-            error: "Error",
-          })
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-target`} className="sr-only">
-          Target
-        </Label>
-        <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
-          defaultValue={row.original.target}
-          id={`${row.original.id}-target`}
-        />
-      </form>
+      <div className="w-24">
+        <span className="text-muted-foreground">{row.original.dateSaved}</span>
+      </div>
     ),
   },
   {
-    accessorKey: "limit",
-    header: () => <div className="w-full text-right">Limit</div>,
+    accessorKey: "deadline",
+    header: "Deadline",
     cell: ({ row }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.header}`,
-            success: "Done",
-            error: "Error",
-          })
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
-          Limit
-        </Label>
-        <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
-          defaultValue={row.original.limit}
-          id={`${row.original.id}-limit`}
-        />
-      </form>
+      <div className="w-24">
+        <span className="font-medium text-red-600">{row.original.deadline}</span>
+      </div>
     ),
   },
   {
-    accessorKey: "reviewer",
-    header: "Reviewer",
-    cell: ({ row }) => {
-      const isAssigned = row.original.reviewer !== "Assign reviewer"
-
-      if (isAssigned) {
-        return row.original.reviewer
-      }
-
-      return (
-        <>
-          <Label htmlFor={`${row.original.id}-reviewer`} className="sr-only">
-            Reviewer
-          </Label>
-          <Select>
-            <SelectTrigger
-              className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
-              size="sm"
-              id={`${row.original.id}-reviewer`}
-            >
-              <SelectValue placeholder="Assign reviewer" />
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-              <SelectItem value="Jamik Tashpulatov">
-                Jamik Tashpulatov
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </>
-      )
-    },
+    accessorKey: "dateApplied",
+    header: "Date Applied",
+    cell: ({ row }) => (
+      <div className="w-24">
+        <span className="text-muted-foreground">{row.original.dateApplied}</span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "followUp",
+    header: "Follow Up",
+    cell: ({ row }) => (
+      <div className="w-24">
+        <span className="text-muted-foreground">{row.original.followUp}</span>
+      </div>
+    ),
   },
   {
     id: "actions",

@@ -149,7 +149,7 @@ export function SiteHeader() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => window.open('mailto:hello@careerforge.com')}
+           
             className="border border-gray-200 dark:border-gray-700 rounded-md px-2"
           >
             <Mail className="size-4 mr-2" />
