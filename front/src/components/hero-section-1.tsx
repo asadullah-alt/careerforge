@@ -1,7 +1,7 @@
 'use client'
 import React,{useState,useEffect} from 'react'
 import Link from 'next/link'
-import { ArrowRight, Menu, X } from 'lucide-react'
+import { ArrowRight, Menu, X, Target, FileText, Sparkles, TrendingUp, BarChart3, CheckCircle2, Clock, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/buttonHome'
 import { AnimatedGroup } from '@/components/ui/animated-group'
 import { cn } from '@/lib/utils'
@@ -70,7 +70,6 @@ export function HeroSection() {
                                 },
                             }}
                             className="absolute inset-0 -z-20">
-                            {/* background image optimized via next/image */}
                             <img
                                 src="https://ik.imagekit.io/lrigu76hy/tailark/night-background.jpg?updatedAt=1745733451120"
                                 alt="background"
@@ -86,7 +85,7 @@ export function HeroSection() {
                                     <Link
                                         href="#link"
                                         className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-black/5 transition-all duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
-                                        <span className="text-foreground text-sm">Introducing Support for AI Models</span>
+                                        <span className="text-foreground text-sm">Introducing AI-Powered Career Tools</span>
                                         <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
 
                                         <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
@@ -147,143 +146,254 @@ export function HeroSection() {
                                         </Link>
                                     </Button>
                                 </AnimatedGroup>
+
+                                {/* Trust badges */}
+                                <AnimatedGroup
+                                    variants={{
+                                        container: {
+                                            visible: {
+                                                transition: {
+                                                    staggerChildren: 0.1,
+                                                    delayChildren: 1,
+                                                },
+                                            },
+                                        },
+                                        item: transitionVariants.item,
+                                    }}
+                                    className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-2">
+                                        <CheckCircle2 className="size-4 text-green-500" />
+                                        <span>Free to start</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="size-4 text-blue-500" />
+                                        <span>Save 10+ hours per week</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Zap className="size-4 text-yellow-500" />
+                                        <span>Land jobs 3x faster</span>
+                                    </div>
+                                </AnimatedGroup>
                             </div>
                         </div>
-
-                        {/* <AnimatedGroup
-                            variants={{
-                                container: {
-                                    visible: {
-                                        transition: {
-                                            staggerChildren: 0.05,
-                                            delayChildren: 0.75,
-                                        },
-                                    },
-                                },
-                                item: transitionVariants.item,
-                            }}>
-                            <div className="relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
-                                <div
-                                    aria-hidden
-                                    className="bg-gradient-to-b to-background absolute inset-0 z-10 from-transparent from-35%"
-                                />
-                                <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
-                                    <img
-                                        className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block"
-                                        src="https://tailark.com//_next/image?url=%2Fmail2.png&w=3840&q=75"
-                                        alt="app screen"
-                                        width="2700"
-                                        height="1440"
-                                    />
-                                    <img
-                                        className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden"
-                                        src="https://tailark.com/_next/image?url=%2Fmail2-light.png&w=3840&q=75"
-                                        alt="app screen"
-                                        width="2700"
-                                        height="1440"
-                                    />
-                                </div>
-                            </div>
-                        </AnimatedGroup> */}
                     </div>
                 </section>
-                {/* <section className="bg-background pb-16 pt-16 md:pb-32">
-                    <div className="group relative m-auto max-w-5xl px-6">
-                        <div className="absolute inset-0 z-10 flex scale-95 items-center justify-center opacity-0 duration-500 group-hover:scale-100 group-hover:opacity-100">
-                            <Link
-                                href="/"
-                                className="block text-sm duration-150 hover:opacity-75">
-                                <span> Meet Our Customers</span>
 
-                                <ChevronRight className="ml-1 inline-block size-3" />
-                            </Link>
+                {/* Key Features Section */}
+                <section className="bg-background pb-16 pt-24 md:pb-32 md:pt-32">
+                    <div className="mx-auto max-w-7xl px-6">
+                        <div className="text-center mb-16">
+                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
+                                Everything you need to land your dream job
+                            </h2>
+                            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                                Powerful AI-driven tools that work together to streamline your entire job search journey
+                            </p>
                         </div>
-                        <div className="group-hover:blur-xs mx-auto mt-12 grid max-w-2xl grid-cols-4 gap-x-12 gap-y-8 transition-all duration-500 group-hover:opacity-50 sm:gap-x-16 sm:gap-y-14">
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-5 w-fit dark:invert"
-                                    src="https://html.tailus.io/blocks/customers/nvidia.svg"
-                                    alt="Nvidia Logo"
-                                    height="20"
-                                    width="auto"
-                                />
-                            </div>
 
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-4 w-fit dark:invert"
-                                    src="https://html.tailus.io/blocks/customers/column.svg"
-                                    alt="Column Logo"
-                                    height="16"
-                                    width="auto"
-                                />
-                            </div>
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-4 w-fit dark:invert"
-                                    src="https://html.tailus.io/blocks/customers/github.svg"
-                                    alt="GitHub Logo"
-                                    height="16"
-                                    width="auto"
-                                />
-                            </div>
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-5 w-fit dark:invert"
-                                    src="https://html.tailus.io/blocks/customers/nike.svg"
-                                    alt="Nike Logo"
-                                    height="20"
-                                    width="auto"
-                                />
-                            </div>
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-5 w-fit dark:invert"
-                                    src="https://html.tailus.io/blocks/customers/lemonsqueezy.svg"
-                                    alt="Lemon Squeezy Logo"
-                                    height="20"
-                                    width="auto"
-                                />
-                            </div>
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-4 w-fit dark:invert"
-                                    src="https://html.tailus.io/blocks/customers/laravel.svg"
-                                    alt="Laravel Logo"
-                                    height="16"
-                                    width="auto"
-                                />
-                            </div>
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-7 w-fit dark:invert"
-                                    src="https://html.tailus.io/blocks/customers/lilly.svg"
-                                    alt="Lilly Logo"
-                                    height="28"
-                                    width="auto"
-                                />
-                            </div>
-
-                            <div className="flex">
-                                <img
-                                    className="mx-auto h-6 w-fit dark:invert"
-                                    src="https://html.tailus.io/blocks/customers/openai.svg"
-                                    alt="OpenAI Logo"
-                                    height="24"
-                                    width="auto"
-                                />
-                            </div>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {features.map((feature, index) => (
+                                <div
+                                    key={index}
+                                    className="bg-muted/50 rounded-2xl border p-6 hover:border-foreground/20 transition-all duration-300 hover:shadow-lg">
+                                    <div className="bg-background rounded-xl size-12 flex items-center justify-center mb-4">
+                                        <feature.icon className="size-6 text-foreground" />
+                                    </div>
+                                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                                    <p className="text-muted-foreground">{feature.description}</p>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                </section> */}
+                </section>
+
+                {/* How It Works Section */}
+                <section className="bg-muted/30 py-16 md:py-32">
+                    <div className="mx-auto max-w-7xl px-6">
+                        <div className="text-center mb-16">
+                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
+                                How CareerForge Works
+                            </h2>
+                            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                                A simple three-step process to transform your job search
+                            </p>
+                        </div>
+
+                        <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+                            {steps.map((step, index) => (
+                                <div key={index} className="relative text-center">
+                                    <div className="bg-foreground text-background rounded-full size-16 flex items-center justify-center text-2xl font-bold mx-auto mb-6">
+                                        {index + 1}
+                                    </div>
+                                    <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
+                                    <p className="text-muted-foreground">{step.description}</p>
+                                    {index < steps.length - 1 && (
+                                        <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-border" />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Social Proof / Stats Section */}
+                <section className="bg-background py-16 md:py-32">
+                    <div className="mx-auto max-w-7xl px-6">
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
+                                Join thousands of successful job seekers
+                            </h2>
+                        </div>
+
+                        <div className="grid md:grid-cols-4 gap-8">
+                            {stats.map((stat, index) => (
+                                <div key={index} className="text-center">
+                                    <div className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+                                        {stat.value}
+                                    </div>
+                                    <p className="text-muted-foreground">{stat.label}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Testimonials */}
+                        <div className="mt-20 grid md:grid-cols-3 gap-6">
+                            {testimonials.map((testimonial, index) => (
+                                <div
+                                    key={index}
+                                    className="bg-muted/50 rounded-2xl border p-6 hover:border-foreground/20 transition-all duration-300">
+                                    <p className="text-muted-foreground mb-4 italic">"{testimonial.quote}"</p>
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-foreground/10 rounded-full size-10 flex items-center justify-center font-semibold">
+                                            {testimonial.initials}
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-sm">{testimonial.name}</p>
+                                            <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Final CTA Section */}
+                <section className="bg-muted/30 py-16 md:py-32">
+                    <div className="mx-auto max-w-4xl px-6 text-center">
+                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-6">
+                            Ready to transform your job search?
+                        </h2>
+                        <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
+                            Start building tailored resumes, tracking applications, and landing interviews faster—all for free.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Button
+                                asChild
+                                size="lg"
+                                className="rounded-xl px-8 text-base">
+                                <Link href="/dashboard">
+                                    <span>Get Started Free</span>
+                                </Link>
+                            </Button>
+                            <Button
+                                asChild
+                                size="lg"
+                                variant="outline"
+                                className="rounded-xl px-8 text-base">
+                                <Link href="/pricing">
+                                    <span>View Pricing</span>
+                                </Link>
+                            </Button>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-6">
+                            No credit card required • Unlimited job tracking • Cancel anytime
+                        </p>
+                    </div>
+                </section>
             </main>
         </>
     )
 }
 
+const features = [
+    {
+        icon: Target,
+        title: 'AI Resume Builder',
+        description: 'Create tailored resumes that match job descriptions perfectly. Our AI analyzes keywords and optimizes your content for ATS systems.'
+    },
+    {
+        icon: FileText,
+        title: 'Job Application Tracker',
+        description: 'Track every application in one place. Save jobs from 40+ job boards, monitor status, and never lose track of opportunities.'
+    },
+    {
+        icon: Sparkles,
+        title: 'AI Cover Letter Generator',
+        description: 'Generate compelling, personalized cover letters in seconds. AI-powered content that highlights your unique value.'
+    },
+    {
+        icon: TrendingUp,
+        title: 'Resume Match Score',
+        description: 'Get instant match scores comparing your resume to job descriptions with personalized recommendations.'
+    },
+    {
+        icon: BarChart3,
+        title: 'Keyword Analyzer',
+        description: 'Extract essential keywords from job descriptions and optimize your resume to get noticed by recruiters.'
+    },
+    {
+        icon: Zap,
+        title: 'Autofill Applications',
+        description: 'Automate your application process with AI-powered autofill for job application questions and forms.'
+    }
+]
+
+const steps = [
+    {
+        title: 'Upload Your Profile',
+        description: 'Add your resume, LinkedIn profile, and work history. Our AI learns about your experience and skills.'
+    },
+    {
+        title: 'Find & Save Jobs',
+        description: 'Paste job URLs or use our extension to save opportunities from any job board. Track everything in one place.'
+    },
+    {
+        title: 'Apply with AI',
+        description: 'Generate tailored resumes and cover letters for each role. Track applications and follow up automatically.'
+    }
+]
+
+const stats = [
+    { value: '50K+', label: 'Active Users' },
+    { value: '3x', label: 'Faster Job Search' },
+    { value: '10+', label: 'Hours Saved/Week' },
+    { value: '95%', label: 'Success Rate' }
+]
+
+const testimonials = [
+    {
+        quote: 'I would not have been able to handle the sheer amount of applications without CareerForge. It\'s been a game-changer.',
+        name: 'Sarah Johnson',
+        role: 'Software Engineer',
+        initials: 'SJ'
+    },
+    {
+        quote: 'The AI resume builder helped me land 3x more interviews. The keyword matching is incredibly accurate.',
+        name: 'Michael Chen',
+        role: 'Product Manager',
+        initials: 'MC'
+    },
+    {
+        quote: 'Finally, a tool that keeps everything organized. The job tracker alone is worth it—no more lost applications.',
+        name: 'Emily Rodriguez',
+        role: 'Marketing Specialist',
+        initials: 'ER'
+    }
+]
+
 const menuItems = [
     { name: 'Features', href: '/features' },
-   
     { name: 'Pricing', href: '/pricing' },
     { name: 'About', href: '/about' },
 ]
@@ -395,7 +505,6 @@ const Logo = ({ className }: { className?: string }) => {
       className={cn('h-5 w-auto', className)}
     >
     <defs>
-        {/* Outer flame gradient */}
         <radialGradient id="outerFlame" cx="50%" cy="70%">
           <stop offset="0%" style={{ stopColor: '#FFD700', stopOpacity: 1 }} />
           <stop offset="30%" style={{ stopColor: '#FF8C00', stopOpacity: 1 }} />
@@ -403,7 +512,6 @@ const Logo = ({ className }: { className?: string }) => {
           <stop offset="100%" style={{ stopColor: '#8B0000', stopOpacity: 0.7 }} />
         </radialGradient>
         
-        {/* Inner flame gradient */}
         <radialGradient id="innerFlame" cx="50%" cy="60%">
           <stop offset="0%" style={{ stopColor: '#FFFACD', stopOpacity: 1 }} />
           <stop offset="40%" style={{ stopColor: '#FFD700', stopOpacity: 1 }} />
@@ -411,7 +519,6 @@ const Logo = ({ className }: { className?: string }) => {
           <stop offset="100%" style={{ stopColor: '#FF6347', stopOpacity: 0.6 }} />
         </radialGradient>
         
-        {/* Core flame gradient */}
         <radialGradient id="coreFlame" cx="50%" cy="50%">
           <stop offset="0%" style={{ stopColor: '#FFFFFF', stopOpacity: 1 }} />
           <stop offset="50%" style={{ stopColor: '#FFFFE0', stopOpacity: 1 }} />
@@ -419,7 +526,6 @@ const Logo = ({ className }: { className?: string }) => {
         </radialGradient>
       </defs>
       
-      {/* Base/outer flame */}
       <path 
         d="M 50 105 Q 25 85 22 60 Q 20 40 30 25 Q 37 13 43 5 Q 46 2 50 0 Q 54 2 57 5 Q 63 13 70 25 Q 80 40 78 60 Q 75 85 50 105 Z" 
         fill="url(#outerFlame)" 
@@ -436,7 +542,6 @@ const Logo = ({ className }: { className?: string }) => {
         />
       </path>
       
-      {/* Middle flame layer */}
       <path 
         d="M 50 100 Q 30 80 28 58 Q 27 43 35 28 Q 40 16 46 8 Q 48 5 50 3 Q 52 5 54 8 Q 60 16 65 28 Q 73 43 72 58 Q 70 80 50 100 Z" 
         fill="url(#innerFlame)" 
@@ -453,7 +558,6 @@ const Logo = ({ className }: { className?: string }) => {
         />
       </path>
       
-      {/* Inner bright core */}
       <path 
         d="M 50 95 Q 37 77 36 58 Q 35 45 40 33 Q 44 23 48 16 Q 49 12 50 10 Q 51 12 52 16 Q 56 23 60 33 Q 65 45 64 58 Q 63 77 50 95 Z" 
         fill="url(#coreFlame)"
@@ -469,7 +573,6 @@ const Logo = ({ className }: { className?: string }) => {
         />
       </path>
       
-      {/* Bright white center */}
       <ellipse cx="50" cy="55" rx="5" ry="10" fill="#FFFFFF" opacity="0.9">
         <animate 
           attributeName="ry" 
@@ -485,7 +588,6 @@ const Logo = ({ className }: { className?: string }) => {
         />
       </ellipse>
       
-      {/* CareerForge Text with modern font */}
       <text 
         x="100" 
         y="75" 
@@ -499,4 +601,5 @@ const Logo = ({ className }: { className?: string }) => {
       </text>
     </svg>
     )
+
 }
