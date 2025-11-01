@@ -262,7 +262,7 @@ export function HeroSection() {
                                 <div
                                     key={index}
                                     className="bg-muted/50 rounded-2xl border p-6 hover:border-foreground/20 transition-all duration-300">
-                                    <p className="text-muted-foreground mb-4 italic">"{testimonial.quote}"</p>
+                                    <p className="text-muted-foreground mb-4 italic">&ldquo;{testimonial.quote}&rdquo;</p>
                                     <div className="flex items-center gap-3">
                                         <div className="bg-foreground/10 rounded-full size-10 flex items-center justify-center font-semibold">
                                             {testimonial.initials}
@@ -373,7 +373,7 @@ const stats = [
 
 const testimonials = [
     {
-        quote: 'I would not have been able to handle the sheer amount of applications without CareerForge. It\'s been a game-changer.',
+        quote: 'I would not have been able to handle the sheer amount of applications without CareerForge. It&apos;s been a game-changer.',
         name: 'Sarah Johnson',
         role: 'Software Engineer',
         initials: 'SJ'
