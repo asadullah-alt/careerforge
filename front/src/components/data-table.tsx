@@ -113,10 +113,11 @@ export const schema = z.object({
   maxSalary: z.string(),
   location: z.string(),
   status: z.string(),
-  dateSaved: z.string(),
-  deadline: z.string(),
-  dateApplied: z.string(),
-  followUp: z.string(),
+  // these four can be a date string or null
+  dateSaved: z.string().nullable(),
+  deadline: z.string().nullable(),
+  dateApplied: z.string().nullable(),
+  followUp: z.string().nullable(),
 })
 
 // Create a separate component for the drag handle
@@ -224,7 +225,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Date Saved",
     cell: ({ row }) => (
       <div className="w-24">
-        <span className="text-muted-foreground">{row.original.dateSaved}</span>
+        <span className="text-muted-foreground">{row.original.dateSaved ?? "—"}</span>
       </div>
     ),
   },
@@ -233,7 +234,9 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Deadline",
     cell: ({ row }) => (
       <div className="w-24">
-        <span className="font-medium text-red-600">{row.original.deadline}</span>
+        <span className={`font-medium ${row.original.deadline ? "text-red-600" : "text-muted-foreground"}`}>
+          {row.original.deadline ?? "—"}
+        </span>
       </div>
     ),
   },
@@ -242,7 +245,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Date Applied",
     cell: ({ row }) => (
       <div className="w-24">
-        <span className="text-muted-foreground">{row.original.dateApplied}</span>
+        <span className="text-muted-foreground">{row.original.dateApplied ?? "—"}</span>
       </div>
     ),
   },
@@ -251,7 +254,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Follow Up",
     cell: ({ row }) => (
       <div className="w-24">
-        <span className="text-muted-foreground">{row.original.followUp}</span>
+        <span className="text-muted-foreground">{row.original.followUp ?? "—"}</span>
       </div>
     ),
   },
@@ -624,15 +627,13 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
     <Drawer direction={isMobile ? "bottom" : "right"}>
       <DrawerTrigger asChild>
         <Button variant="link" className="text-foreground w-fit px-0 text-left">
-          {item.header}
+          {item.jobPosition}
         </Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="gap-1">
-          <DrawerTitle>{item.header}</DrawerTitle>
-          <DrawerDescription>
-            Showing total visitors for the last 6 months
-          </DrawerDescription>
+          <DrawerTitle>{item.jobPosition}</DrawerTitle>
+          <DrawerDescription>Application details and editable fields</DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
           {!isMobile && (
@@ -694,74 +695,75 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
           )}
           <form className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
-              <Label htmlFor="header">Header</Label>
-              <Input id="header" defaultValue={item.header} />
+              <Label htmlFor={`${item.id}-jobPosition`}>Position</Label>
+              <Input id={`${item.id}-jobPosition`} defaultValue={item.jobPosition} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="type">Type</Label>
-                <Select defaultValue={item.type}>
-                  <SelectTrigger id="type" className="w-full">
-                    <SelectValue placeholder="Select a type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Table of Contents">
-                      Table of Contents
-                    </SelectItem>
-                    <SelectItem value="Executive Summary">
-                      Executive Summary
-                    </SelectItem>
-                    <SelectItem value="Technical Approach">
-                      Technical Approach
-                    </SelectItem>
-                    <SelectItem value="Design">Design</SelectItem>
-                    <SelectItem value="Capabilities">Capabilities</SelectItem>
-                    <SelectItem value="Focus Documents">
-                      Focus Documents
-                    </SelectItem>
-                    <SelectItem value="Narrative">Narrative</SelectItem>
-                    <SelectItem value="Cover Page">Cover Page</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor={`${item.id}-company`}>Company</Label>
+                <Input id={`${item.id}-company`} defaultValue={item.company} />
               </div>
               <div className="flex flex-col gap-3">
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor={`${item.id}-status`}>Status</Label>
                 <Select defaultValue={item.status}>
-                  <SelectTrigger id="status" className="w-full">
+                  <SelectTrigger id={`${item.id}-status`} className="w-full">
                     <SelectValue placeholder="Select a status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Done">Done</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Not Started">Not Started</SelectItem>
+                    <SelectItem value="Bookmarked">Bookmarked</SelectItem>
+                    <SelectItem value="Applied">Applied</SelectItem>
+                    <SelectItem value="Interviewing">Interviewing</SelectItem>
+                    <SelectItem value="Applying">Applying</SelectItem>
+                    <SelectItem value="Rejected">Rejected</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-3">
-                <Label htmlFor="target">Target</Label>
-                <Input id="target" defaultValue={item.target} />
+                <Label htmlFor={`${item.id}-maxSalary`}>Max Salary</Label>
+                <Input id={`${item.id}-maxSalary`} defaultValue={item.maxSalary} />
               </div>
               <div className="flex flex-col gap-3">
-                <Label htmlFor="limit">Limit</Label>
-                <Input id="limit" defaultValue={item.limit} />
+                <Label htmlFor={`${item.id}-location`}>Location</Label>
+                <Input id={`${item.id}-location`} defaultValue={item.location} />
               </div>
             </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="reviewer">Reviewer</Label>
-              <Select defaultValue={item.reviewer}>
-                <SelectTrigger id="reviewer" className="w-full">
-                  <SelectValue placeholder="Select a reviewer" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                  <SelectItem value="Jamik Tashpulatov">
-                    Jamik Tashpulatov
-                  </SelectItem>
-                  <SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-3">
+                <Label htmlFor={`${item.id}-dateSaved`}>Date Saved</Label>
+                <Input
+                  id={`${item.id}-dateSaved`}
+                  type="date"
+                  defaultValue={item.dateSaved ?? undefined}
+                />
+              </div>
+              <div className="flex flex-col gap-3">
+                <Label htmlFor={`${item.id}-deadline`}>Deadline</Label>
+                <Input
+                  id={`${item.id}-deadline`}
+                  type="date"
+                  defaultValue={item.deadline ?? undefined}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-3">
+                <Label htmlFor={`${item.id}-dateApplied`}>Date Applied</Label>
+                <Input
+                  id={`${item.id}-dateApplied`}
+                  type="date"
+                  defaultValue={item.dateApplied ?? undefined}
+                />
+              </div>
+              <div className="flex flex-col gap-3">
+                <Label htmlFor={`${item.id}-followUp`}>Follow Up</Label>
+                <Input
+                  id={`${item.id}-followUp`}
+                  type="date"
+                  defaultValue={item.followUp ?? undefined}
+                />
+              </div>
             </div>
           </form>
         </div>
