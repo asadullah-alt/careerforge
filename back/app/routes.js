@@ -6,7 +6,7 @@ const { raw } = require('body-parser');
 const { default: ollamaClient } = require('ollama');
 const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({});
-const {extractSkills, extractSkillsWithRegex, cleanHTML} = require('./util');
+const {extractSkills, extractSkillsWithRegex, cleanHTML, parseLinkedInProjects} = require('./util');
 async function runGeminiFlash(model, prompt) {
   try {
     // Note: model and prompt are now parameters, not constants inside the function.
@@ -145,7 +145,7 @@ module.exports = function (app, passport) {
           rawExperience: cleanHTML(payload.details_experience_main) || '',
           rawEducation: cleanHTML(payload.details_education_main) || '',
           rawSkills: cleanHTML(payload.details_skills_main,"skills") || '',
-          rawProjects: cleanHTML(payload.details_projects_main)  || '',
+          rawProjects: cleanHTML(payload.details_projects_main,"projects")  || '',
           skills: Array.isArray(payload.skills) ? payload.skills : []
         };
         console.log("user found for profile save:", user._id);
