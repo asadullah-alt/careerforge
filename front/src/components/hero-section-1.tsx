@@ -100,52 +100,11 @@ export function HeroSection() {
                                         </div>
                                     </Link>
                         
-                                    <h1
-                                        className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">
-                                       Take the pain out of job applications.
-                                    </h1>
-                                    <p
-                                        className="mx-auto mt-8 max-w-2xl text-balance text-lg">
-                                        Take control. Paste job URLs to track everything instantly. Our AI reads your CV and profiles to forge a winning, tailored CV for every role. Email sync handles follow-up; AI flags the responses you need to act on.
-                                    </p>
+                                   
+                                 
                                 </AnimatedGroup>
 
-                                <AnimatedGroup
-                                    variants={{
-                                        container: {
-                                            visible: {
-                                                transition: {
-                                                    staggerChildren: 0.05,
-                                                    delayChildren: 0.75,
-                                                },
-                                            },
-                                        },
-                                        item: transitionVariants.item,
-                                    }}
-                                    className="mt-12 flex flex-col items-center justify-center gap-2 md:flex-row">
-                                    <div
-                                        key={1}
-                                        className="bg-foreground/10 rounded-[14px] border p-0.5">
-                                        <Button
-                                            asChild
-                                            size="lg"
-                                            className="rounded-xl px-5 text-base">
-                                            <Link href="/dashboard">
-                                                <span className="text-nowrap">Start Building</span>
-                                            </Link>
-                                        </Button>
-                                    </div>
-                                    <Button
-                                        key={2}
-                                        asChild
-                                        size="lg"
-                                        variant="ghost"
-                                        className="h-10.5 rounded-xl px-5">
-                                        <Link href="#link">
-                                            <span className="text-nowrap">Request a demo</span>
-                                        </Link>
-                                    </Button>
-                                </AnimatedGroup>
+                              
 
                                 {/* Trust badges */}
                                 <AnimatedGroup
