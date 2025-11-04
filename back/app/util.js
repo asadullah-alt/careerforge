@@ -1,3 +1,4 @@
+const { JSDOM } = require('jsdom');
 
 /**
  * Extracts skills from LinkedIn profile HTML
@@ -6,8 +7,8 @@
  */
 function extractSkills(html) {
   const skills = [];
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
+  const dom = new JSDOM(html);
+  const doc = dom.window.document;
   
   // Find all list items in the skills section
   const listItems = doc.querySelectorAll('li[id*="profilePagedListComponent"]');
@@ -55,7 +56,7 @@ function extractSkillsWithRegex(html) {
   return Array.from(skills);
 }
 
-function cleanHTML(htmlContent,moduleTypeCV='default') {
+function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   // Default options - remove everything by default
   const defaultOptions = {
     removeScript: true,
@@ -130,22 +131,23 @@ function cleanHTML(htmlContent,moduleTypeCV='default') {
   if (opts.removeNewlines) {
     cleaned = cleaned.replace(/\n/g, '');
   }
-  if(moduleTypeCV==='skills'){
-    
- skillsArray = extractSkillsWithRegex(cleaned);
-  return skillsArray;
-}
-if (moduleTypeCV==="projects")
-{
-  projectsArray = parseLinkedInProjects(cleaned);
-  return projectsArray;
-}
-return cleaned;
+
+  if (moduleTypeCV === 'skills') {
+    const skillsArray = extractSkillsWithRegex(cleaned);
+    return skillsArray;
+  }
+
+  if (moduleTypeCV === "projects") {
+    const projectsArray = parseLinkedInProjects(cleaned);
+    return projectsArray;
+  }
+
+  return cleaned;
 }
 
 function parseLinkedInProjects(html) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
+  const dom = new JSDOM(html);
+  const doc = dom.window.document;
   
   // Find all project list items
   const projectItems = doc.querySelectorAll('li[id^="profilePagedListComponent"]');
@@ -247,8 +249,10 @@ function parseDate(dateStr) {
   return null;
 }
 
-
 // Export for use in different environments
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { extractSkills, extractSkillsWithRegex, parseLinkedInProjects, cleanHTML };
-}
+module.exports = { 
+  extractSkills, 
+  extractSkillsWithRegex, 
+  parseLinkedInProjects, 
+  cleanHTML 
+};
