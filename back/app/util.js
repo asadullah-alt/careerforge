@@ -145,6 +145,10 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
     const experienceArray = parseLinkedInExperience(cleaned);
     return experienceArray;
   }
+  if(moduleTypeCV === "education") {
+    const educationArray = parseEducation(cleaned);
+    return educationArray;
+  }
 
   return cleaned;
 }
@@ -412,7 +416,109 @@ function parseDateExp(dateStr) {
   
   return null;
 }
+function parseDates(dateString) {
+  if (!dateString) {
+    return { startTime: null, endTime: null };
+  }
 
+  // Split the string by the separator " - "
+  const parts = dateString.split(' - ');
+  const startStr = parts[0] ? parts[0].trim() : null;
+  const endStr = parts[1] ? parts[1].trim() : null;
+
+  let startTime = null;
+  let endTime = null;
+
+  // Attempt to parse the start date
+  if (startStr) {
+    const startDate = new Date(startStr);
+    // Check if the parsed date is valid
+    if (!isNaN(startDate.getTime())) {
+      startTime = startDate;
+    }
+  }
+
+  // Attempt to parse the end date
+  if (endStr) {
+    // Handle the "Present" case
+    if (endStr.toLowerCase() === 'present') {
+      endTime = null; // "Present" means no end time has occurred
+    } else {
+      const endDate = new Date(endStr);
+      // Check if the parsed date is valid
+      if (!isNaN(endDate.getTime())) {
+        endTime = endDate;
+      }
+    }
+  }
+
+  return { startTime, endTime };
+}
+
+/**
+ * Parses the education section from a LinkedIn profile HTML string.
+ *
+ * @param {string} html - The raw HTML content of the profile page.
+ * @returns {Array<Object>} An array of education objects in the specified format.
+ */
+function parseEducation(html) {
+  const $ = cheerio.load(html);
+  const educationList = [];
+
+  // Find each education list item. We use a partial attribute selector 
+  // because the ID contains a stable substring "EDUCATION-VIEW-DETAILS".
+  $('li[id*="EDUCATION-VIEW-DETAILS"]').each((i, el) => {
+    const $li = $(el);
+
+    // Find the main content block for this entry using a stable data-attribute
+    const $contentBlock = $li.find('div[data-view-name="profile-component-entity"]')
+                            .children('div').eq(1) // Skips the icon div
+                            .children('div').first(); // Gets the container for text
+
+    // 1. Get Educational Institute
+    // This is the first div child of the content block
+    const educationalInstitute = $contentBlock.children('div').first()
+                                            .find('span[aria-hidden="true"]').first()
+                                            .text().trim() || null;
+
+    // 2. Get Qualification Name
+    // This is the first span child of the content block
+    const qualificationName = $contentBlock.children('span').eq(0)
+                                          .find('span[aria-hidden="true"]').first()
+                                          .text().trim() || null;
+
+    // 3. Get Dates
+    // This is the second span child of the content block
+    const dateString = $contentBlock.children('span').eq(1)
+                                    .find('span[aria-hidden="true"]').first()
+                                    .text().trim() || null;
+
+    // Parse the date string into start and end dates
+    const { startTime, endTime } = parseDates(dateString);
+
+    // 4. Get Grade
+    let grade = null;
+    // The grade is in a separate <ul> (often for details/activities)
+    // We iterate over all spans in that list to find the one starting with "Grade:"
+    $li.find('ul li span[aria-hidden="true"]').each((j, span) => {
+      const spanText = $(span).text().trim();
+      if (spanText.startsWith('Grade:')) {
+        grade = spanText.replace('Grade:', '').trim();
+      }
+    });
+
+    // Add the compiled object to our results array
+    educationList.push({
+      QualificationName: qualificationName,
+      EducationalInstitute: educationalInstitute,
+      endTime: endTime,
+      startTime: startTime,
+      Grade: grade
+    });
+  });
+
+  return educationList;
+}
 // Export for use in different environments
 module.exports = { 
   extractSkills, 

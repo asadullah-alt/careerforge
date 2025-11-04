@@ -11,9 +11,11 @@ const ExperienceSchema = new mongoose.Schema({
 }, { _id: false });
 
 const EducationSchema = new mongoose.Schema({
-  school: { type: String },
-  degree: { type: String },
-  duration: { type: String }
+  QualificationName: { type: String },
+  EducationalInstitute: { type: String },
+  endTime: { type: Date },
+  startTime: { type: Date },
+  Grade: { type: String },
 }, { _id: false });
 
 const ProjectSchema = new mongoose.Schema({
@@ -32,10 +34,6 @@ const ProfileSchema = new mongoose.Schema({
   location: { type: String },
   about: { type: String },
   experience: { type: [ExperienceSchema], default: [] },
-  rawExperience: { type: String, default: '' },
-  rawEducation: { type: String, default: '' },
-  rawSkills: { type: Array, default: '' },
-  rawProjects: { type: String, default: '' },
   projects: { type: [ProjectSchema], default: [] },
   education: { type: [EducationSchema], default: [] },
   skills: { type: [String], default: [] }
