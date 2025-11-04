@@ -1,9 +1,13 @@
 const mongoose = require('mongoose');
 
 const ExperienceSchema = new mongoose.Schema({
-  title: { type: String },
-  company: { type: String },
-  duration: { type: String }
+  jobTitle: { type: String },
+  companyName: { type: String },
+  startTime: { type: Date },
+  endTime: { type: string },
+  address: { type: String },
+  description: { type: String },
+  companyPicURL: { type: String }
 }, { _id: false });
 
 const EducationSchema = new mongoose.Schema({

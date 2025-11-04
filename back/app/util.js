@@ -141,6 +141,11 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
     return projectsArray;
   }
 
+  if(moduleTypeCV === "experience") {
+    const experienceArray = parseLinkedInExperience(cleaned);
+    return experienceArray;
+  }
+
   return cleaned;
 }
 
@@ -253,10 +258,167 @@ function parseDate(dateStr) {
   return null;
 }
 
+
+function parseLinkedInExperience(html) {
+  const $ = cheerio.load(html);
+  
+  // Find all experience list items
+  const experienceItems = $('li[id*="profilePagedListComponent"]');
+  const jobs = [];
+  
+  experienceItems.each((index, item) => {
+    const $item = $(item);
+    
+    const job = {
+      jobTitle: null,
+      startTime: null,
+      endTime: null,
+      address: null,
+      description: null,
+      companyName: null,
+      companyPicURL: null
+    };
+    
+    // Extract all span elements with aria-hidden="true"
+    const spans = $item.find('span[aria-hidden="true"]');
+    const spanTexts = [];
+    
+    spans.each((i, span) => {
+      const text = $(span).text().trim();
+      if (text) {
+        spanTexts.push(text);
+      }
+    });
+    
+    // Extract job title (usually the first span that doesn't contain · or dates)
+    if (spanTexts.length > 0) {
+      const titleText = spanTexts[0];
+      if (titleText && !titleText.includes('·') && !titleText.includes('-') && !titleText.match(/\d{4}/)) {
+        job.jobTitle = titleText;
+      }
+    }
+    
+    // Extract company name (span that contains · and employment type)
+    const companySpan = spanTexts.find(text => 
+      text.includes('·') && 
+      (text.includes('Full-time') || 
+       text.includes('Part-time') || 
+       text.includes('Contract') ||
+       text.includes('Internship'))
+    );
+    
+    if (companySpan) {
+      const companyText = companySpan.split('·')[0].trim();
+      if (companyText) {
+        job.companyName = companyText;
+      }
+    }
+    
+    // Extract date range (start and end time)
+    const dateSpan = spanTexts.find(text => {
+      return text.includes('Present') || 
+             (text.match(/\d{4}/) && (text.includes('-') || text.includes('to')));
+    });
+    
+    if (dateSpan) {
+      const dateMatch = dateSpan.match(/([\w\s]+\d{4})\s*[-–to]+\s*([\w\s]+\d{4}|Present)/i);
+      
+      if (dateMatch) {
+        const startStr = dateMatch[1].trim();
+        const endStr = dateMatch[2].trim();
+        
+        // Parse start date
+        job.startTime = parseDateExp(startStr);
+        
+        // Parse end date
+        if (endStr.toLowerCase().includes('present')) {
+          job.endTime = 'present';
+        } else {
+          job.endTime = endStr;
+        }
+      }
+    }
+    
+    // Extract location/address
+    const locationSpan = spanTexts.find(text => {
+      return !text.includes('·') && 
+             !text.includes('-') && 
+             !text.match(/\d{4}/) && 
+             text.length > 2 && 
+             text.length < 100 &&
+             text !== job.jobTitle &&
+             text !== job.companyName &&
+             (text.includes('Pakistan') || 
+              text.includes('Islamabad') || 
+              text.includes('On-site') || 
+              text.includes('Hybrid') || 
+              text.includes('Remote') ||
+              text.includes('Comsats'));
+    });
+    
+    if (locationSpan) {
+      job.address = locationSpan;
+    }
+    
+    // Extract description (look for bullet point content)
+    const descriptionElements = $item.find('div ul li div span[aria-hidden="true"]');
+    const descriptions = [];
+    
+    descriptionElements.each((i, el) => {
+      const text = $(el).text().trim();
+      if (text && text.includes('-') && text.length > 50) {
+        descriptions.push(text);
+      }
+    });
+    
+    if (descriptions.length > 0) {
+      job.description = descriptions.join('\n');
+    }
+    
+    // Extract company picture URL
+    const img = $item.find('img').first();
+    if (img.length && img.attr('src')) {
+      job.companyPicURL = img.attr('src');
+    }
+    
+    jobs.push(job);
+  });
+  
+  return jobs;
+}
+
+/**
+ * Helper function to parse date strings into Date objects
+ * @param {string} dateStr - Date string like "Jan 2025" or "Feb 2022"
+ * @returns {Date|null} Date object or null if parsing fails
+ */
+function parseDateExp(dateStr) {
+  if (!dateStr) return null;
+  
+  const months = {
+    'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+    'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11,
+    'january': 0, 'february': 1, 'march': 2, 'april': 3, 'june': 5,
+    'july': 6, 'august': 7, 'september': 8, 'october': 9, 'november': 10, 'december': 11
+  };
+  
+  const match = dateStr.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)\s+(\d{4})/i);
+  
+  if (match) {
+    const month = months[match[1].toLowerCase()];
+    const year = parseInt(match[2]);
+    return new Date(year, month, 1);
+  }
+  
+  return null;
+}
+
 // Export for use in different environments
 module.exports = { 
   extractSkills, 
   extractSkillsWithRegex, 
   parseLinkedInProjects, 
-  cleanHTML 
+  cleanHTML,
+  parseLinkedInExperience,
+  parseDateExp
 };

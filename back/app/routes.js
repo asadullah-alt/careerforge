@@ -140,14 +140,14 @@ module.exports = function (app, passport) {
           headline: payload.headline || '',
           location: payload.location || '',
           about: payload.about || '',
-          experience: Array.isArray(payload.experience) ? payload.experience : [],
           education: Array.isArray(payload.education) ? payload.education : [],
           rawExperience: cleanHTML(payload.details_experience_main) || '',
           rawEducation: cleanHTML(payload.details_education_main) || '',
           rawProjects: cleanHTML(payload.details_projects_main) || '',
           rawSkills: cleanHTML(payload.details_skills_main,"skills") || '',
           projects: cleanHTML(payload.details_projects_main,"projects")  || '',
-          skills: Array.isArray(payload.skills) ? payload.skills : []
+          skills: Array.isArray(payload.skills) ? payload.skills : [],
+          experience: cleanHTML(payload.details_experience_main,"experience") || [],
         };
         console.log("user found for profile save:", user._id);
         // Upsert profile by user + profileUrl
