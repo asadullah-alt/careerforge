@@ -1,4 +1,4 @@
-const { JSDOM } = require('jsdom');
+const cheerio = require('cheerio');
 
 /**
  * Extracts skills from LinkedIn profile HTML
@@ -7,18 +7,17 @@ const { JSDOM } = require('jsdom');
  */
 function extractSkills(html) {
   const skills = [];
-  const dom = new JSDOM(html);
-  const doc = dom.window.document;
+  const $ = cheerio.load(html);
   
   // Find all list items in the skills section
-  const listItems = doc.querySelectorAll('li[id*="profilePagedListComponent"]');
+  const listItems = $('li[id*="profilePagedListComponent"]');
   
-  listItems.forEach(item => {
+  listItems.each((i, item) => {
     // Look for span elements that contain skill names
-    const spans = item.querySelectorAll('span[aria-hidden="true"]');
+    const spans = $(item).find('span[aria-hidden="true"]');
     
-    spans.forEach(span => {
-      const text = span.textContent.trim();
+    spans.each((j, span) => {
+      const text = $(span).text().trim();
       
       // Filter out empty strings, endorsement text, and other non-skill content
       if (text && 
@@ -146,15 +145,14 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
 }
 
 function parseLinkedInProjects(html) {
-  const dom = new JSDOM(html);
-  const doc = dom.window.document;
+  const $ = cheerio.load(html);
   
   // Find all project list items
-  const projectItems = doc.querySelectorAll('li[id^="profilePagedListComponent"]');
+  const projectItems = $('li[id^="profilePagedListComponent"]');
   
   const projects = [];
   
-  projectItems.forEach(item => {
+  projectItems.each((i, item) => {
     const project = {
       projectName: null,
       startTime: null,
@@ -164,9 +162,11 @@ function parseLinkedInProjects(html) {
     };
     
     // Extract project name
-    const nameElements = item.querySelectorAll('span[aria-hidden="true"]');
-    for (let elem of nameElements) {
-      const text = elem.textContent.trim();
+    const nameElements = $(item).find('span[aria-hidden="true"]');
+    let foundName = false;
+    nameElements.each((j, elem) => {
+      if (foundName) return;
+      const text = $(elem).text().trim();
       // First substantial text is usually the project name
       if (text && !text.includes('Associated with') && !text.includes('Aug ') && 
           !text.includes('Sep ') && !text.includes('Jan ') && !text.includes('Feb ') &&
@@ -174,36 +174,40 @@ function parseLinkedInProjects(html) {
           !text.includes('Jun ') && !text.includes('Jul ') && !text.includes('Oct ') &&
           !text.includes('Nov ') && !text.includes('Dec ')) {
         project.projectName = text;
-        break;
+        foundName = true;
       }
-    }
+    });
     
     // Extract dates
-    const dateElements = item.querySelectorAll('span > span[aria-hidden="true"]');
-    for (let elem of dateElements) {
-      const text = elem.textContent.trim();
+    const dateElements = $(item).find('span > span[aria-hidden="true"]');
+    let foundDate = false;
+    dateElements.each((j, elem) => {
+      if (foundDate) return;
+      const text = $(elem).text().trim();
       if (text.includes(' - ')) {
         const [start, end] = text.split(' - ').map(s => s.trim());
         project.startTime = parseDate(start);
         project.endTime = parseDate(end);
-        break;
+        foundDate = true;
       }
-    }
+    });
     
     // Extract associated organization
-    const allSpans = item.querySelectorAll('span[aria-hidden="true"]');
-    for (let elem of allSpans) {
-      const text = elem.textContent.trim();
+    const allSpans = $(item).find('span[aria-hidden="true"]');
+    let foundAssoc = false;
+    allSpans.each((j, elem) => {
+      if (foundAssoc) return;
+      const text = $(elem).text().trim();
       if (text.startsWith('Associated with ')) {
         project.associatedWith = text.replace('Associated with ', '');
-        break;
+        foundAssoc = true;
       }
-    }
+    });
     
     // Extract description (usually the longest text content)
     let longestText = '';
-    allSpans.forEach(elem => {
-      const text = elem.textContent.trim();
+    allSpans.each((j, elem) => {
+      const text = $(elem).text().trim();
       // Description is typically a long paragraph
       if (text.length > longestText.length && 
           text.length > 50 && 
