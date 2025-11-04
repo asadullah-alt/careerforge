@@ -144,8 +144,9 @@ module.exports = function (app, passport) {
           education: Array.isArray(payload.education) ? payload.education : [],
           rawExperience: cleanHTML(payload.details_experience_main) || '',
           rawEducation: cleanHTML(payload.details_education_main) || '',
+          rawProjects: cleanHTML(payload.details_projects_main) || '',
           rawSkills: cleanHTML(payload.details_skills_main,"skills") || '',
-          rawProjects: cleanHTML(payload.details_projects_main,"projects")  || '',
+          projects: cleanHTML(payload.details_projects_main,"projects")  || '',
           skills: Array.isArray(payload.skills) ? payload.skills : []
         };
         console.log("user found for profile save:", user._id);
