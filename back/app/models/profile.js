@@ -4,7 +4,7 @@ const ExperienceSchema = new mongoose.Schema({
   jobTitle: { type: String },
   companyName: { type: String },
   startTime: { type: Date },
-  endTime: { type: string },
+  endTime: { type: String },
   address: { type: String },
   description: { type: String },
   companyPicURL: { type: String }
