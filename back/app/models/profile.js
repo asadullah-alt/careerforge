@@ -12,6 +12,14 @@ const EducationSchema = new mongoose.Schema({
   duration: { type: String }
 }, { _id: false });
 
+const ProjectSchema = new mongoose.Schema({
+  projectName: { type: String },
+  description: { type: String },
+  associatedWith: { type: String },
+  startTime: { type: Date },
+  endTime: { type: Date }
+}, { _id: false });
+
 const ProfileSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   profileUrl: { type: String, required: true },
@@ -24,6 +32,7 @@ const ProfileSchema = new mongoose.Schema({
   rawEducation: { type: String, default: '' },
   rawSkills: { type: Array, default: '' },
   rawProjects: { type: String, default: '' },
+  projects: { type: [ProjectSchema], default: [] },
   education: { type: [EducationSchema], default: [] },
   skills: { type: [String], default: [] }
 }, { timestamps: true });
