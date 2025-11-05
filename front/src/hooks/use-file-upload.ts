@@ -1,5 +1,5 @@
 "use client"
-
+import { getCfAuthCookie } from '@/utils/cookie';
 import type React from "react"
 import {
   useCallback,
@@ -197,10 +197,12 @@ export const useFileUpload = (
 
     const formData = new FormData()
     formData.append("file", fileToUpload.file) // FastAPI expects 'file' field
-
+      
+    const authCookie = getCfAuthCookie();
     setState(prev => ({ ...prev, isUploadingGlobal: true, errors: [] }))
-
-    try {
+    if (authCookie) {
+    formData.append("token", authCookie);
+       try {
       const response = await fetch(uploadUrl, {
         method: "POST",
         body: formData,
@@ -278,6 +280,12 @@ export const useFileUpload = (
         return { ...prev, files: updatedFiles, errors: newErrors, isUploadingGlobal: false }
       })
     }
+    } else {
+      // Handle no auth cookie case
+    }
+    
+
+   
   }
 
   const addFilesAndUpload = useCallback(
