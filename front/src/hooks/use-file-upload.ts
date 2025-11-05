@@ -1,5 +1,4 @@
 "use client"
-import { getCfAuthCookie } from '@/utils/cookie';
 import type React from "react"
 import {
   useCallback,
@@ -9,6 +8,7 @@ import {
   type DragEvent,
   type InputHTMLAttributes,
 } from "react"
+import { getCfAuthCookie } from "@/utils/cookie"
 
 export type FileMetadata = {
   name: string
@@ -203,7 +203,15 @@ export const useFileUpload = (
     if (authCookie) {
     formData.append("token", authCookie);
        try {
-      const response = await fetch(uploadUrl, {
+      // If a cf_auth cookie exists, include it as a `token` query parameter
+      const token = getCfAuthCookie()
+      const urlWithToken = token
+        ? `${uploadUrl}${uploadUrl.includes("?") ? "&" : "?"}token=${encodeURIComponent(
+            token
+          )}`
+        : uploadUrl
+
+      const response = await fetch(urlWithToken, {
         method: "POST",
         body: formData,
       })
