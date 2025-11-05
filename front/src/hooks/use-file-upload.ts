@@ -202,9 +202,14 @@ export const useFileUpload = (
 
     try {
       const response = await fetch(uploadUrl, {
-        method: "POST",
+        method: 'POST',
         body: formData,
-      })
+        credentials: 'include', // Include cookies in the request
+        headers: {
+          // The cookie will be automatically included by the browser
+          // when using credentials: 'include'
+        },
+      });
 
       let responseData: Record<string, unknown> = {}; // Initialize for broader scope
       const contentType = response.headers.get("content-type");

@@ -80,10 +80,19 @@ export default function FileUpload() {
     },
     onUploadError: (file, errorMsg) => {
       console.error('Upload error:', file, errorMsg);
-      setUploadFeedback({
-        type: 'error',
-        message: errorMsg || 'An unknown error occurred during upload.',
-      });
+      if (errorMsg.includes('401') || errorMsg.includes('403')) {
+        setUploadFeedback({
+          type: 'error',
+          message: 'Please sign in to upload your resume.',
+        });
+        // Optionally redirect to login page
+        // window.location.href = '/login';
+      } else {
+        setUploadFeedback({
+          type: 'error',
+          message: errorMsg || 'An unknown error occurred during upload.',
+        });
+      }
     },
     onFilesChange: (currentFiles) => {
       if (currentFiles.length === 0) {
