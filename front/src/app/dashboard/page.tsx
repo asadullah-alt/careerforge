@@ -6,9 +6,44 @@ import { DataTable } from "@/components/data-table"
 import { SectionCards } from "@/components/section-cards"
 import { getCfAuthCookie } from "@/utils/cookie"
 
+interface ProcessedJob {
+  user_id: string;
+  job_id: string;
+  job_title: string | null;
+  company_profile: string | null;
+  location: string | null;
+  date_posted: string | null;
+  employment_type: string | null;
+  job_summary: string | null;
+  key_responsibilities: string | null;
+  qualifications: string | null;
+  compensation_and_benfits: string | null;
+  application_info: string | null;
+  extracted_keywords: string | null;
+  processed_at: string;
+}
+
+interface ApiResponse {
+  success: boolean;
+  jobs: ProcessedJob[];
+}
+
+interface TransformedJob {
+  id: number;
+  jobPosition: string;
+  company: string;
+  maxSalary: string;
+  location: string;
+  status: string;
+  dateSaved: string;
+  deadline: string | null;
+  dateApplied: string | null;
+  followUp: string | null;
+}
+
 export default function Page() {
   const [isLoading, setIsLoading] = React.useState(true)
-  const [jobs, setJobs] = React.useState([])
+  const [jobs, setJobs] = React.useState<TransformedJob[]>([])
   const [error, setError] = React.useState("")
 
   React.useEffect(() => {
@@ -33,10 +68,10 @@ export default function Page() {
           throw new Error('Failed to fetch jobs')
         }
 
-        const data = await response.json()
+        const data = await response.json() as ApiResponse
         
         // Transform the API response to match the DataTable schema
-        const transformedJobs = data.jobs.map(job => ({
+        const transformedJobs = data.jobs.map((job: ProcessedJob) => ({
           id: parseInt(job.job_id) || Math.random() * 1000000, // Fallback to random ID if job_id is not a number
           jobPosition: job.job_title || 'Untitled Position',
           company: job.company_profile || 'Unknown Company',
@@ -51,8 +86,8 @@ export default function Page() {
 
         setJobs(transformedJobs)
         setError("")
-      } catch (err) {
-        setError(err.message)
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'An unknown error occurred')
       } finally {
         setIsLoading(false)
       }
