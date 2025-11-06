@@ -6,11 +6,19 @@ import { DataTable } from "@/components/data-table"
 import { SectionCards } from "@/components/section-cards"
 import { getCfAuthCookie } from "@/utils/cookie"
 
+interface CompanyProfile {
+  companyName: string;
+  industry: string | null;
+  website: string | null;
+  description: string | null;
+}
+
 interface ProcessedJob {
   user_id: string;
   job_id: string;
   job_title: string | null;
-  company_profile: string | null;
+  // API may return company_profile as an object OR a JSON-stringified object
+  company_profile: CompanyProfile | string;
   location: string | null;
   date_posted: string | null;
   employment_type: string | null;
@@ -32,6 +40,11 @@ interface TransformedJob {
   id: number;
   jobPosition: string;
   company: string;
+  companyDetails: {
+    industry: string | null;
+    website: string | null;
+    description: string | null;
+  };
   maxSalary: string;
   location: string;
   status: string;
@@ -71,18 +84,39 @@ export default function Page() {
         const data = await response.json() as ApiResponse
         
         // Transform the API response to match the DataTable schema
-        const transformedJobs = data.jobs.map((job: ProcessedJob) => ({
-          id: parseInt(job.job_id) || Math.random() * 1000000, // Fallback to random ID if job_id is not a number
-          jobPosition: job.job_title || 'Untitled Position',
-          company: job.company_profile || 'Unknown Company',
-          maxSalary: job.compensation_and_benfits || 'Not specified',
-          location: job.location || 'Remote',
-          status: job.application_info || 'Bookmarked',
-          dateSaved: new Date(job.processed_at).toISOString().split('T')[0],
-          deadline: null,
-          dateApplied: null,
-          followUp: null
-        }))
+        const transformedJobs = data.jobs.map((job: ProcessedJob) => {
+          // company_profile can be a stringified JSON or an object
+          let companyProfile: CompanyProfile | null = null
+          if (typeof job.company_profile === "string") {
+            try {
+              companyProfile = JSON.parse(job.company_profile)
+            } catch (e) {
+              companyProfile = null
+            }
+          } else if (job.company_profile) {
+            companyProfile = job.company_profile
+          }
+
+          const companyName = companyProfile?.companyName || 'Unknown Company'
+
+          return {
+            id: parseInt(job.job_id) || Math.floor(Math.random() * 1000000), // Fallback to random ID if job_id is not a number
+            jobPosition: job.job_title || 'Untitled Position',
+            company: companyName,
+            companyDetails: {
+              industry: companyProfile?.industry || null,
+              website: companyProfile?.website || null,
+              description: companyProfile?.description || null,
+            },
+            maxSalary: job.compensation_and_benfits || 'Not specified',
+            location: job.location || 'Remote',
+            status: 'Bookmarked',
+            dateSaved: new Date(job.processed_at).toISOString().split('T')[0],
+            deadline: null,
+            dateApplied: null,
+            followUp: null,
+          }
+        })
 
         setJobs(transformedJobs)
         setError("")

@@ -14,8 +14,22 @@ const processedJobSchema = new mongoose.Schema({
     default: null
   },
   company_profile: {
-    type: String,
-    default: null
+    companyName: {
+      type: String,
+      required: true
+    },
+    industry: {
+      type: String,
+      default: null
+    },
+    website: {
+      type: String,
+      default: null
+    },
+    description: {
+      type: String,
+      default: null
+    }
   },
   location: {
     type: String,

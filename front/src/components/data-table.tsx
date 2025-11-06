@@ -110,6 +110,11 @@ export const schema = z.object({
   id: z.number(),
   jobPosition: z.string(),
   company: z.string(),
+  companyDetails: z.object({
+    industry: z.string().nullable(),
+    website: z.string().nullable(),
+    description: z.string().nullable()
+  }).optional(),
   maxSalary: z.string(),
   location: z.string(),
   status: z.string(),
