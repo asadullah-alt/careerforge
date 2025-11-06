@@ -1,5 +1,4 @@
 "use client"
-
 import React, { useState, useEffect } from "react"
 import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -10,27 +9,26 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '/'
-  // If the app is hosted on the main public URL and the user is on one of the
-  // public marketing routes, hide the sidebar and header so the marketing
-  // pages (signup, features, about-us, pricing, root) render without the app chrome.
   const hidePaths = ['/', '/signup', '/features', '/about', '/pricing']
-  // Compute host-dependent UI only after client mount to avoid hydration
-  // mismatches between server and client renders.
-  const [mounted, setMounted] = useState(false)
+  
+  const [isMainHost, setIsMainHost] = useState<boolean | null>(null)
+  
   useEffect(() => {
-    setMounted(true)
+    setIsMainHost(window.location.hostname === 'careerforge.datapsx.com')
   }, [])
 
-  const hideShellOnMain =
-    mounted &&
-    window.location.hostname === 'careerforge.datapsx.com' &&
-    hidePaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
+  // Check path immediately - it's available from Next.js router
+  const isHidePath = hidePaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
+  
+  // Only hide if we've confirmed it's the main host AND it's a hide path
+  // During loading (isMainHost === null), assume we should show the shell
+  const hideShell = isMainHost === true && isHidePath
 
-  if (hideShellOnMain) {
-    // Render children without the persistent sidebar/header
+  if (hideShell) {
     return <div className="min-h-screen">{children}</div>
   }
 
+  // Show loading state or shell while checking hostname
   return (
     <SidebarProvider
       style={
@@ -43,7 +41,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
-  <Toaster />
+        <Toaster />
         <div className="flex flex-1 flex-col">
           <AnimatePresence mode="wait">
             <motion.div
