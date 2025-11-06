@@ -97,7 +97,7 @@ export function SiteHeader() {
             </div>
 
             <SheetFooter>
-              <div className="text-xs text-muted-foreground">Files are stored locally in your browser for this demo.</div>
+              <div className="text-xs text-muted-foreground">Resume will be uploaded and processed by our AI.</div>
             </SheetFooter>
 
             <SheetClose />
