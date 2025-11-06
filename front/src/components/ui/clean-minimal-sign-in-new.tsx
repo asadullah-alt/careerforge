@@ -7,36 +7,17 @@ import { useRouter } from 'next/navigation'
  
 import { useState } from "react";
 
-import {LogIn, Lock, Mail, Check, AlertCircle} from "lucide-react";
+import {LogIn, Lock, Mail} from "lucide-react";
  
-const PASSWORD_REQUIREMENTS = [
-  { id: 'length', label: 'At least 8 characters', regex: /.{8,}/ },
-  { id: 'lowercase', label: 'One lowercase letter', regex: /[a-z]/ },
-  { id: 'uppercase', label: 'One uppercase letter', regex: /[A-Z]/ },
-  { id: 'number', label: 'One number', regex: /\d/ },
-  { id: 'special', label: 'One special character', regex: /[!@#$%^&*(),.?":{}|<>]/ }
-];
-
 const SignIn2 = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [passwordFocus, setPasswordFocus] = useState(false);
  
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-
-  const checkPasswordRequirement = (requirement: { regex: RegExp }) => {
-    return requirement.regex.test(password);
-  };
-
-  const allPasswordRequirementsMet = () => {
-    return PASSWORD_REQUIREMENTS.every(checkPasswordRequirement);
   };
  
   const handleSignIn = async () => {
@@ -46,10 +27,6 @@ const SignIn2 = () => {
     }
     if (!validateEmail(email)) {
       setError("Please enter a valid email address.");
-      return;
-    }
-    if (!allPasswordRequirementsMet()) {
-      setError("Please meet all password requirements.");
       return;
     }
 
@@ -65,7 +42,6 @@ const SignIn2 = () => {
         body: JSON.stringify({
           email,
           password,
-          remember: rememberMe
         })
       });
 
@@ -73,15 +49,11 @@ const SignIn2 = () => {
 
       if (response.ok) {
         if (data.token) {
-          // Store token in cookie with proper expiration based on remember me
-          const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days : 24 hours
-          document.cookie = `cf_auth=${data.token}; path=/; max-age=${maxAge}`;
+          // User was created and auto-verified (shouldn't happen with local signup)
+          document.cookie = `cf_auth=${data.token}; path=/; max-age=86400`; // 24 hours
           router.push('/dashboard');
         } else if (data.success && data.message.includes('verification')) {
-          // Save email in localStorage if remember me is checked
-          if (rememberMe) {
-            localStorage.setItem('rememberedEmail', email);
-          }
+          // Verification required
           router.push(`/verify?email=${encodeURIComponent(email)}`);
         } else {
           setError('An unexpected response was received.');
@@ -96,15 +68,6 @@ const SignIn2 = () => {
       setIsLoading(false);
     }
   };
-
-  // Load remembered email on component mount
-  React.useEffect(() => {
-    const rememberedEmail = localStorage.getItem('rememberedEmail');
-    if (rememberedEmail) {
-      setEmail(rememberedEmail);
-      setRememberMe(true);
-    }
-  }, []);
  
   return (
    
@@ -137,60 +100,18 @@ const SignIn2 = () => {
             </span>
             <input
               placeholder="Password"
-              type={showPassword ? "text" : "password"}
+              type="password"
               value={password}
               className="w-full pl-10 pr-10 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-black text-sm"
               onChange={(e) => setPassword(e.target.value)}
-              onFocus={() => setPasswordFocus(true)}
-              onBlur={() => setPasswordFocus(false)}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs hover:text-gray-600"
-            >
-              {showPassword ? 'Hide' : 'Show'}
-            </button>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer text-xs select-none"></span>
           </div>
-
-          {/* Password requirements */}
-          {passwordFocus && (
-            <div className="text-xs space-y-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
-              <p className="font-medium text-gray-700 mb-1">Password requirements:</p>
-              {PASSWORD_REQUIREMENTS.map((req) => (
-                <div key={req.id} className="flex items-center gap-2">
-                  {checkPasswordRequirement(req) ? (
-                    <Check className="w-3 h-3 text-green-500" />
-                  ) : (
-                    <AlertCircle className="w-3 h-3 text-gray-300" />
-                  )}
-                  <span className={checkPasswordRequirement(req) ? "text-green-600" : "text-gray-500"}>
-                    {req.label}
-                  </span>
-                </div>
-              ))}
-            </div>
+          <div className="w-full flex justify-end">
+          {error && (
+            <div className="text-sm text-red-500 text-left">{error}</div>
           )}
-
-          {/* Remember me checkbox */}
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="remember-me"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="remember-me" className="text-sm text-gray-600">
-              Remember me
-            </label>
-          </div>
-
-          <div className="w-full flex justify-between items-center">
-            {error && (
-              <div className="text-sm text-red-500 flex-1">{error}</div>
-            )}
-            <Link href="/forgot-password" className="text-xs hover:underline font-medium ml-2">
+            <Link href="/forgot-password" className="text-xs hover:underline font-medium">
               Forgot password?
             </Link>
           </div>
@@ -198,7 +119,7 @@ const SignIn2 = () => {
         <button
           onClick={handleSignIn}
           disabled={isLoading}
-          className="w-full bg-gradient-to-b from-gray-700 to-gray-900 text-white font-medium py-2 rounded-xl shadow hover:brightness-105 cursor-pointer transition mb-4 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-gradient-to-b from-gray-700 to-gray-900 text-white font-medium py-2 rounded-xl shadow hover:brightness-105 cursor-pointer transition mb-4 mt-2 disabled:opacity-50"
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
