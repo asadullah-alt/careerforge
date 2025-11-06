@@ -44,6 +44,7 @@ export default function VerificationPage() {
         setError(data.message || 'Verification failed')
       }
     } catch (error) {
+      console.error('Verification error:', error)
       setError('An error occurred during verification')
     } finally {
       setIsLoading(false)
@@ -76,6 +77,7 @@ export default function VerificationPage() {
         setError(data.message || 'Failed to resend verification code')
       }
     } catch (error) {
+      console.error('Resend verification error:', error)
       setError('An error occurred while resending the code')
     } finally {
       setIsLoading(false)
@@ -144,7 +146,7 @@ export default function VerificationPage() {
               disabled={isLoading}
               className="text-sm text-muted-foreground hover:text-primary"
             >
-              Didn't receive the code? Click to resend
+              Didn&apos;t receive the code? Click to resend
             </button>
           </div>
         </div>
