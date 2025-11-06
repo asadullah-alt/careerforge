@@ -13,22 +13,40 @@ interface CompanyProfile {
   description: string | null;
 }
 
+interface Location {
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  remoteStatus: string | null;
+}
+
+interface Qualifications {
+  required: string[];
+  preferred: string[];
+}
+
+interface ApplicationInfo {
+  howToApply: string | null;
+  applyLink: string | null;
+  contactEmail: string | null;
+}
+
 interface ProcessedJob {
   user_id: string;
   job_id: string;
-  job_title: string | null;
-  // API may return company_profile as an object OR a JSON-stringified object
-  company_profile: CompanyProfile | string;
-  location: string | null;
-  date_posted: string | null;
-  employment_type: string | null;
-  job_summary: string | null;
-  key_responsibilities: string | null;
-  qualifications: string | null;
-  compensation_and_benfits: string | null;
-  application_info: string | null;
-  extracted_keywords: string | null;
+  jobTitle: string | null;
+  companyProfile: CompanyProfile | string;
+  location: Location;
+  datePosted: string | null;
+  employmentType: string | null;
+  jobSummary: string | null;
+  keyResponsibilities: string[];
+  qualifications: Qualifications;
+  compensationAndBenefits: string | null;
+  applicationInfo: ApplicationInfo;
+  extractedKeywords: string[];
   processed_at: string;
+  updated_at: string;
 }
 
 interface ApiResponse {
@@ -85,32 +103,39 @@ export default function Page() {
         
         // Transform the API response to match the DataTable schema
         const transformedJobs = data.jobs.map((job: ProcessedJob) => {
-          // company_profile can be a stringified JSON or an object
+          // Parse companyProfile if it's a string
           let companyProfile: CompanyProfile | null = null
-          if (typeof job.company_profile === "string") {
+          if (typeof job.companyProfile === "string") {
             try {
-              companyProfile = JSON.parse(job.company_profile)
+              companyProfile = JSON.parse(job.companyProfile)
             } catch (e) {
               companyProfile = null
             }
-          } else if (job.company_profile) {
-            companyProfile = job.company_profile
+          } else {
+            companyProfile = job.companyProfile as CompanyProfile
           }
 
           const companyName = companyProfile?.companyName || 'Unknown Company'
+          // Format location as string
+          const locationStr = [
+            job.location.city,
+            job.location.state,
+            job.location.country,
+            job.location.remoteStatus
+          ].filter(Boolean).join(', ') || 'Remote'
 
           return {
-            id: parseInt(job.job_id) || Math.floor(Math.random() * 1000000), // Fallback to random ID if job_id is not a number
-            jobPosition: job.job_title || 'Untitled Position',
+            id: parseInt(job.job_id) || Math.floor(Math.random() * 1000000),
+            jobPosition: job.jobTitle || 'Untitled Position',
             company: companyName,
             companyDetails: {
               industry: companyProfile?.industry || null,
               website: companyProfile?.website || null,
               description: companyProfile?.description || null,
             },
-            maxSalary: job.compensation_and_benfits || 'Not specified',
-            location: job.location || 'Remote',
-            status: 'Bookmarked',
+            maxSalary: job.compensationAndBenefits || 'Not specified',
+            location: locationStr,
+            status: job.applicationInfo.howToApply || 'Bookmarked',
             dateSaved: new Date(job.processed_at).toISOString().split('T')[0],
             deadline: null,
             dateApplied: null,

@@ -9,11 +9,11 @@ const processedJobSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  job_title: {
+  jobTitle: {
     type: String,
     default: null
   },
-  company_profile: {
+  companyProfile: {
     companyName: {
       type: String,
       required: true
@@ -32,42 +32,76 @@ const processedJobSchema = new mongoose.Schema({
     }
   },
   location: {
+    city: {
+      type: String,
+      default: null
+    },
+    state: {
+      type: String,
+      default: null
+    },
+    country: {
+      type: String,
+      default: null
+    },
+    remoteStatus: {
+      type: String,
+      default: null
+    }
+  },
+  datePosted: {
     type: String,
     default: null
   },
-  date_posted: {
+  employmentType: {
     type: String,
     default: null
   },
-  employment_type: {
+  jobSummary: {
     type: String,
     default: null
   },
-  job_summary: {
-    type: String,
-    default: null
-  },
-  key_responsibilities: {
-    type: String,
-    default: null
+  keyResponsibilities: {
+    type: [String],
+    default: []
   },
   qualifications: {
+    required: {
+      type: [String],
+      default: []
+    },
+    preferred: {
+      type: [String],
+      default: []
+    }
+  },
+  compensationAndBenefits: {
     type: String,
     default: null
   },
-  compensation_and_benfits: {
-    type: String,
-    default: null
+  applicationInfo: {
+    howToApply: {
+      type: String,
+      default: null
+    },
+    applyLink: {
+      type: String,
+      default: null
+    },
+    contactEmail: {
+      type: String,
+      default: null
+    }
   },
-  application_info: {
-    type: String,
-    default: null
-  },
-  extracted_keywords: {
-    type: String,
-    default: null
+  extractedKeywords: {
+    type: [String],
+    default: []
   },
   processed_at: {
+    type: Date,
+    default: Date.now
+  },
+  updated_at: {
     type: Date,
     default: Date.now
   }
