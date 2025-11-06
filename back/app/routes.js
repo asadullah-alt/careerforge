@@ -337,6 +337,7 @@ responseGemini = response.response;
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
 
         // Get all processed jobs for the user
+        console.log("Fetching jobs for user:", user._id);
         ProcessedJob.find({ user_id: user._id })
           .sort({ processed_at: -1 }) // Sort by processed_at in descending order
           .exec((err, jobs) => {

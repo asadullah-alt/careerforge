@@ -57,7 +57,9 @@ const processedJobSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-});
+}, {
+    collection : 'ProcessedJob' // the collection to use for this schema
+  });
 
 const jobSchema = new mongoose.Schema({
   user_id: {
