@@ -77,6 +77,9 @@ const jobSchema = new mongoose.Schema({
     default: Date.now
   }
 });
-
-export const ProcessedJob = mongoose.model('ProcessedJob', processedJobSchema);
-export const Job = mongoose.model('Job', jobSchema);
+const ProcessedJob = mongoose.model('ProcessedJob', processedJobSchema);
+const Job = mongoose.model('Job', jobSchema);
+module.exports = {
+  ProcessedJob, // Key and value are the same: { ProcessedJob: ProcessedJob }
+  Job           // Key and value are the same: { Job: Job }
+};
