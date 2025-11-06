@@ -11,24 +11,23 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '/'
   const hidePaths = ['/', '/signup', '/features', '/about', '/pricing']
   
-  const [isMainHost, setIsMainHost] = useState<boolean | null>(null)
+  const [shouldHideShell, setShouldHideShell] = useState<boolean | null>(null)
   
   useEffect(() => {
-    setIsMainHost(window.location.hostname === 'careerforge.datapsx.com')
-  }, [])
+    const isMainHost = window.location.hostname === 'careerforge.datapsx.com'
+    const isHidePath = hidePaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
+    setShouldHideShell(isMainHost && isHidePath)
+  }, [pathname])
 
-  // Check path immediately - it's available from Next.js router
-  const isHidePath = hidePaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
-  
-  // Only hide if we've confirmed it's the main host AND it's a hide path
-  // During loading (isMainHost === null), assume we should show the shell
-  const hideShell = isMainHost === true && isHidePath
+  // While checking, show nothing (or a blank screen)
+ if (shouldHideShell === null) {
+  return <div className="min-h-screen bg-background" />
+}
 
-  if (hideShell) {
+  if (shouldHideShell) {
     return <div className="min-h-screen">{children}</div>
   }
 
-  // Show loading state or shell while checking hostname
   return (
     <SidebarProvider
       style={
