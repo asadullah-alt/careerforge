@@ -95,7 +95,7 @@ const SignIn2 = () => {
             className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow"
           >
             <Image
-              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              src="/google-color.svg"
               alt="Google"
               className="w-6 h-6"
               width={24}
@@ -104,7 +104,7 @@ const SignIn2 = () => {
           </button>
           <button className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow">
             <Image
-              src="https://www.svgrepo.com/show/448224/facebook.svg"
+              src="/facebook.svg"
               alt="Facebook"
               className="w-6 h-6"
               width={24}
@@ -113,7 +113,7 @@ const SignIn2 = () => {
           </button>
           <button className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow">
             <Image
-              src="https://www.svgrepo.com/show/511330/apple-173.svg"
+              src="/apple-173.svg"
               alt="Apple"
               className="w-6 h-6"
               width={24}
