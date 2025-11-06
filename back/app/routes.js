@@ -47,14 +47,44 @@ module.exports = function (app, passport) {
   });
 
   app.post('/signup', (req, res, next) => {
-
-    return passport.authenticate('local-signup', { session: false }, (err, passportUser, info) => {
+    return passport.authenticate('local-signup', { session: false }, async (err, passportUser, info) => {
       if (err) {
         return res.json({ 'errors': err });
       }
 
       if (passportUser) {
-        return res.json({ user: passportUser, token: passportUser.generateJWT(passportUser.local.email) });
+        try {
+          // If this is a local signup (email/password) and the user is not verified,
+          // generate a verification code, save it, send the email, and do NOT return a JWT.
+          if (passportUser.local && passportUser.local.email && !passportUser.isVerified) {
+            const { generateVerificationCode, sendVerificationEmail } = require('./utils/emailService');
+            const verificationCode = generateVerificationCode();
+            const expiresAt = new Date();
+            expiresAt.setMinutes(expiresAt.getMinutes() + 15);
+
+            passportUser.verificationCode = {
+              code: verificationCode,
+              expiresAt
+            };
+            await passportUser.save();
+
+            // Send verification email (best-effort)
+            await sendVerificationEmail(passportUser.local.email, verificationCode);
+
+            return res.status(200).json({
+              success: true,
+              message: 'Verification code sent to email. Please verify to complete signup',
+              user: { email: passportUser.local.email }
+            });
+          }
+
+          // Otherwise (e.g., OAuth signups which are marked verified), return token
+          const mailForToken = (passportUser.local && passportUser.local.email) || (passportUser.google && passportUser.google.email) || '';
+          return res.json({ user: passportUser, token: passportUser.generateJWT(mailForToken) });
+        } catch (e) {
+          console.error('Signup post-processing error:', e);
+          return res.status(500).json({ success: false, message: 'An error occurred during signup' });
+        }
       }
 
       return res.status(400).json({

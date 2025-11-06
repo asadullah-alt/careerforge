@@ -2,11 +2,11 @@ const nodemailer = require('nodemailer');
 
 // Create reusable transporter object using SMTP transport
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true for 465, false for other ports
+  host: "smtpout.secureserver.net",
+  port: 465,
+  secure: true, // true for 465, false for other ports
   auth: {
-    user: "asadullahbeg@datapsx.com",
+    user: "support@datapsx.com",
     pass: process.env.EMAIL_PASSWORD // Should be set in environment variables
   }
 });
@@ -20,7 +20,7 @@ const generateVerificationCode = () => {
 const sendVerificationEmail = async (to, verificationCode) => {
   try {
     const mailOptions = {
-      from: '"CareerForge" <asadullahbeg@datapsx.com>',
+      from: '"CareerForge" <support@datapsx.com>',
       to: to,
       subject: "Email Verification - CareerForge",
       html: `

@@ -149,6 +149,8 @@ module.exports = (passport) => {
                         newUser.google.token = token;
                         newUser.google.name = profile.displayName;
                         newUser.google.email = profile.emails[0].value;
+                        // Mark OAuth-created users as verified (no email/password verification required)
+                        newUser.isVerified = true;
 
                         newUser.save((err) => {
                             if (err)
@@ -183,6 +185,8 @@ module.exports = (passport) => {
                         newUser.google.token = token;
                         newUser.google.name = profile.displayName;
                         newUser.google.email = profile.emails[0].value;
+                        // Mark OAuth-created users as verified (no email/password verification required)
+                        newUser.isVerified = true;
 
                         newUser.save((err) => {
                             if (err)
@@ -218,6 +222,9 @@ module.exports = (passport) => {
                             newUser.linkedin.token = token;
                             newUser.linkedin.name = profile.displayName;
                             newUser.linkedin.email = profile.emails[0].value;
+
+                                // Mark OAuth-created users as verified (no email/password verification required)
+                                newUser.isVerified = true;
 
                             newUser.save((err) => {
                                 if (err)
