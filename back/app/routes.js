@@ -6,6 +6,7 @@ const { raw } = require('body-parser');
 const { default: ollamaClient } = require('ollama');
 const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({});
+const { ProcessedJob } = require('./models/jobApplication');
 const {extractSkills, extractSkillsWithRegex, cleanHTML, parseLinkedInProjects} = require('./util');
 async function runGeminiFlash(model, prompt) {
   try {
@@ -318,6 +319,33 @@ responseGemini = response.response;
       });
     } catch (e) {
       return res.status(500).json({ success: false, valid: false, message: e.message });
+    }
+  });
+
+  // Get all processed jobs for a user
+  app.post('/api/allJobs', (req, res) => {
+    try {
+      const token = req.body.token || (req.headers && (req.headers.authorization || req.headers.Authorization) ? (req.headers.authorization || req.headers.Authorization).replace(/^Bearer\s+/i, '') : null);
+      
+      if (!token) {
+        return res.status(400).json({ success: false, message: 'Missing token' });
+      }
+
+      // Find user by token
+      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
+        if (err) return res.status(500).json({ success: false, message: err.message });
+        if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
+
+        // Get all processed jobs for the user
+        ProcessedJob.find({ user_id: user._id })
+          .sort({ processed_at: -1 }) // Sort by processed_at in descending order
+          .exec((err, jobs) => {
+            if (err) return res.status(500).json({ success: false, message: err.message });
+            return res.json({ success: true, jobs });
+          });
+      });
+    } catch (e) {
+      return res.status(500).json({ success: false, message: e.message });
     }
   });
 
