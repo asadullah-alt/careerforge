@@ -84,8 +84,14 @@ module.exports = function (app, passport) {
   app.get('/auth/google/callback',
     passport.authenticate('google', ), (req, res) => {
       console.log(req.user.google)
-      let token = req.user.google.token;
-      res.redirect('https://careerforge.datapsx.com/dashboard?token=' + token)
+      if (!req.user.isVerified) {
+        // Redirect to verification page if email not verified
+        res.redirect(`https://careerforge.datapsx.com/verify?email=${encodeURIComponent(req.user.google.email)}`)
+      } else {
+        // If already verified, redirect to dashboard with token
+        let token = req.user.google.token;
+        res.redirect('https://careerforge.datapsx.com/dashboard?token=' + token)
+      }
     });
 
     app.get('/auth/linkedin', passport.authenticate('linkedin'));
@@ -98,6 +104,105 @@ module.exports = function (app, passport) {
 
   app.get('/jwt', passport.authenticate('jwt-auth', { session: false }), (req, res) => {
     res.json({ user: req.user })
+  });
+
+  const { verificationRateLimiter } = require('./middleware/rateLimiter');
+
+  // Verify email route
+  app.post('/verify-email', verificationRateLimiter, async (req, res) => {
+    const { email, code } = req.body;
+
+    try {
+      const user = await User.findOne({
+        $or: [
+          { 'local.email': email },
+          { 'google.email': email }
+        ],
+        'verificationCode.code': code,
+        'verificationCode.expiresAt': { $gt: new Date() }
+      });
+
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid or expired verification code'
+        });
+      }
+
+      // Update user verification status
+      user.isVerified = true;
+      user.verificationCode = undefined; // Clear verification code
+      await user.save();
+
+      // Generate JWT token
+      const token = user.generateJWT(email);
+
+      res.json({
+        success: true,
+        message: 'Email verified successfully',
+        token,
+        user: {
+          email: email,
+          name: user.google.name || user.local.email,
+          isVerified: true
+        }
+      });
+    } catch (error) {
+      console.error('Verification error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'An error occurred during verification'
+      });
+    }
+  });
+
+  // Resend verification code
+  app.post('/resend-verification', async (req, res) => {
+    const { email } = req.body;
+    const { generateVerificationCode, sendVerificationEmail } = require('./utils/emailService');
+
+    try {
+      const user = await User.findOne({
+        $or: [
+          { 'local.email': email },
+          { 'google.email': email }
+        ],
+        isVerified: false
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found or already verified'
+        });
+      }
+
+      // Generate new verification code
+      const verificationCode = generateVerificationCode();
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 15);
+
+      // Update user with new code
+      user.verificationCode = {
+        code: verificationCode,
+        expiresAt
+      };
+      await user.save();
+
+      // Send new verification email
+      await sendVerificationEmail(email, verificationCode);
+
+      res.json({
+        success: true,
+        message: 'Verification code sent successfully'
+      });
+    } catch (error) {
+      console.error('Resend verification error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'An error occurred while resending verification code'
+      });
+    }
   });
 
   app.get('/token', (req, res, next) => {

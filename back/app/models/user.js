@@ -26,11 +26,29 @@ let userSchema = mongoose.Schema({
         token        : String,
         email        : String,
         name         : String
-    }
+    },
+
+    // verification fields
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+    verificationCode: {
+        code: String,
+        expiresAt: Date
+    },
+    verificationAttempts: {
+        count: {
+            type: Number,
+            default: 0
+        },
+        lastAttempt: Date,
+        blockedUntil: Date
+    },
 
     // extension token used by the browser extension to identify the user
-    ,Extensiontoken: String
-    ,extensionToken: String
+    Extensiontoken: String,
+    extensionToken: String
 
 });
 
