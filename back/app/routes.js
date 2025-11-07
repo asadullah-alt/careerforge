@@ -158,15 +158,16 @@ module.exports = function (app, passport) {
           message: 'Invalid or expired verification code'
         });
       }
+      const token = user.generateJWT(email);
 
       // Update user verification status
       user.isVerified = true;
       user.verificationCode = undefined; // Clear verification code
+      user.local.token = token;
       await user.save();
 
       // Generate JWT token
-      const token = user.generateJWT(email);
-
+      
       res.json({
         success: true,
         message: 'Email verified successfully',
@@ -265,7 +266,7 @@ module.exports = function (app, passport) {
       }
 
       // Find the user by any stored social token
-      User.findOne({ $or: [{ 'Extensiontoken': token },{'google.token':token}, { 'linkedin.token': token }] }, (err, user) => {
+      User.findOne({ $or: [{ 'Extensiontoken': token },{ 'local.token':token},{'google.token':token}, { 'linkedin.token': token }] }, (err, user) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found.' });
          
@@ -320,7 +321,7 @@ responseGemini = response.response;
       }
 
       // find user by token
-      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
+      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token':token},{ 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
 
         // attempt to extract JSON from responseGemini
@@ -425,7 +426,7 @@ responseGemini = response.response;
         return res.status(400).json({ success: false, valid: false, message: 'Missing token' });
       }
 
-      User.findOne({ $or: [{ 'google.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }] }, (err, user) => {
+      User.findOne({ $or: [{ 'google.token': token },{ 'local.token':token}, { 'extensionToken': token }, { 'linkedin.token': token }] }, (err, user) => {
         if (err) return res.status(500).json({ success: false, valid: false, message: err.message });
         if (!user) return res.json({ success: true, valid: false });
 
@@ -467,7 +468,7 @@ responseGemini = response.response;
       }
 
       // Find user by token
-      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
+      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token':token},{ 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
 
