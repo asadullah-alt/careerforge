@@ -38,10 +38,10 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         // Otherwise fetch from API and cache into the store
         const response = await fetch(`https://resume.datapsx.com/api/v1/jobs?job_id=${params.id}&token=${token}`)
         const data = await response.json()
-        console.log(data)
+       
         if (!mounted) return
-        setJobData(data.processed_job)
-        setSelectedJob(data.processed_job)
+        setJobData(data.data.processed_job)
+        setSelectedJob(data.data.processed_job)
       } catch (error) {
         console.error('Error fetching job data:', error)
       } finally {
