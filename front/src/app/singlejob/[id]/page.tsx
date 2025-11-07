@@ -303,47 +303,38 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         <div className="space-y-6">
           <div className="bg-card rounded-lg p-6 border shadow-sm">
             <h2 className="text-xl font-semibold mb-4">Application Progress</h2>
-            {analyzing ? (
-              <div className="space-y-4">
-                <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Analyzing your resume against this job posting...
-                  </p>
+            <div className="flex flex-col">
+              {analyzing ? (
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                    <p className="text-sm text-muted-foreground text-center">
+                      Analyzing your resume against this job posting...
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ) : (
-            {analyzing ? (
-              <div className="space-y-4">
-                <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Analyzing your resume against this job posting...
-                  </p>
+              ) : (
+                <div className="flex flex-col items-center mb-4">
+                  <GaugeComponent
+                    type="semicircle"
+                    arc={{
+                      colorArray: ['#00FF15', '#FF2121'],
+                      padding: 0.02,
+                      subArcs: [
+                        { limit: 40 },
+                        { limit: 60 },
+                        { limit: 70 },
+                        {},
+                        {},
+                        {},
+                        {}
+                      ]
+                    }}
+                    pointer={{type: "blob", animationDelay: 0 }}
+                    value={50}
+                  />
                 </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center mb-4">
-                <GaugeComponent
-                  type="semicircle"
-                  arc={{
-                    colorArray: ['#00FF15', '#FF2121'],
-                    padding: 0.02,
-                    subArcs: [
-                      { limit: 40 },
-                      { limit: 60 },
-                      { limit: 70 },
-                      {},
-                      {},
-                      {},
-                      {}
-                    ]
-                  }}
-                  pointer={{type: "blob", animationDelay: 0 }}
-                  value={50}
-                />
-              </div>
-            )}
+              )}
             </div>
             <div className="space-y-4 mt-6">
               <div>
