@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separatorInteractive'
 import { Badge } from '@/components/ui/badgeTable'
 import { schema } from '@/components/data-table'
 import { z } from 'zod'
+import { useJobStore } from '@/store/job-store'
 
 type Job = z.infer<typeof schema>
 
@@ -18,22 +19,44 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = React.useState(true)
   const [analysisScore] = React.useState(85) // Example score
 
+  const selectedJob = useJobStore((s) => s.selectedJob)
+  const setSelectedJob = useJobStore((s) => s.setSelectedJob)
+
   React.useEffect(() => {
-    // TODO: Replace with actual API call
-    const fetchJobData = async () => {
+    let mounted = true
+
+    const load = async () => {
       try {
-        const response = await fetch(`https://careerback.datapsx.com/jobs/${params.id}`)
+        // If the store already has the job and the ids match, use it
+        if (selectedJob && selectedJob.id.toString() === params.id) {
+          if (!mounted) return
+          setJobData(selectedJob)
+          setLoading(false)
+          return
+        }
+
+        // Otherwise fetch from API and cache into the store
+        const response = await fetch(`https://resume.datapsx.com/api/v1/job?job_id=${params.id}`)
         const data = await response.json()
+        if (!mounted) return
         setJobData(data)
+        setSelectedJob(data)
       } catch (error) {
         console.error('Error fetching job data:', error)
       } finally {
-        setLoading(false)
+        if (mounted) setLoading(false)
       }
     }
 
-    fetchJobData()
-  }, [params.id])
+    load()
+
+    return () => {
+      mounted = false
+      // optional: clear the cached job when leaving the page
+      // keep this if you don't want stale data to persist
+      // setSelectedJob(null)
+    }
+  }, [params.id, selectedJob, setSelectedJob])
 
   if (loading) {
     return (

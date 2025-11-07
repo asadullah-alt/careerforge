@@ -92,8 +92,10 @@ import {
   Tabs,
   TabsContent,
 } from "@/components/ui/tabs"
+import { useJobStore } from '@/store/job-store'
 
 export const schema = z.object({
+  job_id: z.string(),
   id: z.number(),
   jobPosition: z.string(),
   company: z.string(),
@@ -617,12 +619,18 @@ const chartConfig = {
 
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   const router = useRouter()
+  const setSelectedJob = useJobStore((state) => state.setSelectedJob)
+
+  const handleClick = () => {
+    setSelectedJob(item)
+    router.push(`/singlejob/${item.job_id}`)
+  }
 
   return (
     <Button
       variant="link"
       className="text-foreground w-fit px-0 text-left"
-      onClick={() => router.push(`/singlejob/${item.id}`)}
+      onClick={handleClick}
     >
       {item.jobPosition}
     </Button>
