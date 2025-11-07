@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { IconArrowLeft, IconChartBar } from '@tabler/icons-react'
+import { IconArrowLeft, IconChartBar, IconChevronDown } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separatorInteractive'
@@ -21,6 +21,9 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
   const [jobData, setJobData] = React.useState<Job | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [analysisScore] = React.useState(85) // Example score
+  const [isCompanyExpanded, setIsCompanyExpanded] = React.useState(false)
+  const [analyzing, setAnalyzing] = React.useState(false)
+  const [analysisResult, setAnalysisResult] = React.useState(null)
 
   const selectedJob = useJobStore((s) => s.selectedJob)
   const setSelectedJob = useJobStore((s) => s.setSelectedJob)
@@ -45,11 +48,59 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         if (!mounted) return
         setJobData(data.data.processed_job)
         setSelectedJob(data.data.processed_job)
-        console.log(jobData)
+        
+        // Start resume analysis after job data is loaded
+        analyzeResume()
       } catch (error) {
         console.error('Error fetching job data:', error)
       } finally {
         if (mounted) setLoading(false)
+      }
+    }
+
+    const analyzeResume = async () => {
+      if (!mounted) return
+      try {
+        setAnalyzing(true)
+        const token = getCfAuthCookie()
+        
+        // First get all user resumes
+        const resumesResponse = await fetch(
+          `https://resume.datapsx.com/api/v1/resumes/getAllUserResumes?token=${token}`
+        )
+        const resumesData = await resumesResponse.json()
+        
+        if (!resumesData.data || resumesData.data.length === 0) {
+          console.error('No resumes found')
+          return
+        }
+
+        // Use the first resume for analysis
+        const resumeId = resumesData.data[0]
+        
+        // Send analysis request
+        const analysisResponse = await fetch('https://resume.datapsx.com/api/v1/resumes/improve', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            job_id: params.id,
+            resume_id: resumeId
+          })
+        })
+        
+        const analysisData = await analysisResponse.json()
+        console.log('Analysis Result:', analysisData)
+        if (mounted) {
+          setAnalysisResult(analysisData)
+        }
+      } catch (error) {
+        console.error('Error analyzing resume:', error)
+      } finally {
+        if (mounted) {
+          setAnalyzing(false)
+        }
       }
     }
 
@@ -112,7 +163,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
 
           <Separator />
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-2 gap-4">
             <div>
               <h3 className="font-medium mb-1">Status</h3>
               <Badge variant="outline" className={
@@ -137,11 +188,24 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
             </div>
           </div>
 
-          <Separator />
+          <Separator /> */}
 
           <div>
-            <h2 className="text-xl font-semibold mb-4">Company Details</h2>
-            <div className="space-y-4">
+            <button
+              onClick={() => setIsCompanyExpanded(!isCompanyExpanded)}
+              className="w-full flex items-center justify-between text-xl font-semibold mb-4 hover:text-primary transition-colors"
+            >
+              <span>Company Details</span>
+              <IconChevronDown
+                className={`transform transition-transform duration-200 ${
+                  isCompanyExpanded ? 'rotate-180' : ''
+                }`}
+                size={24}
+              />
+            </button>
+            <div className={`space-y-4 overflow-hidden transition-all duration-200 ${
+              isCompanyExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+            }`}>
               <div>
                 <h3 className="font-medium mb-1">Industry</h3>
                 <p className="text-muted-foreground">{jobData.company_profile?.industry || '—'}</p>
@@ -239,26 +303,47 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         <div className="space-y-6">
           <div className="bg-card rounded-lg p-6 border shadow-sm">
             <h2 className="text-xl font-semibold mb-4">Application Progress</h2>
-            <div className="flex flex-col items-center mb-4">
-             <GaugeComponent
-                type="semicircle"
-                arc={{
+            {analyzing ? (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                  <p className="text-sm text-muted-foreground text-center">
+                    Analyzing your resume against this job posting...
+                  </p>
+                </div>
+              </div>
+            ) : (
+            {analyzing ? (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                  <p className="text-sm text-muted-foreground text-center">
+                    Analyzing your resume against this job posting...
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center mb-4">
+                <GaugeComponent
+                  type="semicircle"
+                  arc={{
                     colorArray: ['#00FF15', '#FF2121'],
                     padding: 0.02,
-                    subArcs:
-                    [
-                        { limit: 40 },
-                        { limit: 60 },
-                        { limit: 70 },
-                        {},
-                        {},
-                        {},
-                        {}
+                    subArcs: [
+                      { limit: 40 },
+                      { limit: 60 },
+                      { limit: 70 },
+                      {},
+                      {},
+                      {},
+                      {}
                     ]
-                }}
-                pointer={{type: "blob", animationDelay: 0 }}
-                value={50}
+                  }}
+                  pointer={{type: "blob", animationDelay: 0 }}
+                  value={50}
                 />
+              </div>
+            )}
             </div>
             <div className="space-y-4 mt-6">
               <div>
@@ -305,7 +390,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
             </Button>
           </div>
 
-          <div className="bg-card rounded-lg p-6 border shadow-sm">
+          {/* <div className="bg-card rounded-lg p-6 border shadow-sm">
             <h2 className="text-xl font-semibold mb-4">Key Dates & Status</h2>
             <div className="space-y-3">
               <div>
@@ -338,7 +423,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
                 <p className="text-muted-foreground">{jobData.followUp || '—'}</p>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
