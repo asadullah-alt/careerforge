@@ -33,6 +33,7 @@ import {
   IconLoader,
   IconPlus,
   IconTrendingUp,
+  IconExternalLink,
 } from "@tabler/icons-react"
 import {
   ColumnDef,
@@ -262,6 +263,33 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
         <span className="text-muted-foreground">{row.original.followUp ?? "—"}</span>
       </div>
     ),
+  },
+  {
+    id: "url",
+    header: "URL",
+    cell: ({ row }) => {
+      // Try common fields where a job URL might be stored
+      const raw: any = row.original as any
+      const jobUrl = raw.job_url || raw.jobUrl || raw.src || raw.companyDetails?.website || null
+
+      return (
+        <div className="w-12 flex justify-center">
+          {jobUrl ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-primary"
+              onClick={() => window.open(jobUrl, "_blank", "noopener,noreferrer")}
+              aria-label="Open job URL"
+            >
+              <IconExternalLink />
+            </Button>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
+        </div>
+      )
+    },
   },
   {
     id: "actions",
