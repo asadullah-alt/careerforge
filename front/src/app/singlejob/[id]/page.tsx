@@ -45,13 +45,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
 
     const load = async () => {
       try {
-        // If the store already has the job and the ids match, use it
-        if (selectedJob && selectedJob.id.toString() === params.id) {
-          if (!mounted) return
-          setJobData(selectedJob)
-          setLoading(false)
-          return
-        }
+     
         const token = getCfAuthCookie()
         // Otherwise fetch from API and cache into the store
         const response = await fetch(`https://resume.datapsx.com/api/v1/jobs?job_id=${params.id}&token=${token}`)
@@ -103,17 +97,14 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         })
         
         const analysisData = await analysisResponse.json()
-        console.log('Analysis Result:', analysisData)
+        console.log('Analysis Result:', analysisData.data)
         if (mounted) {
-          setAnalysisResult(analysisData)
+          setAnalysisResult(analysisData.data)
+          setAnalyzing(false)
         }
       } catch (error) {
         console.error('Error analyzing resume:', error)
-      } finally {
-        if (mounted) {
-          setAnalyzing(false)
-        }
-      }
+      } 
     }
 
     load()
