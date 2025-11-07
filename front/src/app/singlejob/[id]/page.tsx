@@ -12,6 +12,8 @@ import { schema } from '@/components/data-table'
 import { z } from 'zod'
 import { useJobStore } from '@/store/job-store'
 import { getCfAuthCookie } from '@/utils/cookie'
+import dynamic from "next/dynamic";
+const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
 type Job = z.infer<typeof schema>
 
 export default function SingleJobPage({ params }: { params: { id: string } }) {
@@ -238,7 +240,25 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
           <div className="bg-card rounded-lg p-6 border shadow-sm">
             <h2 className="text-xl font-semibold mb-4">Application Progress</h2>
             <div className="flex flex-col items-center mb-4">
-              <Speedometer value={analysisScore} size={200} />
+             <GaugeComponent
+                type="semicircle"
+                arc={{
+                    colorArray: ['#00FF15', '#FF2121'],
+                    padding: 0.02,
+                    subArcs:
+                    [
+                        { limit: 40 },
+                        { limit: 60 },
+                        { limit: 70 },
+                        {},
+                        {},
+                        {},
+                        {}
+                    ]
+                }}
+                pointer={{type: "blob", animationDelay: 0 }}
+                value={50}
+                />
             </div>
             <div className="space-y-4 mt-6">
               <div>
