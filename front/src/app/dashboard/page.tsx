@@ -127,6 +127,7 @@ export default function Page() {
           ].filter(Boolean).join(', ') || 'Remote'
 
           return {
+            job_id:job.job_id,
             id: parseInt(job.job_id) || Math.floor(Math.random() * 1000000),
             jobPosition: job.jobTitle || 'Untitled Position',
             company: companyName,
