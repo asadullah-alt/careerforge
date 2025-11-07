@@ -35,16 +35,16 @@ interface ProcessedJob {
   user_id: string;
   job_id: string;
   job_title: string | null;
-  companyProfile: CompanyProfile | string;
+  company_profile: CompanyProfile | string;
   location: Location;
   datePosted: string | null;
   employmentType: string | null;
-  jobSummary: string | null;
-  keyResponsibilities: string[];
+  job_summary: string | null;
+  key_responsibilities: string[];
   qualifications: Qualifications;
-  compensationAndBenefits: string | null;
-  applicationInfo: ApplicationInfo;
-  extractedKeywords: string[];
+  compensation_and_benefits: string | null;
+  application_info: ApplicationInfo;
+  extracted_keywords: string[];
   processed_at: string;
   updated_at: string;
 }
@@ -110,15 +110,15 @@ export default function Page() {
         const transformedJobs = data.jobs.map((job: ProcessedJob) => {
           // Parse companyProfile if it's a string
           let companyProfile: CompanyProfile | null = null
-          if (typeof job.companyProfile === "string") {
+          if (typeof job.company_profile === "string") {
             try {
-              companyProfile = JSON.parse(job.companyProfile)
+              companyProfile = JSON.parse(job.company_profile)
             } catch (e) {
               console.log("Error parsing companyProfile:", e)
               companyProfile = null
             }
           } else {
-            companyProfile = job.companyProfile as CompanyProfile
+            companyProfile = job.company_profile as CompanyProfile
           }
 
           const companyName = companyProfile?.companyName || 'Unknown Company'
@@ -144,16 +144,16 @@ export default function Page() {
               required: job.qualifications?.required || [],
               preferred: job.qualifications?.preferred || []
             },
-            maxSalary: job.compensationAndBenefits || 'Not specified',
+            maxSalary: job.compensation_and_benefits || 'Not specified',
             location: job.location, // Pass the full location object instead of string
-            status: job.applicationInfo.how_to_apply || 'Bookmarked',
+            status: job.application_info.how_to_apply || 'Bookmarked',
             dateSaved: new Date(job.processed_at).toISOString().split('T')[0],
             deadline: null,
             dateApplied: null,
             followUp: null,
             // Add the missing properties
-            application_info: job.applicationInfo,
-            extracted_keywords: job.extractedKeywords || []
+            application_info: job.application_info,
+            extracted_keywords: job.extracted_keywords || []
           } satisfies TransformedJob
         })
 
