@@ -322,7 +322,16 @@ export function DataTable({
   const [data, setData] = React.useState(() => initialData)
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+    React.useState<VisibilityState>({
+      // Columns to hide by default:
+      maxSalary: true,
+      dateSaved: false,
+      deadline: false,
+      dateApplied: false,
+      followUp: false,
+      status: false
+    
+    })
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
