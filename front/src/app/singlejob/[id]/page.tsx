@@ -39,8 +39,8 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         const response = await fetch(`https://resume.datapsx.com/api/v1/jobs?job_id=${params.id}&token=${token}`)
         const data = await response.json()
         if (!mounted) return
-        setJobData(data)
-        setSelectedJob(data)
+        setJobData(data.processed_job)
+        setSelectedJob(data.processed_job)
       } catch (error) {
         console.error('Error fetching job data:', error)
       } finally {
@@ -94,9 +94,14 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
           <div>
             <h1 className="text-3xl font-bold mb-2">{jobData.jobPosition}</h1>
             <div className="flex items-center gap-3 text-muted-foreground">
-              <span className="font-medium text-lg">{jobData.company}</span>
+              <span className="font-medium text-lg">{jobData.companyDetails?.companyName}</span>
               <span>•</span>
-              <span>{jobData.location}</span>
+              <span>{[
+                jobData.location.city,
+                jobData.location.state,
+                jobData.location.country,
+                jobData.location.remoteStatus
+              ].filter(Boolean).join(', ') || 'Remote'}</span>
             </div>
           </div>
 

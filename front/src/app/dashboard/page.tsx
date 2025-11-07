@@ -26,9 +26,9 @@ interface Qualifications {
 }
 
 interface ApplicationInfo {
-  howToApply: string | null;
-  applyLink: string | null;
-  contactEmail: string | null;
+  how_to_apply: string | null;
+  apply_link: string | null;
+  contact_email: string | null;
 }
 
 interface ProcessedJob {
@@ -58,14 +58,18 @@ interface TransformedJob {
   id: number;
   jobPosition: string;
   job_id: string;
-  company: string;
+  
   companyDetails: {
+    companyName: string;
     industry: string | null;
     website: string | null;
     description: string | null;
   };
   maxSalary: string;
-  location: string;
+  location:Location;
+  qualifications: Qualifications;
+  application_info: ApplicationInfo;
+  extracted_keywords: string[];
   status: string;
   dateSaved: string;
   deadline: string | null;
@@ -127,23 +131,30 @@ export default function Page() {
           ].filter(Boolean).join(', ') || 'Remote'
 
           return {
-            job_id:job.job_id,
+            job_id: job.job_id,
             id: parseInt(job.job_id) || Math.floor(Math.random() * 1000000),
             jobPosition: job.jobTitle || 'Untitled Position',
-            company: companyName,
             companyDetails: {
+              companyName: companyName,
               industry: companyProfile?.industry || null,
               website: companyProfile?.website || null,
               description: companyProfile?.description || null,
             },
+            qualifications: {
+              required: job.qualifications?.required || [],
+              preferred: job.qualifications?.preferred || []
+            },
             maxSalary: job.compensationAndBenefits || 'Not specified',
-            location: locationStr,
-            status: job.applicationInfo.howToApply || 'Bookmarked',
+            location: job.location, // Pass the full location object instead of string
+            status: job.applicationInfo.how_to_apply || 'Bookmarked',
             dateSaved: new Date(job.processed_at).toISOString().split('T')[0],
             deadline: null,
             dateApplied: null,
             followUp: null,
-          }
+            // Add the missing properties
+            application_info: job.applicationInfo,
+            extracted_keywords: job.extractedKeywords || []
+          } satisfies TransformedJob
         })
 
         setJobs(transformedJobs)

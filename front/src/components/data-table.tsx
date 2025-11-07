@@ -98,14 +98,29 @@ export const schema = z.object({
   job_id: z.string(),
   id: z.number(),
   jobPosition: z.string(),
-  company: z.string(),
+  application_info: z.object({
+    how_to_apply: z.string().nullable(),
+    apply_link: z.string().nullable(),
+    contact_email: z.string().nullable()
+  }),
+  extracted_keywords: z.array(z.string()),
+  qualifications: z.object({
+    required: z.array(z.string()).nullable(),
+    preferred: z.array(z.string()).nullable()
+  }),
   companyDetails: z.object({
+    companyName: z.string().nullable(),
     industry: z.string().nullable(),
     website: z.string().nullable(),
     description: z.string().nullable()
   }).optional(),
   maxSalary: z.string(),
-  location: z.string(),
+  location:  z.object({
+    city: z.string().nullable(),  
+    state: z.string().nullable(),
+    country: z.string().nullable(),
+    remoteStatus: z.string().nullable()
+  }),
   status: z.string(),
   // these four can be a date string or null
   dateSaved: z.string().nullable(),
@@ -179,7 +194,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Company",
     cell: ({ row }) => (
       <div className="w-32">
-        <span className="font-medium">{row.original.company}</span>
+        <span className="font-medium">{row.original.companyDetails?.companyName}</span>
       </div>
     ),
   },
@@ -197,7 +212,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Location",
     cell: ({ row }) => (
       <div className="w-32">
-        <span className="text-muted-foreground">{row.original.location}</span>
+        <span className="text-muted-foreground">{row.original.location.country}</span>
       </div>
     ),
   },
