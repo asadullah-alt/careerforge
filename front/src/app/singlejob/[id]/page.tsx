@@ -36,7 +36,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         }
         const token = getCfAuthCookie()
         // Otherwise fetch from API and cache into the store
-        const response = await fetch(`https://resume.datapsx.com/api/v1/job?job_id=${params.id}&token=${token}`)
+        const response = await fetch(`https://resume.datapsx.com/api/v1/jobs?job_id=${params.id}&token=${token}`)
         const data = await response.json()
         if (!mounted) return
         setJobData(data)
