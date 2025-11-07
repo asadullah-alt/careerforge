@@ -94,7 +94,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         {/* Job Details Section */}
         <div className="md:col-span-2 space-y-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">{jobData.jobPosition}</h1>
+            <h1 className="text-3xl font-bold mb-2">{jobData.job_title}</h1>
             <div className="flex items-center gap-3 text-muted-foreground">
               <span className="font-medium text-lg">{jobData.companyDetails?.companyName}</span>
               <span>•</span>

@@ -8,7 +8,8 @@ interface JobStore {
   selectedJob: Job | null
   setSelectedJob: (job: Job | null) => void
 }
-export const useJobStore = create<JobStore>()((set) => ({
+
+export const useJobStore = create<JobStore>((set) => ({
   selectedJob: null,
-  setSelectedJob: (job) => set({ selectedJob: job }),
+  setSelectedJob: (job: Job | null) => set({ selectedJob: job }),
 }))

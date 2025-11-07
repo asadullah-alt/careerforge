@@ -21,8 +21,8 @@ interface Location {
 }
 
 interface Qualifications {
-  required: string[];
-  preferred: string[];
+  required: string[] | null;
+  preferred: string[] | null;
 }
 
 interface ApplicationInfo {
@@ -34,7 +34,7 @@ interface ApplicationInfo {
 interface ProcessedJob {
   user_id: string;
   job_id: string;
-  jobTitle: string | null;
+  job_title: string | null;
   companyProfile: CompanyProfile | string;
   location: Location;
   datePosted: string | null;
@@ -56,7 +56,7 @@ interface ApiResponse {
 
 interface TransformedJob {
   id: number;
-  jobPosition: string;
+  job_title: string;
   job_id: string;
   
   companyDetails: {
@@ -133,7 +133,7 @@ export default function Page() {
           return {
             job_id: job.job_id,
             id: parseInt(job.job_id) || Math.floor(Math.random() * 1000000),
-            jobPosition: job.jobTitle || 'Untitled Position',
+            job_title: job.job_title || 'Untitled Position',
             companyDetails: {
               companyName: companyName,
               industry: companyProfile?.industry || null,

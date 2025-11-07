@@ -97,7 +97,7 @@ import { useJobStore } from '@/store/job-store'
 export const schema = z.object({
   job_id: z.string(),
   id: z.number(),
-  jobPosition: z.string(),
+  job_title: z.string(),
   application_info: z.object({
     how_to_apply: z.string().nullable(),
     apply_link: z.string().nullable(),
@@ -647,7 +647,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
       className="text-foreground w-fit px-0 text-left"
       onClick={handleClick}
     >
-      {item.jobPosition}
+      {item.job_title}
     </Button>
   )
 }
