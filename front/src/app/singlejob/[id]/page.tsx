@@ -23,7 +23,19 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
   const [analysisScore] = React.useState(85) // Example score
   const [isCompanyExpanded, setIsCompanyExpanded] = React.useState(false)
   const [analyzing, setAnalyzing] = React.useState(false)
-  const [analysisResult, setAnalysisResult] = React.useState(null)
+  const [analysisResult, setAnalysisResult] = React.useState<{
+    original_score: number;
+    new_score: number;
+    skill_comparison: Array<{
+      skill: string;
+      resume_mentions: number;
+      job_mentions: number;
+    }>;
+    improvements: Array<{
+      suggestion: string;
+      lineNumber: string;
+    }>;
+  } | null>(null)
 
   const selectedJob = useJobStore((s) => s.selectedJob)
   const setSelectedJob = useJobStore((s) => s.setSelectedJob)
@@ -313,67 +325,71 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
                     </p>
                   </div>
                 </div>
-              ) : (
-                <div className="flex flex-col items-center mb-4">
-                  <GaugeComponent
-                    type="semicircle"
-                    arc={{
-                      colorArray: ['#00FF15', '#FF2121'],
-                      padding: 0.02,
-                      subArcs: [
-                        { limit: 40 },
-                        { limit: 60 },
-                        { limit: 70 },
-                        {},
-                        {},
-                        {},
-                        {}
-                      ]
-                    }}
-                    pointer={{type: "blob", animationDelay: 0 }}
-                    value={50}
-                  />
+              ) : analysisResult && (
+                <div className="space-y-6">
+                  <div className="flex flex-col items-center">
+                    <GaugeComponent
+                      type="semicircle"
+                      arc={{
+                        colorArray: ['#FF2121', '#FFA500', '#00FF15'],
+                        padding: 0.02,
+                        width: 0.2,
+                        subArcs: [
+                          { limit: 40 },
+                          { limit: 60 },
+                          { limit: 100 }
+                        ]
+                      }}
+                      pointer={{type: "blob", animationDelay: 0}}
+                      value={Math.round(analysisResult.original_score * 100)}
+                    />
+                    <div className="text-center mt-4">
+                      <p className="text-sm font-medium">Match Score</p>
+                      <p className="text-2xl font-bold">{Math.round(analysisResult.original_score * 100)}%</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="bg-muted/20 rounded-lg p-4">
+                      <h4 className="font-medium mb-2">Skill Analysis</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {analysisResult.skill_comparison.map((skill, index) => (
+                          skill.resume_mentions > 0 && (
+                            <Badge key={index} variant="secondary" className="justify-between">
+                              {skill.skill}
+                              <span className="ml-2 text-xs">{skill.resume_mentions}✓</span>
+                            </Badge>
+                          )
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium mb-2">Missing Skills</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {analysisResult.skill_comparison.map((skill, index) => (
+                          skill.resume_mentions === 0 && (
+                            <Badge key={index} variant="outline" className="border-red-200 text-red-500">
+                              {skill.skill}
+                            </Badge>
+                          )
+                        ))}
+                      </div>
+                    </div>
+
+                    {analysisResult.improvements && (
+                      <div>
+                        <h4 className="font-medium mb-2">Suggested Improvements</h4>
+                        <ul className="list-disc pl-4 space-y-1 text-sm text-muted-foreground">
+                          {analysisResult.improvements.slice(0, 3).map((imp, index) => (
+                            <li key={index}>{imp.suggestion}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
-            </div>
-            <div className="space-y-4 mt-6">
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Skills Match</span>
-                  <span className="text-sm text-muted-foreground">{50}%</span>
-                </div>
-                <Progress value={50} />
-              </div>
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Experience Match</span>
-                  <span className="text-sm text-muted-foreground">{50}%</span>
-                </div>
-                <Progress value={50} />
-              </div>
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Education Match</span>
-                  <span className="text-sm text-muted-foreground">{50}%</span>
-                </div>
-                <Progress value={50} />
-              </div>
-            </div>
-            <Separator className="my-4" />
-            <div className="space-y-3">
-              <div>
-                <h3 className="text-sm font-medium mb-2">Required Skills</h3>
-                <div className="flex flex-wrap gap-2">
-                  {jobData.extracted_keywords?.map((skill: string, index: number) => (
-                    <Badge key={index} variant="secondary">{skill}</Badge>
-                  )) || '—'}
-                </div>
-              </div>
-             
-              <div>
-                <h3 className="text-sm font-medium mb-2">Education Requirements</h3>
-                <p className="text-sm text-muted-foreground">{jobData.qualifications.required || '—'}</p>
-              </div>
             </div>
             <Button className="w-full mt-6" size="lg">
               <IconChartBar className="mr-2 h-4 w-4" />
