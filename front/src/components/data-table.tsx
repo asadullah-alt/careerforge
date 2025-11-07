@@ -108,8 +108,8 @@ export const schema = z.object({
     required: z.array(z.string()).nullable(),
     preferred: z.array(z.string()).nullable()
   }),
-  companyDetails: z.object({
-    companyName: z.string().nullable(),
+  company_profile: z.object({
+    company_name: z.string().nullable(),
     industry: z.string().nullable(),
     website: z.string().nullable(),
     description: z.string().nullable()
@@ -119,7 +119,7 @@ export const schema = z.object({
     city: z.string().nullable(),  
     state: z.string().nullable(),
     country: z.string().nullable(),
-    remoteStatus: z.string().nullable()
+    remote_status: z.string().nullable()
   }),
   status: z.string(),
   // these four can be a date string or null
@@ -194,7 +194,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Company",
     cell: ({ row }) => (
       <div className="w-32">
-        <span className="font-medium">{row.original.companyDetails?.companyName}</span>
+        <span className="font-medium">{row.original.company_profile?.companyName}</span>
       </div>
     ),
   },

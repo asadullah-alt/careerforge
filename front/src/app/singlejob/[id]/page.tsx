@@ -96,13 +96,13 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
           <div>
             <h1 className="text-3xl font-bold mb-2">{jobData.job_title}</h1>
             <div className="flex items-center gap-3 text-muted-foreground">
-              <span className="font-medium text-lg">{jobData.companyDetails?.companyName}</span>
+              <span className="font-medium text-lg">{jobData.company_profile?.company_name}</span>
               <span>•</span>
               <span>{[
                 jobData.location.city,
                 jobData.location.state,
                 jobData.location.country,
-                jobData.location.remoteStatus
+                jobData.location.remote_status
               ].filter(Boolean).join(', ') || 'Remote'}</span>
             </div>
           </div>
@@ -141,25 +141,25 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
             <div className="space-y-4">
               <div>
                 <h3 className="font-medium mb-1">Industry</h3>
-                <p className="text-muted-foreground">{jobData.companyDetails?.industry || '—'}</p>
+                <p className="text-muted-foreground">{jobData.company_profile?.industry || '—'}</p>
               </div>
               <div>
                 <h3 className="font-medium mb-1">Website</h3>
-                {jobData.companyDetails?.website ? (
+                {jobData.company_profile?.website ? (
                   <a
-                    href={jobData.companyDetails.website}
+                    href={jobData.company_profile.website}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary hover:underline"
                   >
-                    {jobData.companyDetails.website}
+                    {jobData.company_profile.website}
                   </a>
                 ) : '—'}
               </div>
               <div>
                 <h3 className="font-medium mb-1">Description</h3>
                 <p className="text-muted-foreground whitespace-pre-line">
-                  {jobData.companyDetails?.description || '—'}
+                  {jobData.company_profile?.description || '—'}
                 </p>
               </div>
             </div>
