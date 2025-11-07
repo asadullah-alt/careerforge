@@ -72,7 +72,6 @@ const SignIn2 = () => {
       const data = await response.json();
 
       if (response.ok) {
-        console.log(response)
         if (data.token) {
           // Store token in cookie with proper expiration based on remember me
           const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days : 24 hours
