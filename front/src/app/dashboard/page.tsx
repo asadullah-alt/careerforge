@@ -17,7 +17,7 @@ interface Location {
   city: string | null;
   state: string | null;
   country: string | null;
-  remoteStatus: string | null;
+  remote_status: string | null;
 }
 
 interface Qualifications {
@@ -59,8 +59,8 @@ interface TransformedJob {
   job_title: string;
   job_id: string;
   
-  companyDetails: {
-    companyName: string;
+  company_profile: {
+    company_name: string;
     industry: string | null;
     website: string | null;
     description: string | null;
@@ -127,15 +127,15 @@ export default function Page() {
             job.location.city,
             job.location.state,
             job.location.country,
-            job.location.remoteStatus
+            job.location.remote_status
           ].filter(Boolean).join(', ') || 'Remote'
 
           return {
             job_id: job.job_id,
             id: parseInt(job.job_id) || Math.floor(Math.random() * 1000000),
             job_title: job.job_title || 'Untitled Position',
-            companyDetails: {
-              companyName: companyName,
+            company_profile: {
+              company_name: companyName,
               industry: companyProfile?.industry || null,
               website: companyProfile?.website || null,
               description: companyProfile?.description || null,

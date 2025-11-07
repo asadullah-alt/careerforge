@@ -194,7 +194,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Company",
     cell: ({ row }) => (
       <div className="w-32">
-        <span className="font-medium">{row.original.company_profile?.companyName}</span>
+        <span className="font-medium">{row.original.company_profile?.company_name}</span>
       </div>
     ),
   },
