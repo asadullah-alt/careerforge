@@ -40,12 +40,52 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
   const selectedJob = useJobStore((s) => s.selectedJob)
   const setSelectedJob = useJobStore((s) => s.setSelectedJob)
 
+  const analyzeResume = async () => {
+    try {
+      setAnalyzing(true)
+      const token = getCfAuthCookie()
+      
+      // First get all user resumes
+      const resumesResponse = await fetch(
+        `https://resume.datapsx.com/api/v1/resumes/getAllUserResumes?token=${token}`
+      )
+      const resumesData = await resumesResponse.json()
+      
+      if (!resumesData.data || resumesData.data.length === 0) {
+        console.error('No resumes found')
+        return
+      }
+
+      // Use the first resume for analysis
+      const resumeId = resumesData.data[0]
+      
+      // Send analysis request
+      const analysisResponse = await fetch('https://resume.datapsx.com/api/v1/resumes/improve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          job_id: params.id,
+          resume_id: resumeId
+        })
+      })
+      
+      const analysisData = await analysisResponse.json()
+      console.log('Analysis Result:', analysisData.data)
+      setAnalysisResult(analysisData.data)
+    } catch (error) {
+      console.error('Error analyzing resume:', error)
+    } finally {
+      setAnalyzing(false)
+    }
+  }
+
   React.useEffect(() => {
     let mounted = true
 
     const load = async () => {
       try {
-     
         const token = getCfAuthCookie()
         // Otherwise fetch from API and cache into the store
         const response = await fetch(`https://resume.datapsx.com/api/v1/jobs?job_id=${params.id}&token=${token}`)
@@ -54,57 +94,11 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         if (!mounted) return
         setJobData(data.data.processed_job)
         setSelectedJob(data.data.processed_job)
-        
-        // Start resume analysis after job data is loaded
-        analyzeResume()
       } catch (error) {
         console.error('Error fetching job data:', error)
       } finally {
         if (mounted) setLoading(false)
       }
-    }
-
-    const analyzeResume = async () => {
-      if (!mounted) return
-      try {
-        setAnalyzing(true)
-        const token = getCfAuthCookie()
-        
-        // First get all user resumes
-        const resumesResponse = await fetch(
-          `https://resume.datapsx.com/api/v1/resumes/getAllUserResumes?token=${token}`
-        )
-        const resumesData = await resumesResponse.json()
-        
-        if (!resumesData.data || resumesData.data.length === 0) {
-          console.error('No resumes found')
-          return
-        }
-
-        // Use the first resume for analysis
-        const resumeId = resumesData.data[0]
-        
-        // Send analysis request
-        const analysisResponse = await fetch('https://resume.datapsx.com/api/v1/resumes/improve', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            job_id: params.id,
-            resume_id: resumeId
-          })
-        })
-        
-        const analysisData = await analysisResponse.json()
-        console.log('Analysis Result:', analysisData.data)
-        if (mounted) {
-          setAnalysisResult(analysisData.data)
-          setAnalyzing(false)
-        }
-      } catch (error) {
-        console.error('Error analyzing resume:', error)
-      } 
     }
 
     load()
@@ -382,9 +376,23 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
                 </div>
               )}
             </div>
-            <Button className="w-full mt-6" size="lg">
-              <IconChartBar className="mr-2 h-4 w-4" />
-              View Detailed Analysis
+            <Button 
+              className="w-full mt-6" 
+              size="lg"
+              onClick={analyzeResume}
+              disabled={analyzing}
+            >
+              {analyzing ? (
+                <>
+                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
+                  Analyzing Resume...
+                </>
+              ) : (
+                <>
+                  <IconChartBar className="mr-2 h-4 w-4" />
+                  {analysisResult ? 'Analyze Again' : 'Analyze Resume'}
+                </>
+              )}
             </Button>
           </div>
 
