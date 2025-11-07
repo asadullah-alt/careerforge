@@ -57,7 +57,7 @@ interface ApiResponse {
 interface TransformedJob {
   id: number;
   jobPosition: string;
-  job_id?: string;
+  job_id: string;
   company: string;
   companyDetails: {
     industry: string | null;
