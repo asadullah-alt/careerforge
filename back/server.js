@@ -3,7 +3,10 @@ let app      = express();
 let mongoose = require('mongoose');
 let passport = require('passport');
 require('dotenv-flow').config();
-
+require('formdata-node/cjs/whatwg-with-fetch').setup();
+const { File, Blob } = require('formdata-node');
+globalThis.File = File;
+globalThis.Blob = Blob;
 let morgan       = require('morgan');
 let cookieParser = require('cookie-parser');
 let bodyParser   = require('body-parser');
