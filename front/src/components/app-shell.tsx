@@ -37,7 +37,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      {/* <AppSidebar variant="inset" /> */}
       <SidebarInset>
         <SiteHeader />
         <Toaster />
