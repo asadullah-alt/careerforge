@@ -26,12 +26,9 @@ import {
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
-  IconCircleCheckFilled,
   IconDotsVertical,
   IconGripVertical,
   IconLayoutColumns,
-  IconLoader,
-  IconPlus,
   IconTrendingUp,
   IconExternalLink,
 } from "@tabler/icons-react"
@@ -51,7 +48,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
-import { toast } from "sonner"
+// toast removed (unused)
 import { z } from "zod"
 
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -103,8 +100,6 @@ import {
 import {
   Tabs,
   TabsContent,
-  TabsList,
-  TabsTrigger,
 } from "@/components/ui/tabs"
 
 export const schema = z.object({
@@ -268,8 +263,15 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     id: "url",
     header: "URL",
     cell: ({ row }) => {
-      // Try common fields where a job URL might be stored
-      const raw: any = row.original as any
+      // Typed view of the row so we avoid `any` and satisfy the linter.
+      type JobRow = z.infer<typeof schema> & {
+        job_url?: string
+        jobUrl?: string
+        src?: string | null
+        companyDetails?: { website?: string | null }
+      }
+
+      const raw = row.original as JobRow
       const jobUrl = raw.job_url || raw.jobUrl || raw.src || raw.companyDetails?.website || null
 
       return (

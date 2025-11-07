@@ -1,65 +1,13 @@
 "use client"
-
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { Button } from "@/components/ui/buttonTable"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet"
 
-// small helper to copy text
-async function copyToClipboard(text: string) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    return navigator.clipboard.writeText(text)
-  }
-  // fallback
-  const ta = document.createElement('textarea')
-  ta.value = text
-  document.body.appendChild(ta)
-  ta.select()
-  try { document.execCommand('copy') } catch { /* ignore */ }
-  document.body.removeChild(ta)
-}
-
 export default function LinkedinModal({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
-  const [token, setToken] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [copied, setCopied] = useState(false)
+  
+  
+ 
 
-  useEffect(() => {
-    if (!open) return
-    // try to fetch existing token when modal opens
-    const fetchToken = async () => {
-      setLoading(true)
-      try {
-        const res = await fetch('https://careerback.datapsx.com/api/extension-token', { credentials: 'include' })
-        const data = await res.json()
-        if (data && data.success && data.token) setToken(data.token)
-      } catch { 
-        // ignore
-      } finally { setLoading(false) }
-    }
-    fetchToken()
-  }, [open])
-
-  const createToken = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch('https://careerback.datapsx.com/api/extension-token', { method: 'POST', credentials: 'include' })
-      const data = await res.json()
-      if (data && data.success && data.token) setToken(data.token)
-    } catch (err) {
-      console.error(err)
-    } finally { setLoading(false) }
-  }
-
-  const handleCopy = async () => {
-    if (!token) return
-    try {
-      await copyToClipboard(token)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (e) {
-      console.error('copy failed', e)
-    }
-  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

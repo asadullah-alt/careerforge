@@ -109,6 +109,7 @@ export default function Page() {
             try {
               companyProfile = JSON.parse(job.companyProfile)
             } catch (e) {
+              console.log("Error parsing companyProfile:", e)
               companyProfile = null
             }
           } else {
