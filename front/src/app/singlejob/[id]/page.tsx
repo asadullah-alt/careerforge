@@ -42,6 +42,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         if (!mounted) return
         setJobData(data.data.processed_job)
         setSelectedJob(data.data.processed_job)
+        console.log(jobData)
       } catch (error) {
         console.error('Error fetching job data:', error)
       } finally {
