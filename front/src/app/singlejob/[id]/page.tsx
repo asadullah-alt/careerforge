@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separatorInteractive'
 import { Badge } from '@/components/ui/badgeTable'
+import Speedometer from '@/components/ui/speedometer'
 import { schema } from '@/components/data-table'
 import { z } from 'zod'
 import { useJobStore } from '@/store/job-store'
@@ -164,34 +165,157 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
               </div>
             </div>
           </div>
+
+          <Separator />
+
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Job Details</h2>
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-medium mb-2">Job Summary</h3>
+                <p className="text-muted-foreground whitespace-pre-line">
+                  {jobData.job_summary || '—'}
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-medium mb-2">Employment Type</h3>
+                <Badge variant="secondary">
+                  {jobData.employment_type || '—'}
+                </Badge>
+              </div>
+
+              <div>
+                <h3 className="font-medium mb-2">Key Responsibilities</h3>
+                <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+                  {jobData.key_responsibilities?.map((responsibility: string, index: number) => (
+                    <li key={index}>{responsibility}</li>
+                  )) || <li>—</li>}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-medium mb-2">Required Qualifications</h3>
+                <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+                  {jobData.qualifications?.required?.map((qual: string, index: number) => (
+                    <li key={index}>{qual}</li>
+                  )) || <li>—</li>}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-medium mb-2">Preferred Qualifications</h3>
+                <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+                  {jobData.qualifications?.preferred?.map((qual: string, index: number) => (
+                    <li key={index}>{qual}</li>
+                  )) || <li>—</li>}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-medium mb-2">Required Skills</h3>
+                <div className="flex flex-wrap gap-2">
+                  {jobData.extracted_keywords?.map((skill: string, index: number) => (
+                    <Badge key={index} variant="secondary">{skill}</Badge>
+                  )) || '—'}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-medium mb-2">Preferred Skills</h3>
+                <div className="flex flex-wrap gap-2">
+                  {jobData.qualifications.preferred?.map((skill: string, index: number) => (
+                    <Badge key={index} variant="secondary">{skill}</Badge>
+                  )) || '—'}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Analysis Section */}
         <div className="space-y-6">
           <div className="bg-card rounded-lg p-6 border shadow-sm">
             <h2 className="text-xl font-semibold mb-4">Application Progress</h2>
-            <Progress value={analysisScore} className="mb-2" />
-            <p className="text-sm text-muted-foreground">
-              Overall application strength: {analysisScore}%
-            </p>
-            <Button className="w-full mt-4" size="lg">
+            <div className="flex flex-col items-center mb-4">
+              <Speedometer value={analysisScore} size={200} />
+            </div>
+            <div className="space-y-4 mt-6">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium">Skills Match</span>
+                  <span className="text-sm text-muted-foreground">{50}%</span>
+                </div>
+                <Progress value={50} />
+              </div>
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium">Experience Match</span>
+                  <span className="text-sm text-muted-foreground">{50}%</span>
+                </div>
+                <Progress value={50} />
+              </div>
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium">Education Match</span>
+                  <span className="text-sm text-muted-foreground">{50}%</span>
+                </div>
+                <Progress value={50} />
+              </div>
+            </div>
+            <Separator className="my-4" />
+            <div className="space-y-3">
+              <div>
+                <h3 className="text-sm font-medium mb-2">Required Skills</h3>
+                <div className="flex flex-wrap gap-2">
+                  {jobData.extracted_keywords?.map((skill: string, index: number) => (
+                    <Badge key={index} variant="secondary">{skill}</Badge>
+                  )) || '—'}
+                </div>
+              </div>
+             
+              <div>
+                <h3 className="text-sm font-medium mb-2">Education Requirements</h3>
+                <p className="text-sm text-muted-foreground">{jobData.qualifications.required || '—'}</p>
+              </div>
+            </div>
+            <Button className="w-full mt-6" size="lg">
               <IconChartBar className="mr-2 h-4 w-4" />
-              View Analysis
+              View Detailed Analysis
             </Button>
           </div>
 
           <div className="bg-card rounded-lg p-6 border shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">Key Dates</h2>
+            <h2 className="text-xl font-semibold mb-4">Key Dates & Status</h2>
             <div className="space-y-3">
               <div>
-                <p className="text-sm font-medium">Saved</p>
+                <p className="text-sm font-medium">Application Status</p>
+                <Badge variant="outline" className={
+                  jobData.status === "Interviewing" ? "bg-green-100 text-green-800" :
+                  jobData.status === "Applied" ? "bg-blue-100 text-blue-800" :
+                  "bg-gray-100 text-gray-800"
+                }>
+                  {jobData.status}
+                </Badge>
+              </div>
+              
+              <div>
+                <p className="text-sm font-medium">Date Saved</p>
                 <p className="text-muted-foreground">{jobData.dateSaved || '—'}</p>
               </div>
               <div>
-                <p className="text-sm font-medium">Deadline</p>
+                <p className="text-sm font-medium">Date Applied</p>
+                <p className="text-muted-foreground">{jobData.dateApplied || '—'}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Application Deadline</p>
                 <p className={`font-medium ${jobData.deadline ? 'text-red-600' : 'text-muted-foreground'}`}>
                   {jobData.deadline || '—'}
                 </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Next Follow Up</p>
+                <p className="text-muted-foreground">{jobData.followUp || '—'}</p>
               </div>
             </div>
           </div>

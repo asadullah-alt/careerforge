@@ -97,6 +97,9 @@ import { useJobStore } from '@/store/job-store'
 export const schema = z.object({
   job_id: z.string(),
   id: z.number(),
+  job_summary:z.string(),
+  employment_type: z.string(),
+  key_responsibilities: z.array(z.string()),
   job_title: z.string(),
   application_info: z.object({
     how_to_apply: z.string().nullable(),

@@ -58,7 +58,9 @@ interface TransformedJob {
   id: number;
   job_title: string;
   job_id: string;
-  
+  job_summary: string;
+  employment_type: string;
+  key_responsibilities: string[];
   company_profile: {
     company_name: string;
     industry: string | null;
@@ -132,8 +134,11 @@ export default function Page() {
 
           return {
             job_id: job.job_id,
+            job_summary:job.job_summary || '',
             id: parseInt(job.job_id) || Math.floor(Math.random() * 1000000),
             job_title: job.job_title || 'Untitled Position',
+            employment_type: job.employmentType || 'Not specified',
+            key_responsibilities: job.key_responsibilities || [],
             company_profile: {
               company_name: companyName,
               industry: companyProfile?.industry || null,
