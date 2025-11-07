@@ -77,7 +77,7 @@ const SignIn2 = () => {
           const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days : 24 hours
           document.cookie = `cf_auth=${data.token}; path=/; max-age=${maxAge}`;
           router.push('/dashboard');
-        } else if (data.success && data.message.includes('verification')) {
+        } else if (data.success && data.message.includes('Verification')) {
           // Save email in localStorage if remember me is checked
           if (rememberMe) {
             localStorage.setItem('rememberedEmail', email);
