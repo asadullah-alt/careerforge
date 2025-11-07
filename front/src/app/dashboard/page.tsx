@@ -17,7 +17,7 @@ interface Location {
   city: string | null;
   state: string | null;
   country: string | null;
-  remote_status: string | null;
+  remoteStatus: string | null;
 }
 
 interface Qualifications {
@@ -26,25 +26,25 @@ interface Qualifications {
 }
 
 interface ApplicationInfo {
-  how_to_apply: string | null;
-  apply_link: string | null;
-  contact_email: string | null;
+  howToApply: string | null;
+  applyLink: string | null;
+  contactEmail: string | null;
 }
 
 interface ProcessedJob {
   user_id: string;
   job_id: string;
-  job_title: string | null;
-  company_profile: CompanyProfile | string;
+  jobTitle: string | null;
+  companyProfile: CompanyProfile | string;
   location: Location;
   datePosted: string | null;
   employmentType: string | null;
-  job_summary: string | null;
-  key_responsibilities: string[];
+  jobSummary: string | null;
+  keyResponsibilities: string[];
   qualifications: Qualifications;
-  compensation_and_benefits: string | null;
-  application_info: ApplicationInfo;
-  extracted_keywords: string[];
+  compensationAndBenefits: string | null;
+  applicationInfo: ApplicationInfo;
+  extractedKeywords: string[];
   processed_at: string;
   updated_at: string;
 }
@@ -56,13 +56,13 @@ interface ApiResponse {
 
 interface TransformedJob {
   id: number;
-  job_title: string;
+  jobTitle: string;
   job_id: string;
-  job_summary: string;
-  employment_type: string;
-  key_responsibilities: string[];
-  company_profile: {
-    company_name: string;
+  jobSummary: string;
+  employmentType: string;
+  keyResponsibilities: string[];
+  companyProfile: {
+    companyName: string;
     industry: string | null;
     website: string | null;
     description: string | null;
@@ -70,8 +70,8 @@ interface TransformedJob {
   maxSalary: string;
   location:Location;
   qualifications: Qualifications;
-  application_info: ApplicationInfo;
-  extracted_keywords: string[];
+  applicationInfo: ApplicationInfo;
+  extractedKeywords: string[];
   status: string;
   dateSaved: string;
   deadline: string | null;
@@ -112,15 +112,15 @@ export default function Page() {
         const transformedJobs = data.jobs.map((job: ProcessedJob) => {
           // Parse companyProfile if it's a string
           let companyProfile: CompanyProfile | null = null
-          if (typeof job.company_profile === "string") {
+          if (typeof job.companyProfile === "string") {
             try {
-              companyProfile = JSON.parse(job.company_profile)
+              companyProfile = JSON.parse(job.companyProfile)
             } catch (e) {
               console.log("Error parsing companyProfile:", e)
               companyProfile = null
             }
           } else {
-            companyProfile = job.company_profile as CompanyProfile
+            companyProfile = job.companyProfile as CompanyProfile
           }
 
           const companyName = companyProfile?.companyName || 'Unknown Company'
@@ -129,18 +129,18 @@ export default function Page() {
             job.location.city,
             job.location.state,
             job.location.country,
-            job.location.remote_status
+            job.location.remoteStatus
           ].filter(Boolean).join(', ') || 'Remote'
 
           return {
             job_id: job.job_id,
-            job_summary:job.job_summary || '',
+            jobSummary:job.jobSummary || '',
             id: parseInt(job.job_id) || Math.floor(Math.random() * 1000000),
-            job_title: job.job_title || 'Untitled Position',
-            employment_type: job.employmentType || 'Not specified',
-            key_responsibilities: job.key_responsibilities || [],
-            company_profile: {
-              company_name: companyName,
+            jobTitle: job.jobTitle || 'Untitled Position',
+            employmentType: job.employmentType || 'Not specified',
+            keyResponsibilities: job.keyResponsibilities || [],
+            companyProfile: {
+              companyName: companyName,
               industry: companyProfile?.industry || null,
               website: companyProfile?.website || null,
               description: companyProfile?.description || null,
@@ -149,16 +149,16 @@ export default function Page() {
               required: job.qualifications?.required || [],
               preferred: job.qualifications?.preferred || []
             },
-            maxSalary: job.compensation_and_benefits || 'Not specified',
+            maxSalary: job.compensationAndBenefits || 'Not specified',
             location: job.location, // Pass the full location object instead of string
-            status: job.application_info.how_to_apply || 'Bookmarked',
+            status: job.applicationInfo.howToApply || 'Bookmarked',
             dateSaved: new Date(job.processed_at).toISOString().split('T')[0],
             deadline: null,
             dateApplied: null,
             followUp: null,
             // Add the missing properties
-            application_info: job.application_info,
-            extracted_keywords: job.extracted_keywords || []
+            applicationInfo: job.applicationInfo,
+            extractedKeywords: job.extractedKeywords || []
           } satisfies TransformedJob
         })
 

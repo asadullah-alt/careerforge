@@ -145,15 +145,15 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         {/* Job Details Section */}
         <div className="md:col-span-2 space-y-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">{jobData.job_title}</h1>
+            <h1 className="text-3xl font-bold mb-2">{jobData.jobTitle}</h1>
             <div className="flex items-center gap-3 text-muted-foreground">
-              <span className="font-medium text-lg">{jobData.company_profile?.company_name}</span>
+              <span className="font-medium text-lg">{jobData.companyProfile?.companyName}</span>
               <span>•</span>
               <span>{[
                 jobData.location.city,
                 jobData.location.state,
                 jobData.location.country,
-                jobData.location.remote_status
+                jobData.location.remoteStatus
               ].filter(Boolean).join(', ') || 'Remote'}</span>
             </div>
           </div>
@@ -205,25 +205,25 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
             }`}>
               <div>
                 <h3 className="font-medium mb-1">Industry</h3>
-                <p className="text-muted-foreground">{jobData.company_profile?.industry || '—'}</p>
+                <p className="text-muted-foreground">{jobData.companyProfile?.industry || '—'}</p>
               </div>
               <div>
                 <h3 className="font-medium mb-1">Website</h3>
-                {jobData.company_profile?.website ? (
+                {jobData.companyProfile?.website ? (
                   <a
-                    href={jobData.company_profile.website}
+                    href={jobData.companyProfile.website}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary hover:underline"
                   >
-                    {jobData.company_profile.website}
+                    {jobData.companyProfile.website}
                   </a>
                 ) : '—'}
               </div>
               <div>
                 <h3 className="font-medium mb-1">Description</h3>
                 <p className="text-muted-foreground whitespace-pre-line">
-                  {jobData.company_profile?.description || '—'}
+                  {jobData.companyProfile?.description || '—'}
                 </p>
               </div>
             </div>
@@ -237,21 +237,21 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
               <div>
                 <h3 className="font-medium mb-2">Job Summary</h3>
                 <p className="text-muted-foreground whitespace-pre-line">
-                  {jobData.job_summary || '—'}
+                  {jobData.jobSummary || '—'}
                 </p>
               </div>
 
               <div>
                 <h3 className="font-medium mb-2">Employment Type</h3>
                 <Badge variant="secondary">
-                  {jobData.employment_type || '—'}
+                  {jobData.employmentType || '—'}
                 </Badge>
               </div>
 
               <div>
                 <h3 className="font-medium mb-2">Key Responsibilities</h3>
                 <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
-                  {jobData.key_responsibilities?.map((responsibility: string, index: number) => (
+                  {jobData.keyResponsibilities?.map((responsibility: string, index: number) => (
                     <li key={index}>{responsibility}</li>
                   )) || <li>—</li>}
                 </ul>
@@ -278,7 +278,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
               <div>
                 <h3 className="font-medium mb-2">Required Skills</h3>
                 <div className="flex flex-wrap gap-2">
-                  {jobData.extracted_keywords?.map((skill: string, index: number) => (
+                  {jobData.extractedKeywords?.map((skill: string, index: number) => (
                     <Badge key={index} variant="secondary">{skill}</Badge>
                   )) || '—'}
                 </div>

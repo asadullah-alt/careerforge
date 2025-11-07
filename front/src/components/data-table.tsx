@@ -97,22 +97,22 @@ import { useJobStore } from '@/store/job-store'
 export const schema = z.object({
   job_id: z.string(),
   id: z.number(),
-  job_summary:z.string(),
-  employment_type: z.string(),
-  key_responsibilities: z.array(z.string()),
-  job_title: z.string(),
-  application_info: z.object({
-    how_to_apply: z.string().nullable(),
-    apply_link: z.string().nullable(),
-    contact_email: z.string().nullable()
+  jobSummary:z.string(),
+  employmentType: z.string(),
+  keyResponsibilities: z.array(z.string()),
+  jobTitle: z.string(),
+  applicationInfo: z.object({
+    howToApply: z.string().nullable(),
+    applyLink: z.string().nullable(),
+    contactEmail: z.string().nullable()
   }),
-  extracted_keywords: z.array(z.string()),
+  extractedKeywords: z.array(z.string()),
   qualifications: z.object({
     required: z.array(z.string()).nullable(),
     preferred: z.array(z.string()).nullable()
   }),
-  company_profile: z.object({
-    company_name: z.string().nullable(),
+  companyProfile: z.object({
+    companyName: z.string().nullable(),
     industry: z.string().nullable(),
     website: z.string().nullable(),
     description: z.string().nullable()
@@ -122,7 +122,7 @@ export const schema = z.object({
     city: z.string().nullable(),  
     state: z.string().nullable(),
     country: z.string().nullable(),
-    remote_status: z.string().nullable()
+    remoteStatus: z.string().nullable()
   }),
   status: z.string(),
   // these four can be a date string or null
@@ -197,7 +197,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     header: "Company",
     cell: ({ row }) => (
       <div className="w-32">
-        <span className="font-medium">{row.original.company_profile?.company_name}</span>
+        <span className="font-medium">{row.original.companyProfile?.companyName}</span>
       </div>
     ),
   },
@@ -650,7 +650,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
       className="text-foreground w-fit px-0 text-left"
       onClick={handleClick}
     >
-      {item.job_title}
+      {item.jobTitle}
     </Button>
   )
 }
