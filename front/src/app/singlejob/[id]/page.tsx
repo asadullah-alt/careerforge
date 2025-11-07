@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badgeTable'
 import { schema } from '@/components/data-table'
 import { z } from 'zod'
 import { useJobStore } from '@/store/job-store'
-
+import { getCfAuthCookie } from '@/utils/cookie'
 type Job = z.infer<typeof schema>
 
 export default function SingleJobPage({ params }: { params: { id: string } }) {
@@ -34,9 +34,9 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
           setLoading(false)
           return
         }
-
+        const token = getCfAuthCookie()
         // Otherwise fetch from API and cache into the store
-        const response = await fetch(`https://resume.datapsx.com/api/v1/job?job_id=${params.id}`)
+        const response = await fetch(`https://resume.datapsx.com/api/v1/job?job_id=${params.id}&token=${token}`)
         const data = await response.json()
         if (!mounted) return
         setJobData(data)
