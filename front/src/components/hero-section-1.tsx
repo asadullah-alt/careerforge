@@ -436,7 +436,7 @@ export const HeroHeader = () => {
 const Logo = ({ className }: { className?: string }) => {
     return (
         <Image 
-          src="/output-image.png" 
+          src="/output_image.png" 
           alt="CareerForge Logo"
           width={50} 
           height={50} 
