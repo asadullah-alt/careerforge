@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/buttonTable"
 import { Separator } from "@/components/ui/separatorInteractive"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import FileUpload from "@/components/file-upload"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet"
 import { UploadCloud, Linkedin, Mail} from "lucide-react"
 import { Sun, Moon } from 'lucide-react'
@@ -26,6 +26,14 @@ export function SiteHeader() {
   useEffect(() => {
     console.log('[SiteHeader] theme:', theme)
   }, [theme])
+
+  const router = useRouter()
+
+  function handleLogout() {
+    // Clear cf_auth cookie by setting it to expired
+    document.cookie = 'cf_auth=; path=/; max-age=0; SameSite=Lax'
+    router.replace('/')
+  }
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
@@ -73,15 +81,13 @@ export function SiteHeader() {
             {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
            
           </Button>
-          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-            <a
-              href="https://bhaikaamdo.com"
-              rel="noopener noreferrer"
-              target="_blank"
-              className="dark:text-foreground flex items-center"
-            >
-              <span>{buttonText}</span>
-            </a>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="hidden sm:flex border border-gray-200 dark:border-gray-700 rounded-md px-2"
+          >
+            Logout
           </Button>
         </div>
 
