@@ -70,7 +70,7 @@ export function SiteHeader() {
 
         <div className="ml-auto flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={() => { console.log('[SiteHeader] toggle clicked'); toggle() }} className="border border-gray-200 dark:border-gray-700 rounded-md px-2">
-            {theme === 'dark' ? <Sun className="size-4 mr-2" /> : <Moon className="size-4 mr-2" />}
+            {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
            
           </Button>
           <Button variant="ghost" asChild size="sm" className="hidden sm:flex">

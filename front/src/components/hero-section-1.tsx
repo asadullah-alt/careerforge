@@ -395,8 +395,9 @@ export const HeroHeader = () => {
                                 variant="ghost" 
                                 size="sm" 
                                 onClick={() => { toggle() }} 
-                                className={cn("border border-gray-200 dark:border-gray-700 rounded-md px-2", isScrolled && 'lg:hidden')}>
-                                    {theme === 'dark' ? <Sun className="size-4 mr-2" /> : <Moon className="size-4 mr-2" />}
+                                className={cn("border border-gray-200 dark:border-gray-700 rounded-md px-2 flex items-center", isScrolled && 'lg:hidden')}>
+                                    {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+                                    <span className="ml-2">Theme</span>
                                  </Button>
                                 <Button
                                     asChild
