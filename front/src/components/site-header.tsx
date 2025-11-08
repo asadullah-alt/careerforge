@@ -78,9 +78,9 @@ export function SiteHeader() {
               href="https://careerforge.datapsx.com"
               rel="noopener noreferrer"
               target="_blank"
-              className="dark:text-foreground"
+              className="dark:text-foreground flex items-center"
             >
-              {buttonText}
+              <span>{buttonText}</span>
             </a>
           </Button>
         </div>
