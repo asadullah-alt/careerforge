@@ -103,12 +103,12 @@ module.exports = function (app, passport) {
       scope: ['email']
     }), (req, res) => {
       let token = req.user.facebook.token;
-      res.redirect('https://careerforge.datapsx.com/game?token=' + token)
+      res.redirect('https://bhaikaamdo.com/game?token=' + token)
     });
 
   app.get('/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email'],
-    redirect_uri: 'https://careerback.datapsx.com/auth/google/callback'
+    redirect_uri: 'https://careerback.bhaikaamdo.com/auth/google/callback'
   }));
 
   app.get('/auth/google/callback',
@@ -116,11 +116,11 @@ module.exports = function (app, passport) {
       console.log(req.user.google)
       if (!req.user.isVerified) {
         // Redirect to verification page if email not verified
-        res.redirect(`https://careerforge.datapsx.com/verify?email=${encodeURIComponent(req.user.google.email)}`)
+        res.redirect(`https://bhaikaamdo.com/verify?email=${encodeURIComponent(req.user.google.email)}`)
       } else {
         // If already verified, redirect to dashboard with token
         let token = req.user.google.token;
-        res.redirect('https://careerforge.datapsx.com/dashboard?token=' + token)
+        res.redirect('https://bhaikaamdo.com/dashboard?token=' + token)
       }
     });
 
@@ -129,7 +129,7 @@ module.exports = function (app, passport) {
     app.get('/auth/linkedin/callback',
       passport.authenticate('linkedin', ), (req, res) => {
         let token = req.user.linkedin.token;
-        res.redirect('https://careerforge.datapsx.com/game?token=' + token)
+        res.redirect('https://bhaikaamdo.com/game?token=' + token)
       });
 
   app.get('/jwt', passport.authenticate('jwt-auth', { session: false }), (req, res) => {

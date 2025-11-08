@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CareerForge - AI-Powered Job Search & Career Coaching",
+  title: "Bhai Kaam Do",
   description: "Simplifying your job search with AI-driven insights and tools.",
 };
 
