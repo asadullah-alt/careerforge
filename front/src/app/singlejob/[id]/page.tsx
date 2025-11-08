@@ -47,7 +47,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
       
       // First get all user resumes
       const resumesResponse = await fetch(
-        `https://resume.datapsx.com/api/v1/resumes/getAllUserResumes?token=${token}`
+        `https://resume.bhaikaamdo.com/api/v1/resumes/getAllUserResumes?token=${token}`
       )
       const resumesData = await resumesResponse.json()
       
@@ -60,7 +60,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
       const resumeId = resumesData.data[0]
       
       // Send analysis request
-      const analysisResponse = await fetch('https://resume.datapsx.com/api/v1/resumes/improve', {
+      const analysisResponse = await fetch('https://resume.bhaikaamdo.com/api/v1/resumes/improve', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
       try {
         const token = getCfAuthCookie()
         // Otherwise fetch from API and cache into the store
-        const response = await fetch(`https://resume.datapsx.com/api/v1/jobs?job_id=${params.id}&token=${token}`)
+        const response = await fetch(`https://resume.bhaikaamdo.com/api/v1/jobs?job_id=${params.id}&token=${token}`)
         const data = await response.json()
        
         if (!mounted) return

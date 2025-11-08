@@ -57,7 +57,7 @@ const SignIn2 = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://careerback.datapsx.com/signup', {
+      const response = await fetch('https://careerback.bhaikaamdo.com/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +220,7 @@ const SignIn2 = () => {
         <div className="flex gap-3 w-full justify-center mt-2">
           <button
             type="button"
-            onClick={() => (window.location.href = 'https://careerback.datapsx.com/auth/google')}
+            onClick={() => (window.location.href = 'https://careerback.bhaikaamdo.com/auth/google')}
             className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow"
           >
             <Image

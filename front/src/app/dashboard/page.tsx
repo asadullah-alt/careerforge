@@ -94,7 +94,7 @@ export default function Page() {
           return
         }
 
-        const response = await fetch('https://careerback.datapsx.com/api/allJobs', {
+        const response = await fetch('https://careerback.bhaikaamdo.com/api/allJobs', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

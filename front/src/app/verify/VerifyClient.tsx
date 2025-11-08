@@ -21,7 +21,7 @@ export default function VerifyClient({ email }: { email?: string | null }) {
     setError('')
 
     try {
-      const response = await fetch('https://careerback.datapsx.com/verify-email', {
+      const response = await fetch('https://careerback.bhaikaamdo.com/verify-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export default function VerifyClient({ email }: { email?: string | null }) {
     setError('')
 
     try {
-      const response = await fetch('https://careerback.datapsx.com/resend-verification', {
+      const response = await fetch('https://careerback.bhaikaamdo.com/resend-verification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

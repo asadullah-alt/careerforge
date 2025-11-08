@@ -75,7 +75,7 @@ export function SiteHeader() {
           </Button>
           <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
             <a
-              href="https://careerforge.datapsx.com"
+              href="https://bhaikaamdo.com"
               rel="noopener noreferrer"
               target="_blank"
               className="dark:text-foreground flex items-center"
