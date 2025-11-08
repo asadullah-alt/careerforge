@@ -391,14 +391,13 @@ export const HeroHeader = () => {
                             </div>
                             <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
                                 <Button 
-                                asChild 
                                 variant="ghost" 
                                 size="sm" 
-                                onClick={() => { toggle() }} 
+                                onClick={toggle} 
                                 className={cn("border border-gray-200 dark:border-gray-700 rounded-md px-2 flex items-center", isScrolled && 'lg:hidden')}>
                                     {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
                                     <span className="ml-2">Theme</span>
-                                 </Button>
+                                </Button>
                                 <Button
                                     asChild
                                     variant="outline"
