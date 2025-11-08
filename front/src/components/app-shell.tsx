@@ -16,7 +16,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const isMainHost = window.location.hostname === 'bhaikaamdo.com'
     const isHidePath = hidePaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
-    setShouldHideShell(isHidePath)
+    setShouldHideShell(isMainHost && isHidePath)
   }, [pathname])
 
   // While checking, show nothing (or a blank screen)

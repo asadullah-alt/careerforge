@@ -1,11 +1,12 @@
 'use client'
 import React,{useState,useEffect} from 'react'
 import Link from 'next/link'
-import { ArrowRight, Menu, X, Target, FileText, Sparkles, TrendingUp, BarChart3, CheckCircle2, Clock, Zap } from 'lucide-react'
+import { ArrowRight, Menu, X, Target, FileText, Sparkles, TrendingUp, BarChart3, CheckCircle2, Clock, Zap,Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/buttonHome'
 import { AnimatedGroup } from '@/components/ui/animated-group'
 import { cn } from '@/lib/utils'
 import type { Variants } from 'framer-motion'
+import { useTheme } from '@/context/theme-context'
 
 const transitionVariants: {
     container?: Variants;
@@ -325,6 +326,7 @@ const menuItems = [
 ]
 
 export const HeroHeader = () => {
+    const { theme, toggle } = useTheme()
     const [menuState, setMenuState] = useState(false)
     const [isScrolled, setIsScrolled] = useState(false)
 
@@ -388,6 +390,14 @@ export const HeroHeader = () => {
                                 </ul>
                             </div>
                             <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
+                                <Button 
+                                asChild 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => { toggle() }} 
+                                className={cn("border border-gray-200 dark:border-gray-700 rounded-md px-2", isScrolled && 'lg:hidden')}>
+                                    {theme === 'dark' ? <Sun className="size-4 mr-2" /> : <Moon className="size-4 mr-2" />}
+                                 </Button>
                                 <Button
                                     asChild
                                     variant="outline"
