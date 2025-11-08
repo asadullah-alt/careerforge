@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowRight, Menu, X, Target, FileText, Sparkles, TrendingUp, BarChart3, CheckCircle2, Clock, Zap,Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/buttonHome'
 import { AnimatedGroup } from '@/components/ui/animated-group'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import type { Variants } from 'framer-motion'
 import { useTheme } from '@/context/theme-context'
@@ -434,7 +435,13 @@ export const HeroHeader = () => {
 
 const Logo = ({ className }: { className?: string }) => {
     return (
-        <img src="/output-image.png" alt="A description of the SVG" width="50" height="50" className={className} />
+        <Image 
+          src="/output-image.png" 
+          alt="CareerForge Logo"
+          width={50} 
+          height={50} 
+          className={className} 
+        />
     )
 
 }
