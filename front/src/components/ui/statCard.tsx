@@ -16,6 +16,7 @@ interface StatCardProps {
   percentage?: string | number;
   description?: string;
   footerText: string;
+  icon?: React.ReactNode;
 }
 
 export default function StatCard({ 
@@ -24,7 +25,8 @@ export default function StatCard({
   trending = "neutral", 
   percentage, 
   description, 
-  footerText 
+  footerText,
+  icon
 }: StatCardProps) {
   const isUp = trending === "up";
   const isDown = trending === "down";
@@ -41,10 +43,14 @@ export default function StatCard({
   const displayDescription = description || getDefaultDescription();
   
   return (
-    <Card className="@container/card cursor-pointer transition-all duration-300 hover:shadow-[0_0_20px_rgba(34,197,94,0.6),0_0_40px_rgba(34,197,94,0.4),inset_0_0_20px_rgba(34,197,94,0.2)] hover:border-green-500/50 hover:animate-pulse">
-      <CardHeader>
-        <CardDescription>{title}</CardDescription>
-        <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+    <Card className="@container/card cursor-pointer group transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/20 hover:border-primary/50">
+      <CardHeader className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 group-hover:translate-x-full duration-1000 transition-transform ease-in-out"></div>
+        <div className="flex items-center gap-2">
+          {icon}
+          <CardDescription>{title}</CardDescription>
+        </div>
+        <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl transition-all duration-300 group-hover:scale-105 transform-gpu">
           {count}
         </CardTitle>
         <CardAction>
@@ -62,8 +68,8 @@ export default function StatCard({
         </CardAction>
       </CardHeader>
       <CardFooter className="flex-col items-start gap-1.5 text-sm">
-        <div className="line-clamp-1 flex gap-2 font-medium">
-          {displayDescription} {TrendIcon && <TrendIcon className="size-4" />}
+        <div className="line-clamp-1 flex gap-2 font-medium group-hover:text-primary transition-colors duration-300">
+          {displayDescription} {TrendIcon && <TrendIcon className="size-4 transition-transform duration-300 group-hover:scale-110" />}
         </div>
         <div className="text-muted-foreground">{footerText}</div>
       </CardFooter>

@@ -298,7 +298,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
 
         {/* Analysis Section */}
         <div className="space-y-6">
-          <div className="bg-card rounded-lg p-6 border shadow-sm">
+          <div className="bg-card rounded-lg p-6 border shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/50 hover:-translate-y-0.5">
             <h2 className="text-xl font-semibold mb-4">Application Progress</h2>
             <div className="flex flex-col">
               {analyzing ? (

@@ -120,3 +120,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes flow-line {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-flow-line {
+  animation: flow-line 2s linear infinite;
+}
+
+/* Enhance the tooltip animation */
+.tooltip-enter {
+  opacity: 0;
+  transform: translateY(4px) scale(0.97);
+}
+
+.tooltip-enter-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
