@@ -87,13 +87,33 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
     const load = async () => {
       try {
         const token = getCfAuthCookie()
+
+        // If the store already has the selected job matching this id, use it and skip the fetch.
+        // We check common id field names to be resilient to slight shape differences.
+        if (selectedJob) {
+          const selId = (selectedJob as any).id || (selectedJob as any).jobId || (selectedJob as any).job_id
+          if (selId && String(selId) === String(params.id)) {
+            if (!mounted) return
+            setJobData(selectedJob as any)
+            setLoading(false)
+            return
+          }
+        }
+
         // Otherwise fetch from API and cache into the store
         const response = await fetch(`https://resume.bhaikaamdo.com/api/v1/jobs?job_id=${params.id}&token=${token}`)
         const data = await response.json()
-       
+
         if (!mounted) return
-        setJobData(data.data.processed_job)
-        setSelectedJob(data.data.processed_job)
+        const fetched = data.data.processed_job
+        setJobData(fetched)
+
+        // Only update the store if the fetched job is different to avoid triggering loops.
+        const fetchedId = (fetched as any).id || (fetched as any).jobId || (fetched as any).job_id
+        const selIdAfter = selectedJob ? ((selectedJob as any).id || (selectedJob as any).jobId || (selectedJob as any).job_id) : undefined
+        if (!selIdAfter || String(selIdAfter) !== String(fetchedId)) {
+          setSelectedJob(fetched)
+        }
       } catch (error) {
         console.error('Error fetching job data:', error)
       } finally {
@@ -109,7 +129,9 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
       // keep this if you don't want stale data to persist
       // setSelectedJob(null)
     }
-  }, [params.id, selectedJob, setSelectedJob])
+    // only run when the route param changes; we intentionally omit `selectedJob` here
+    // to avoid a fetch loop caused by updating the store inside this effect
+  }, [params.id])
 
   if (loading) {
     return (
