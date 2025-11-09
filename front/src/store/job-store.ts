@@ -2,14 +2,22 @@ import { create } from 'zustand'
 import { z } from 'zod'
 import { schema } from '@/components/data-table'
 
-type Job = z.infer<typeof schema>
+// Base type from schema
+type BaseJob = z.infer<typeof schema>
+
+// Extended type that relaxes ID field requirements
+export type ExtendedJob = Omit<BaseJob, 'job_id' | 'id' | 'jobId'> & {
+  id?: string | number;
+  jobId?: string | number;
+  job_id?: string | number;
+}
 
 interface JobStore {
-  selectedJob: Job | null
-  setSelectedJob: (job: Job | null) => void
+  selectedJob: ExtendedJob | null
+  setSelectedJob: (job: ExtendedJob | null) => void
 }
 
 export const useJobStore = create<JobStore>((set) => ({
   selectedJob: null,
-  setSelectedJob: (job: Job | null) => set({ selectedJob: job }),
+  setSelectedJob: (job: ExtendedJob | null) => set({ selectedJob: job }),
 }))

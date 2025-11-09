@@ -4,23 +4,22 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { IconArrowLeft, IconChartBar, IconChevronDown } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separatorInteractive'
 import { Badge } from '@/components/ui/badgeTable'
-import Speedometer from '@/components/ui/speedometer'
 import { schema } from '@/components/data-table'
 import { z } from 'zod'
 import { useJobStore } from '@/store/job-store'
 import { getCfAuthCookie } from '@/utils/cookie'
 import dynamic from "next/dynamic";
+
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
-type Job = z.infer<typeof schema>
+
+import { ExtendedJob } from '@/store/job-store'
 
 export default function SingleJobPage({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const [jobData, setJobData] = React.useState<Job | null>(null)
+  const [jobData, setJobData] = React.useState<ExtendedJob | null>(null)
   const [loading, setLoading] = React.useState(true)
-  const [analysisScore] = React.useState(85) // Example score
   const [isCompanyExpanded, setIsCompanyExpanded] = React.useState(false)
   const [analyzing, setAnalyzing] = React.useState(false)
   const [analysisResult, setAnalysisResult] = React.useState<{
@@ -84,17 +83,21 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
   React.useEffect(() => {
     let mounted = true
 
+    const getJobId = (job: ExtendedJob): string | undefined => {
+      const id = job.id || job.jobId || job.job_id
+      return id ? String(id) : undefined
+    }
+
     const load = async () => {
       try {
         const token = getCfAuthCookie()
 
-        // If the store already has the selected job matching this id, use it and skip the fetch.
-        // We check common id field names to be resilient to slight shape differences.
+        // If the store already has the selected job matching this id, use it and skip the fetch
         if (selectedJob) {
-          const selId = (selectedJob as any).id || (selectedJob as any).jobId || (selectedJob as any).job_id
-          if (selId && String(selId) === String(params.id)) {
+          const selId = getJobId(selectedJob as ExtendedJob)
+          if (selId && selId === String(params.id)) {
             if (!mounted) return
-            setJobData(selectedJob as any)
+            setJobData(selectedJob as ExtendedJob)
             setLoading(false)
             return
           }
@@ -105,13 +108,24 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         const data = await response.json()
 
         if (!mounted) return
-        const fetched = data.data.processed_job
+        
+        // Ensure the fetched job has the required fields
+        const processedJob = data.data.processed_job
+        const fetched: ExtendedJob = {
+          ...processedJob,
+          // Ensure the job_id is present and matches params.id
+          job_id: String(params.id),
+          // Keep original id if present, otherwise use params.id
+          id: processedJob.id || Number(params.id)
+        }
+        
         setJobData(fetched)
 
-        // Only update the store if the fetched job is different to avoid triggering loops.
-        const fetchedId = (fetched as any).id || (fetched as any).jobId || (fetched as any).job_id
-        const selIdAfter = selectedJob ? ((selectedJob as any).id || (selectedJob as any).jobId || (selectedJob as any).job_id) : undefined
-        if (!selIdAfter || String(selIdAfter) !== String(fetchedId)) {
+        // Only update the store if the fetched job is different to avoid triggering loops
+        const fetchedId = getJobId(fetched)
+        const selIdAfter = selectedJob ? getJobId(selectedJob) : undefined
+        
+        if (!selIdAfter || selIdAfter !== String(fetchedId)) {
           setSelectedJob(fetched)
         }
       } catch (error) {
@@ -121,16 +135,12 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
       }
     }
 
-    load()
+    void load()
 
     return () => {
       mounted = false
-      // optional: clear the cached job when leaving the page
-      // keep this if you don't want stale data to persist
-      // setSelectedJob(null)
     }
-    // only run when the route param changes; we intentionally omit `selectedJob` here
-    // to avoid a fetch loop caused by updating the store inside this effect
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
 
   if (loading) {
