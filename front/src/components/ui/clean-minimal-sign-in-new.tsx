@@ -21,6 +21,7 @@ const SignIn2 = () => {
   };
  
   const handleSignIn = async () => {
+    // if the jackass doesnt type in a password
     if (!email || !password) {
       setError("Please enter both email and password.");
       return;

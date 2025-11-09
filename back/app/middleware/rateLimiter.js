@@ -28,6 +28,7 @@ const verificationRateLimiter = async (req, res, next) => {
         // Check if user is blocked
         if (user.verificationAttempts?.blockedUntil && user.verificationAttempts.blockedUntil > now) {
             const remainingTime = Math.ceil((user.verificationAttempts.blockedUntil - now) / 1000 / 60);
+            // user is still a jackass
             return res.status(429).json({
                 success: false,
                 message: `Too many verification attempts. Please try again in ${remainingTime} minutes`
@@ -54,6 +55,7 @@ const verificationRateLimiter = async (req, res, next) => {
             if (user.verificationAttempts.count > MAX_ATTEMPTS) {
                 user.verificationAttempts.blockedUntil = new Date(now.getTime() + BLOCK_DURATION);
                 await user.save();
+                // user has been a jackass
                 return res.status(429).json({
                     success: false,
                     message: 'Too many verification attempts. Please try again in 30 minutes'

@@ -1,4 +1,8 @@
 const nodemailer = require('nodemailer');
+// please please please dont add this in the codebase again
+// this should be in environment variables
+// holy shit 
+// the above comments were auto completed by github copilot
 
 // Create reusable transporter object using SMTP transport
 const transporter = nodemailer.createTransport({
@@ -20,19 +24,19 @@ const generateVerificationCode = () => {
 const sendVerificationEmail = async (to, verificationCode) => {
   try {
     const mailOptions = {
-      from: '"CareerForge" <support@datapsx.com>',
+      from: '"Bhai Kaam Do" <support@datapsx.com>',
       to: to,
-      subject: "Email Verification - CareerForge",
+      subject: "Email Verification - Bhai Kaam Do",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">Welcome to CareerForge!</h2>
+          <h2 style="color: #333;">Welcome to Bhai Kaam Do!</h2>
           <p>Thank you for signing up. To complete your registration, please use the following verification code:</p>
           <div style="background-color: #f5f5f5; padding: 15px; text-align: center; margin: 20px 0;">
             <h1 style="color: #007bff; letter-spacing: 5px;">${verificationCode}</h1>
           </div>
           <p>This code will expire in 15 minutes.</p>
           <p>If you didn't request this verification, please ignore this email.</p>
-          <p>Best regards,<br>The CareerForge Team</p>
+          <p>Best regards,<br>The Bhai Kaam Do Team</p>
         </div>
       `
     };
