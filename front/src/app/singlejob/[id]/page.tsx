@@ -11,6 +11,7 @@ import { z } from 'zod'
 import { useJobStore } from '@/store/job-store'
 import { getCfAuthCookie } from '@/utils/cookie'
 import dynamic from "next/dynamic";
+import {Link} from "lucide-react";
 
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
 
@@ -178,6 +179,11 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         <div className="md:col-span-2 space-y-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">{jobData.jobTitle}</h1>
+            <a href={jobData.jobUrl} target="_blank" rel="noopener noreferrer" title="Go to External Website">
+            {/* The Link icon from lucide-react */}
+            <Link size={24} color="blue" /> 
+          
+          </a>
             <div className="flex items-center gap-3 text-muted-foreground">
               <span className="font-medium text-lg">{jobData.companyProfile?.companyName}</span>
               <span>•</span>

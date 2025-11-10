@@ -10,6 +10,7 @@ export type ExtendedJob = Omit<BaseJob, 'job_id' | 'id' | 'jobId'> & {
   id?: string | number;
   jobId?: string | number;
   job_id?: string | number;
+  jobUrl?: string;
 }
 
 interface JobStore {

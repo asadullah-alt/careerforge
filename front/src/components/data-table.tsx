@@ -47,7 +47,6 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 import { useRouter } from 'next/navigation'
 import { z } from "zod"
 
@@ -56,9 +55,6 @@ import { Badge } from "@/components/ui/badgeTable"
 import { Button } from "@/components/ui/buttonTable"
 import {
   ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart"
 import { Checkbox } from "@/components/ui/checkbox"
 
@@ -70,7 +66,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/inputInteractive"
 import { Label } from "@/components/ui/labelInteractive"
 import {
   Select,
@@ -79,7 +74,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separatorInteractive"
 import {
   Table,
   TableBody,
