@@ -16,7 +16,6 @@ export function SiteHeader() {
   const pathname = usePathname() || "/"
   const isLifecycle = pathname.startsWith("/lifecycle")
   const title = isLifecycle ? "Lifecycle" : "Dashboard"
-  const buttonText = isLifecycle ? "Create Lifecycle" : "Create New Job Application"
 
   const [sheetOpen, setSheetOpen] = useState(false)
   const [linkedinOpen, setLinkedinOpen] = useState(false)

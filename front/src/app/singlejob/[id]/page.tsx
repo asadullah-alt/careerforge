@@ -6,8 +6,6 @@ import { IconArrowLeft, IconChartBar, IconChevronDown } from '@tabler/icons-reac
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separatorInteractive'
 import { Badge } from '@/components/ui/badgeTable'
-import { schema } from '@/components/data-table'
-import { z } from 'zod'
 import { useJobStore } from '@/store/job-store'
 import { getCfAuthCookie } from '@/utils/cookie'
 import dynamic from "next/dynamic";

@@ -125,12 +125,7 @@ export default function Page() {
 
           const companyName = companyProfile?.companyName || 'Unknown Company'
           // Format location as string
-          const locationStr = [
-            job.location.city,
-            job.location.state,
-            job.location.country,
-            job.location.remoteStatus
-          ].filter(Boolean).join(', ') || 'Remote'
+         
 
           return {
             job_id: job.job_id,

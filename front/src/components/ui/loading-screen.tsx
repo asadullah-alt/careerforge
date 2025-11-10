@@ -49,11 +49,7 @@ function FloatingPaths({ position }: { position: number }) {
     );
 }
 
-export function BackgroundPaths({
-    title = "Background Paths",
-}: {
-    title?: string;
-}) {
+export function BackgroundPaths() {
     
 
     return (

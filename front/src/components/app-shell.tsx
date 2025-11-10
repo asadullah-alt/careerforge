@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react"
 import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
-import { AppSidebar } from "@/components/app-sidebar"
+// import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { Toaster } from '@/components/ui/sonner'
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
