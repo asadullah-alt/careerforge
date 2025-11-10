@@ -177,7 +177,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         <div className="md:col-span-2 space-y-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <h1 className="text-3xl font-bold">{jobData.jobTitle}</h1>
+              <h1 className="text-3xl font-bold">{jobData.jobPosition}</h1>
               {(() => {
                 const jobUrl = (jobData.jobUrl as string | undefined) || (jobData.jobUrl as string | undefined) 
                 return jobUrl ? (
