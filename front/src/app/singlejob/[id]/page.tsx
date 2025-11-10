@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badgeTable'
 import { useJobStore } from '@/store/job-store'
 import { getCfAuthCookie } from '@/utils/cookie'
 import dynamic from "next/dynamic";
-import {Link} from "lucide-react";
+import {Link, Share2} from "lucide-react";
 
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
 
@@ -37,6 +37,43 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
 
   const selectedJob = useJobStore((s) => s.selectedJob)
   const setSelectedJob = useJobStore((s) => s.setSelectedJob)
+  const [copied, setCopied] = React.useState(false)
+
+  const handleShareClick = async () => {
+    if (!jobData) return
+    const url = (jobData.job_url ?? jobData.jobUrl ?? jobData.src ?? jobData.applicationInfo?.applyLink) as string | undefined
+    if (!url) return
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: jobData.jobPosition || jobData.jobTitle || 'Job',
+          url,
+        })
+        return
+      }
+
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url)
+        setCopied(true)
+        window.setTimeout(() => setCopied(false), 2000)
+        return
+      }
+
+      // fallback: open in new tab
+      window.open(url, '_blank', 'noopener,noreferrer')
+    } catch (e) {
+      // ignore user cancel or errors
+      // fallback to copy if possible
+      try {
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(url)
+          setCopied(true)
+          window.setTimeout(() => setCopied(false), 2000)
+        }
+      } catch {}
+    }
+  }
 
   const analyzeResume = async () => {
     try {
@@ -78,6 +115,91 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
       setAnalyzing(false)
     }
   }
+
+  // Manage tab title animations while analyzing
+  React.useEffect(() => {
+    const originalTitle = 'Bhai Kaam Do'
+    const marqueeBase = 'Bhai Kaam Do - Analyzing your Resume   '
+    const marqueeSpeed = 250 // ms per frame
+    const flashSpeed = 600 // ms per flash
+
+    let marqueeInterval: number | null = null
+    let flashInterval: number | null = null
+    let currentMarquee = marqueeBase
+
+    const startMarquee = () => {
+      // set initial
+      document.title = currentMarquee
+      marqueeInterval = window.setInterval(() => {
+        // rotate string by one char
+        currentMarquee = currentMarquee.slice(1) + currentMarquee.charAt(0)
+        document.title = currentMarquee
+      }, marqueeSpeed)
+    }
+
+    const startFlashing = () => {
+      let show = false
+      flashInterval = window.setInterval(() => {
+        document.title = show ? '● Analyzing...' : originalTitle
+        show = !show
+      }, flashSpeed)
+    }
+
+    const stopAll = () => {
+      if (marqueeInterval !== null) {
+        clearInterval(marqueeInterval)
+        marqueeInterval = null
+      }
+      if (flashInterval !== null) {
+        clearInterval(flashInterval)
+        flashInterval = null
+      }
+      document.title = originalTitle
+      currentMarquee = marqueeBase
+    }
+
+    const handleVisibility = () => {
+      if (!analyzing) return
+      // when tab becomes visible -> marquee
+      if (!document.hidden) {
+        if (flashInterval !== null) {
+          clearInterval(flashInterval)
+          flashInterval = null
+        }
+        if (marqueeInterval === null) startMarquee()
+      } else {
+        // tab hidden -> flashing
+        if (marqueeInterval !== null) {
+          clearInterval(marqueeInterval)
+          marqueeInterval = null
+        }
+        if (flashInterval === null) startFlashing()
+      }
+    }
+
+    // React to analyzing state
+    if (analyzing) {
+      // initialize based on visibility
+      if (document.hidden) {
+        startFlashing()
+      } else {
+        startMarquee()
+      }
+
+      // If user returns to tab, stop flashing and start marquee
+      document.addEventListener('visibilitychange', handleVisibility)
+      // also stop flashing when window gains focus (some browsers trigger focus)
+      window.addEventListener('focus', handleVisibility)
+    }
+
+    // cleanup / when analyzing ends
+    return () => {
+      stopAll()
+      document.removeEventListener('visibilitychange', handleVisibility)
+      window.removeEventListener('focus', handleVisibility)
+    }
+    // we only want to run when analyzing toggles
+  }, [analyzing])
 
   React.useEffect(() => {
     let mounted = true
@@ -177,20 +299,41 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         <div className="md:col-span-2 space-y-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <h1 className="text-3xl font-bold">{jobData.jobPosition}</h1>
+              <h1 className="text-3xl font-bold">{jobData.jobPosition || jobData.jobTitle}</h1>
               {(() => {
-                const jobUrl = (jobData.jobUrl as string | undefined) || (jobData.jobUrl as string | undefined) 
-                return jobUrl ? (
-                  <a
-                    href={jobUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center hover:bg-muted rounded-lg p-2 transition-colors"
-                    aria-label="Open job posting"
-                  >
-                    <Link className="h-5 w-5 text-primary" />
-                  </a>
-                ) : null
+                const jobUrl = (jobData.job_url ?? jobData.jobUrl ?? jobData.src ?? jobData.applicationInfo?.applyLink) as string | undefined
+                if (!jobUrl) return null
+                return (
+                  <>
+                    <div className="inline-flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleShareClick}
+                        title={copied ? 'Copied!' : 'Share'}
+                        className="inline-flex items-center justify-center hover:bg-muted rounded-lg p-2 transition-colors"
+                        aria-label="Share job posting"
+                      >
+                        <Share2 className="h-5 w-5 text-muted-foreground" />
+                      </button>
+
+                      {/* Visual copied indicator */}
+                      {copied && (
+                        <span className="text-sm font-medium text-green-600 dark:text-green-400">Copied!</span>
+                      )}
+
+                      <a
+                        href={jobUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center hover:bg-muted rounded-lg p-2 transition-colors"
+                        aria-label="Open job posting"
+                      >
+                        {/* larger, higher-contrast link icon for accessibility */}
+                        <Link className="h-6 w-6 text-primary" aria-hidden />
+                      </a>
+                    </div>
+                  </>
+                )
               })()}
             </div>
            
