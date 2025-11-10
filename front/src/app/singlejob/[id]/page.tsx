@@ -178,17 +178,20 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <h1 className="text-3xl font-bold">{jobData.jobTitle}</h1>
-              {(jobData as any).job_url || (jobData as any).jobUrl || (jobData as any).src ? (
-                <a
-                  href={(jobData as any).job_url || (jobData as any).jobUrl || (jobData as any).src}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center hover:bg-muted rounded-lg p-2 transition-colors"
-                  aria-label="Open job posting"
-                >
-                  <Link className="h-5 w-5 text-primary" />
-                </a>
-              ) : null}
+              {(() => {
+                const jobUrl = (jobData.jobUrl as string | undefined) || (jobData.jobUrl as string | undefined) 
+                return jobUrl ? (
+                  <a
+                    href={jobUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center hover:bg-muted rounded-lg p-2 transition-colors"
+                    aria-label="Open job posting"
+                  >
+                    <Link className="h-5 w-5 text-primary" />
+                  </a>
+                ) : null
+              })()}
             </div>
            
             <div className="flex items-center gap-3 text-muted-foreground">
