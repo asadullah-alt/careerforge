@@ -176,12 +176,21 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         {/* Job Details Section */}
         <div className="md:col-span-2 space-y-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">{jobData.jobTitle}</h1>
-            <a href={jobData.jobUrl} target="_blank" rel="noopener noreferrer" title="Go to External Website">
-            {/* The Link icon from lucide-react */}
-            <Link size={24} color="blue" /> 
-          
-          </a>
+            <div className="flex items-center gap-2 mb-2">
+              <h1 className="text-3xl font-bold">{jobData.jobTitle}</h1>
+              {(jobData as any).job_url || (jobData as any).jobUrl || (jobData as any).src ? (
+                <a
+                  href={(jobData as any).job_url || (jobData as any).jobUrl || (jobData as any).src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center hover:bg-muted rounded-lg p-2 transition-colors"
+                  aria-label="Open job posting"
+                >
+                  <Link className="h-5 w-5 text-primary" />
+                </a>
+              ) : null}
+            </div>
+           
             <div className="flex items-center gap-3 text-muted-foreground">
               <span className="font-medium text-lg">{jobData.companyProfile?.companyName}</span>
               <span>•</span>
