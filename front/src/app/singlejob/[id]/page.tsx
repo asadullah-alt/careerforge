@@ -95,15 +95,23 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
       const resumeId = resumesData.data[0]
       
       // Send analysis request
+      const payload: Record<string, unknown> = {
+        job_id: params.id,
+        resume_id: resumeId,
+      }
+
+      // When analysis has already been run and the user clicked "Analyze Again",
+      // include analysis_again flag so the backend can handle re-analysis differently.
+      if (analysisResult) {
+        payload.analysis_again = true
+      }
+
       const analysisResponse = await fetch('https://resume.bhaikaamdo.com/api/v1/resumes/improve', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          job_id: params.id,
-          resume_id: resumeId
-        })
+        body: JSON.stringify(payload)
       })
       
       const analysisData = await analysisResponse.json()
