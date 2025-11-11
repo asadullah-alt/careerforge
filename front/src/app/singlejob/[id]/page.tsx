@@ -124,6 +124,28 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
     }
   }
 
+  // Fetch cached improvement analysis on component mount (once only)
+  React.useEffect(() => {
+    const fetchCachedImprovements = async () => {
+      try {
+        const token = getCfAuthCookie()
+        const response = await fetch(
+          `https://resume.bhaikaamdo.com/api/v1/resumes/getImprovements?resume_id=${jobData?.id || jobData?.jobId}&job_id=${params.id}&token=${token}`
+        )
+        const data = await response.json()
+        if (data.data) {
+          setAnalysisResult(data.data)
+        }
+      } catch (error) {
+        console.error('Error fetching cached improvements:', error)
+      }
+    }
+
+    if (jobData && params.id) {
+      void fetchCachedImprovements()
+    }
+  }, [])
+
   // Manage tab title animations while analyzing
   React.useEffect(() => {
     const originalTitle = 'Bhai Kaam Do'
