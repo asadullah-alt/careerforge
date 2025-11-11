@@ -38,6 +38,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
   const selectedJob = useJobStore((s) => s.selectedJob)
   const setSelectedJob = useJobStore((s) => s.setSelectedJob)
   const [copied, setCopied] = React.useState(false)
+  const [resumeId, setResumeId] = React.useState<string | null>(null)
 
   const handleShareClick = async () => {
     if (!jobData) return
@@ -76,23 +77,13 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
   }
 
   const analyzeResume = async () => {
+    if (!resumeId) {
+      console.error('Resume ID not available')
+      return
+    }
+
     try {
       setAnalyzing(true)
-      const token = getCfAuthCookie()
-      
-      // First get all user resumes
-      const resumesResponse = await fetch(
-        `https://resume.bhaikaamdo.com/api/v1/resumes/getAllUserResumes?token=${token}`
-      )
-      const resumesData = await resumesResponse.json()
-      
-      if (!resumesData.data || resumesData.data.length === 0) {
-        console.error('No resumes found')
-        return
-      }
-
-      // Use the first resume for analysis
-      const resumeId = resumesData.data[0]
       
       // Send analysis request
       const payload: Record<string, unknown> = {
@@ -124,27 +115,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
     }
   }
 
-  // Fetch cached improvement analysis on component mount (once only)
-  React.useEffect(() => {
-    const fetchCachedImprovements = async () => {
-      try {
-        const token = getCfAuthCookie()
-        const response = await fetch(
-          `https://resume.bhaikaamdo.com/api/v1/resumes/getImprovements?resume_id=${jobData?.id || jobData?.jobId}&job_id=${params.id}&token=${token}`
-        )
-        const data = await response.json()
-        if (data.data) {
-          setAnalysisResult(data.data)
-        }
-      } catch (error) {
-        console.error('Error fetching cached improvements:', error)
-      }
-    }
 
-    if (jobData && params.id) {
-      void fetchCachedImprovements()
-    }
-  }, [])
 
   // Manage tab title animations while analyzing
   React.useEffect(() => {
@@ -233,6 +204,39 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
 
   React.useEffect(() => {
     let mounted = true
+    
+    const fetchResumesAndImprovements = async () => {
+      try {
+        const token = getCfAuthCookie()
+        
+        // Fetch all user resumes first
+        const resumesResponse = await fetch(
+          `https://resume.bhaikaamdo.com/api/v1/resumes/getAllUserResumes?token=${token}`
+        )
+        const resumesData = await resumesResponse.json()
+        
+        if (!resumesData.data || resumesData.data.length === 0) {
+          console.error('No resumes found')
+          return
+        }
+
+        // Use the first resume ID
+        const firstResumeId = resumesData.data[0]
+        if (!mounted) return
+        setResumeId(firstResumeId)
+
+        // Fetch cached improvements using the resume ID and job ID
+        const improvementsResponse = await fetch(
+          `https://resume.bhaikaamdo.com/api/v1/resumes/getImprovements?resume_id=${firstResumeId}&job_id=${params.id}&token=${token}`
+        )
+        const improvementsData = await improvementsResponse.json()
+        if (improvementsData.data && mounted) {
+          setAnalysisResult(improvementsData.data)
+        }
+      } catch (error) {
+        console.error('Error fetching resumes or cached improvements:', error)
+      }
+    }
 
     const getJobId = (job: ExtendedJob): string | undefined => {
       const id = job.id || job.jobId || job.job_id
@@ -286,6 +290,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
       }
     }
 
+    void fetchResumesAndImprovements()
     void load()
 
     return () => {
