@@ -120,7 +120,7 @@ export function SiteHeader() {
            <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/resume-builder')}
+           
             className="border border-gray-200 dark:border-gray-700 rounded-md px-2"
           >
             <BookOpenCheck className="size-4 mr-2" />

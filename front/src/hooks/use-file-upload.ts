@@ -414,7 +414,7 @@ export const useFileUpload = (
       multiple, maxFiles, uploadUrl,
       validateFile, generateUniqueId, createPreview, // Other useCallback deps
       onFilesChange, onFilesAdded, // Callbacks
-      // _uploadFileInternal is not directly a dep but its logic is tied to uploadUrl etc.
+        _uploadFileInternal, // Used within the callback
       // setState itself is stable.
     ]
   )

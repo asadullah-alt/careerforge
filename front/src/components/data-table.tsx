@@ -52,9 +52,6 @@ import { z } from "zod"
 
 import { Badge } from "@/components/ui/badgeTable"
 import { Button } from "@/components/ui/buttonTable"
-import {
-  ChartConfig,
-} from "@/components/ui/chart"
 import { Checkbox } from "@/components/ui/checkbox"
 
 import {

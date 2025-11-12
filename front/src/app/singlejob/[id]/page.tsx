@@ -63,7 +63,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
 
       // fallback: open in new tab
       window.open(url, '_blank', 'noopener,noreferrer')
-    } catch (e) {
+    } catch {
       // ignore user cancel or errors
       // fallback to copy if possible
       try {
