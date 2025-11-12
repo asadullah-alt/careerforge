@@ -7,10 +7,19 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import FileUpload from "@/components/file-upload"
 import { usePathname, useRouter } from "next/navigation"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet"
-import { UploadCloud, Linkedin, Mail} from "lucide-react"
+import { UploadCloud, Linkedin, Mail, ChevronDown } from "lucide-react"
 import { Sun, Moon } from 'lucide-react'
 import { useTheme } from '@/context/theme-context'
 import LinkedinModal from "@/components/linkedin-modal"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
+import { getCfAuthCookie } from "@/utils/cookie"
 
 export function SiteHeader() {
   const pathname = usePathname() || "/"
@@ -19,6 +28,9 @@ export function SiteHeader() {
 
   const [sheetOpen, setSheetOpen] = useState(false)
   const [linkedinOpen, setLinkedinOpen] = useState(false)
+  const [resumes, setResumes] = useState<Array<{ id?: string; name?: string } | string>>([])
+  const [activeResume, setActiveResume] = useState<string | null>(null)
+  const [loadingResumes, setLoadingResumes] = useState(false)
 
   const { theme, toggle } = useTheme()
   // Log theme changes only (avoids logging on every render)
@@ -26,12 +38,48 @@ export function SiteHeader() {
     console.log('[SiteHeader] theme:', theme)
   }, [theme])
 
+  // Fetch resumes on mount
+  useEffect(() => {
+    const fetchResumes = async () => {
+      try {
+        setLoadingResumes(true)
+        const token = getCfAuthCookie()
+        if (!token) return
+
+        const response = await fetch(
+          `https://resume.bhaikaamdo.com/api/v1/resumes/getAllUserResumes?token=${token}`
+        )
+        const data = await response.json()
+        if (data.data && Array.isArray(data.data)) {
+          setResumes(data.data)
+          // Set first resume as active by default
+          if (data.data.length > 0) {
+            setActiveResume(data.data[0].id || (typeof data.data[0] === 'string' ? data.data[0] : 'Resume'))
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching resumes:', error)
+      } finally {
+        setLoadingResumes(false)
+      }
+    }
+
+    void fetchResumes()
+  }, [])
+
   const router = useRouter()
 
   function handleLogout() {
     // Clear cf_auth cookie by setting it to expired
     document.cookie = 'cf_auth=; path=/; max-age=0; SameSite=Lax'
     router.replace('/')
+  }
+
+  const getResumeDisplayName = (resume: { id?: string; name?: string } | string): string => {
+    if (typeof resume === 'string') {
+      return resume
+    }
+    return resume.name || resume.id || 'Resume'
   }
 
   return (
@@ -76,6 +124,49 @@ export function SiteHeader() {
   <LinkedinModal open={linkedinOpen} onOpenChange={setLinkedinOpen} />
 
         <div className="ml-auto flex items-center gap-2">
+          {/* Resume Selector Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="border border-gray-200 dark:border-gray-700 rounded-md px-2 hidden sm:flex items-center gap-1"
+                disabled={loadingResumes || resumes.length === 0}
+              >
+                <span className="text-xs truncate max-w-[150px]">
+                  {loadingResumes ? 'Loading...' : activeResume ? getResumeDisplayName(resumes.find(r => {
+                    const resumeId = typeof r === 'string' ? r : (r.id || r)
+                    return resumeId === activeResume
+                  }) ?? 'Resume') : 'Select Resume'}
+                </span>
+                <ChevronDown className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Active Resume</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+                   {resumes.length > 0 ? (
+                resumes.map((resume, index) => {
+                  const resumeId = typeof resume === 'string' ? resume : (resume.id || String(index))
+                  return (
+                    <DropdownMenuItem
+                      key={typeof resumeId === 'string' ? resumeId : String(index)}
+                      onClick={() => setActiveResume(typeof resumeId === 'string' ? resumeId : String(index))}
+                      className={activeResume === resumeId ? 'bg-accent' : ''}
+                    >
+                      <span className="text-sm">{getResumeDisplayName(resume)}</span>
+                      {activeResume === resumeId && <span className="ml-2">✓</span>}
+                    </DropdownMenuItem>
+                  )
+                })
+              ) : (
+                <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                  No resumes found
+                </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button variant="ghost" size="sm" onClick={() => { console.log('[SiteHeader] toggle clicked'); toggle() }} className="border border-gray-200 dark:border-gray-700 rounded-md px-2">
             {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
            
