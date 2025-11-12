@@ -7,7 +7,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import FileUpload from "@/components/file-upload"
 import { usePathname, useRouter } from "next/navigation"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet"
-import { UploadCloud, Linkedin, Mail, ChevronDown } from "lucide-react"
+import { UploadCloud, Linkedin, Mail, ChevronDown,BookOpenCheck  } from "lucide-react"
 import { Sun, Moon } from 'lucide-react'
 import { useTheme } from '@/context/theme-context'
 import LinkedinModal from "@/components/linkedin-modal"
@@ -116,6 +116,15 @@ export function SiteHeader() {
           >
             <Mail className="size-4 mr-2" />
             <span className="hidden md:inline">Connect with Email</span>
+          </Button>
+           <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push('/resume-builder')}
+            className="border border-gray-200 dark:border-gray-700 rounded-md px-2"
+          >
+            <BookOpenCheck className="size-4 mr-2" />
+            <span className="hidden md:inline">Resume Builder</span>
           </Button>
         </div>
   <LinkedinModal open={linkedinOpen} onOpenChange={setLinkedinOpen} />
