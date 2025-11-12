@@ -28,7 +28,7 @@ export function SiteHeader() {
 
   const [sheetOpen, setSheetOpen] = useState(false)
   const [linkedinOpen, setLinkedinOpen] = useState(false)
-  const [resumes, setResumes] = useState<Array<{ id?: string; name?: string } | string>>([])
+  const [resumes, setResumes] = useState<Array<{ id: string; resume_name?: string }>>([])
   const [activeResume, setActiveResume] = useState<string | null>(null)
   const [loadingResumes, setLoadingResumes] = useState(false)
 
@@ -54,7 +54,7 @@ export function SiteHeader() {
           setResumes(data.data)
           // Set first resume as active by default
           if (data.data.length > 0) {
-            setActiveResume(data.data[0].id || (typeof data.data[0] === 'string' ? data.data[0] : 'Resume'))
+            setActiveResume(data.data[0].id)
           }
         }
       } catch (error) {
@@ -75,11 +75,8 @@ export function SiteHeader() {
     router.replace('/')
   }
 
-  const getResumeDisplayName = (resume: { id?: string; name?: string } | string): string => {
-    if (typeof resume === 'string') {
-      return resume
-    }
-    return resume.name || resume.id || 'Resume'
+  const getResumeDisplayName = (resume: { id: string; resume_name?: string }): string => {
+    return resume.resume_name || resume.id || 'Resume'
   }
 
   return (
@@ -134,10 +131,7 @@ export function SiteHeader() {
                 disabled={loadingResumes || resumes.length === 0}
               >
                 <span className="text-xs truncate max-w-[150px]">
-                  {loadingResumes ? 'Loading...' : activeResume ? getResumeDisplayName(resumes.find(r => {
-                    const resumeId = typeof r === 'string' ? r : (r.id || r)
-                    return resumeId === activeResume
-                  }) ?? 'Resume') : 'Select Resume'}
+                  {loadingResumes ? 'Loading...' : activeResume ? getResumeDisplayName(resumes.find(r => r.id === activeResume) || { id: activeResume }) : 'Select Resume'}
                 </span>
                 <ChevronDown className="size-4" />
               </Button>
@@ -145,20 +139,17 @@ export function SiteHeader() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>Active Resume</DropdownMenuLabel>
               <DropdownMenuSeparator />
-                   {resumes.length > 0 ? (
-                resumes.map((resume, index) => {
-                  const resumeId = typeof resume === 'string' ? resume : (resume.id || String(index))
-                  return (
-                    <DropdownMenuItem
-                      key={typeof resumeId === 'string' ? resumeId : String(index)}
-                      onClick={() => setActiveResume(typeof resumeId === 'string' ? resumeId : String(index))}
-                      className={activeResume === resumeId ? 'bg-accent' : ''}
-                    >
-                      <span className="text-sm">{getResumeDisplayName(resume)}</span>
-                      {activeResume === resumeId && <span className="ml-2">✓</span>}
-                    </DropdownMenuItem>
-                  )
-                })
+              {resumes.length > 0 ? (
+                resumes.map((resume) => (
+                  <DropdownMenuItem
+                    key={resume.id}
+                    onClick={() => setActiveResume(resume.id)}
+                    className={activeResume === resume.id ? 'bg-accent' : ''}
+                  >
+                    <span className="text-sm">{getResumeDisplayName(resume)}</span>
+                    {activeResume === resume.id && <span className="ml-2">✓</span>}
+                  </DropdownMenuItem>
+                ))
               ) : (
                 <div className="px-2 py-1.5 text-xs text-muted-foreground">
                   No resumes found

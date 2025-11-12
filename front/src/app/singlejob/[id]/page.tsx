@@ -221,7 +221,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         }
 
         // Use the first resume ID
-        const firstResumeId = resumesData.data[0]
+        const firstResumeId = resumesData.data[0].id
         if (!mounted) return
         setResumeId(firstResumeId)
 
