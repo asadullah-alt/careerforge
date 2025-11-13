@@ -23,6 +23,8 @@ type ResumeListItem = {
   id: string
   title: string
   resume_name: string
+  experiences: any[]
+  skills: any[]
   createdAt: string
   updatedAt?: string
   data: StructuredResume
@@ -170,8 +172,8 @@ export default function ResumesListPage() {
             {resumes.map((r) => {
               const name = r.data?.personal_data ? `${r.data.personal_data.firstName || ''} ${r.data.personal_data.lastName || ''}`.trim() : r.title
               const initials = (name || r.title || 'U').split(' ').map((s:string) => s.charAt(0)).slice(0,2).join('').toUpperCase()
-              const experiences = Array.isArray(r.data?.experiences) ? r.data.experiences.length : 0
-              const skills = Array.isArray(r.data?.skills) ? r.data.skills.length : 0
+              const experiences = Array.isArray(r?.experiences) ? r.data.experiences.length : 0
+              const skills = Array.isArray(r?.skills) ? r.data.skills.length : 0
               const updated = r.updatedAt || r.createdAt || ''
 
               return (
