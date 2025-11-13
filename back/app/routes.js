@@ -571,7 +571,7 @@ responseGemini = response.response;
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
 
-        Resume.findOne({ _id: id, user_id: user._id }, (err, resume) => {
+        ProcessedResume.findOne({ _id: id, user_id: user._id }, (err, resume) => {
           if (err) return res.status(500).json({ success: false, message: err.message });
           if (!resume) return res.status(404).json({ success: false, message: 'Resume not found' });
           return res.json({ success: true, data: resume });
