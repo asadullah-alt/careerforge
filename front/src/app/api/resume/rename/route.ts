@@ -35,25 +35,39 @@ async function writeStore(list: ResumeItem[]) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { id, title } = body as { id?: string; title?: string }
+    const body = (await request.json()) as { id?: string; title?: string; token?: string }
+    const { id, title, token } = body
     if (!id || !title) {
       return NextResponse.json({ success: false, error: 'id and title are required' }, { status: 400 })
     }
 
+    // Rename in local store
     const list = await readStore()
     const idx = list.findIndex((r) => r.id === id)
-    if (idx === -1) {
-      return NextResponse.json({ success: false, error: 'Resume not found' }, { status: 404 })
+    if (idx !== -1) {
+      list[idx].title = title
+      list[idx].updatedAt = new Date().toISOString()
+      await writeStore(list)
     }
 
-    list[idx].title = title
-    list[idx].updatedAt = new Date().toISOString()
-    await writeStore(list)
+    // Rename in backend if token provided
+    if (token) {
+      try {
+        const backendUrl = process.env.BACKEND_URL || 'https://careerback.bhaikaamdo.com'
+        await fetch(`${backendUrl}/api/resume/rename`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, title, token })
+        })
+      } catch (err) {
+        console.warn('[Resume Rename API] Backend rename error (non-fatal):', err)
+      }
+    }
 
     return NextResponse.json({ success: true, message: 'Renamed' }, { status: 200 })
-  } catch (err) {
-    console.error('[Resume Rename API] Error:', err)
+  } catch (e) {
+    console.error('[Resume Rename API] Error:', e)
     return NextResponse.json({ success: false, error: 'Failed to rename' }, { status: 500 })
   }
 }
+

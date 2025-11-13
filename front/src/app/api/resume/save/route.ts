@@ -34,13 +34,13 @@ async function writeStore(list: ResumeItem[]) {
 }
 
 /**
- * Save resume to persistent JSON store
+ * Save resume to persistent JSON store AND backend MongoDB
  * POST /api/resume/save
- * Accepts body: { id?: string, title?: string, data: StructuredResume }
+ * Accepts body: { id?: string, title?: string, data: StructuredResume, token?: string }
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as { id?: string; title?: string; data?: StructuredResume };
+    const body = (await request.json()) as { id?: string; title?: string; data?: StructuredResume; token?: string };
 
     // Validate the resume data against the schema
     const validatedResume = StructuredResumeSchema.parse(body.data || body);
@@ -60,7 +60,29 @@ export async function POST(request: NextRequest) {
       list[existingIndex] = item
     }
 
+    // Save locally first
     await writeStore(list)
+
+    // Optionally push to backend if token is provided
+    if (body.token) {
+      try {
+        const backendUrl = process.env.BACKEND_URL || 'https://careerback.bhaikaamdo.com'
+        const backendRes = await fetch(`${backendUrl}/api/resume/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: existingIndex === -1 ? undefined : id, title, data: validatedResume, token: body.token })
+        })
+        if (backendRes.ok) {
+          const backendData = await backendRes.json()
+          console.log('[Resume Save API] Backend sync success:', backendData)
+        } else {
+          console.warn('[Resume Save API] Backend sync failed:', backendRes.status)
+        }
+      } catch (err) {
+        console.warn('[Resume Save API] Backend sync error (non-fatal):', err)
+        // Continue even if backend sync fails
+      }
+    }
 
     return NextResponse.json(
       {

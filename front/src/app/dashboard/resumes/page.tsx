@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { StructuredResume } from '@/lib/schemas/resume'
+import { getCfAuthCookie } from "@/utils/cookie"
 
 type ResumeListItem = {
   id: string
@@ -37,15 +38,24 @@ export default function ResumesListPage() {
   const [renameOpen, setRenameOpen] = useState(false)
   const [renameId, setRenameId] = useState<string | null>(null)
   const [renameTitle, setRenameTitle] = useState("")
+  const [token, setToken] = useState<string | null>(null)
 
   useEffect(() => {
-    loadFromServer()
+    // Get auth token
+    const authToken = getCfAuthCookie()
+    setToken(authToken)
   }, [])
+
+  useEffect(() => {
+    if (token !== null) {
+      loadFromServer()
+    }
+  }, [token])
 
   async function loadFromServer() {
     setIsLoading(true)
     try {
-      const res = await fetch('/api/resume/list')
+      const res = await fetch(`/api/resume/list?token=${encodeURIComponent(token || '')}`)
       const json = await res.json()
       if (json?.success) setResumes(json.data || [])
       else setResumes([])
@@ -66,7 +76,7 @@ export default function ResumesListPage() {
 
   async function handleEdit(item: ResumeListItem) {
     try {
-      const res = await fetch(`/api/resume/load?id=${encodeURIComponent(item.id)}`)
+      const res = await fetch(`/api/resume/load?id=${encodeURIComponent(item.id)}&token=${encodeURIComponent(token || '')}`)
       const json = await res.json()
       if (json?.success && json.data) {
         initializeResume(json.data.data)
@@ -83,7 +93,7 @@ export default function ResumesListPage() {
   async function handleDelete(id: string) {
     if (!confirm("Delete this resume? This cannot be undone.")) return
     try {
-      const res = await fetch(`/api/resume/load?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+      const res = await fetch(`/api/resume/load?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token || '')}`, { method: 'DELETE' })
       const json = await res.json()
       if (json?.success) {
         toast.success('Resume deleted')
@@ -106,7 +116,7 @@ export default function ResumesListPage() {
   async function submitRename() {
     if (!renameId) return
     try {
-      const res = await fetch('/api/resume/rename', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: renameId, title: renameTitle }) })
+      const res = await fetch('/api/resume/rename', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: renameId, title: renameTitle, token }) })
       const json = await res.json()
       if (json?.success) {
         toast.success('Renamed')

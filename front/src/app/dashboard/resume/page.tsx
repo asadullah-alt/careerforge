@@ -15,6 +15,7 @@ import { Save, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import AuthGuard from "@/components/auth-guard"
 import { ExportResumeDialog } from "@/components/resume/export-resume-dialog"
+import { getCfAuthCookie } from "@/utils/cookie"
 
 export default function ResumePage() {
   const resume = useResumeStore((state) => state.resume)
@@ -27,21 +28,20 @@ export default function ResumePage() {
 
     setIsSaving(true)
     try {
-      // In a real application, this would call your backend API
+      const token = getCfAuthCookie()
       const title = `${resume.personal_data?.firstName || ""} ${resume.personal_data?.lastName || ""}`.trim() || "Untitled Resume"
       const response = await fetch("/api/resume/save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ data: resume, title }),
+        body: JSON.stringify({ data: resume, title, token }),
       })
 
       if (!response.ok) {
         throw new Error("Failed to save resume")
       }
 
-      if (!response.ok) throw new Error('Failed to save resume')
       const json = await response.json()
       if (json?.success) {
         toast.success("Resume saved successfully!")

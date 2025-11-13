@@ -7,6 +7,7 @@ const { default: ollamaClient } = require('ollama');
 const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({});
 const { ProcessedJob } = require('./models/jobApplication');
+const Resume = require('./models/resume');
 const {extractSkills, extractSkillsWithRegex, cleanHTML, parseLinkedInProjects} = require('./util');
 async function runGeminiFlash(model, prompt) {
   try {
@@ -480,6 +481,155 @@ responseGemini = response.response;
             if (err) return res.status(500).json({ success: false, message: err.message });
             return res.json({ success: true, jobs });
           });
+      });
+    } catch (e) {
+      return res.status(500).json({ success: false, message: e.message });
+    }
+  });
+
+  // Resume endpoints
+
+  // Save or update a resume
+  app.post('/api/resume/save', (req, res) => {
+    try {
+      const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
+      
+      if (!token) {
+        return res.status(400).json({ success: false, message: 'Missing token' });
+      }
+
+      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
+        if (err) return res.status(500).json({ success: false, message: err.message });
+        if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
+
+        const { id, title, data } = req.body;
+        const resumeTitle = title || `${data?.personal_data?.firstName || ''} ${data?.personal_data?.lastName || ''}`.trim() || 'Untitled Resume';
+
+        if (id) {
+          // Update existing resume
+          Resume.findByIdAndUpdate(id, { title: resumeTitle, data, updatedAt: new Date() }, { new: true }, (err, updated) => {
+            if (err) return res.status(500).json({ success: false, message: err.message });
+            if (!updated) return res.status(404).json({ success: false, message: 'Resume not found' });
+            return res.json({ success: true, message: 'Resume updated', id: updated._id });
+          });
+        } else {
+          // Create new resume
+          const resume = new Resume({ user_id: user._id, title: resumeTitle, data });
+          resume.save((err, saved) => {
+            if (err) return res.status(500).json({ success: false, message: err.message });
+            return res.json({ success: true, message: 'Resume saved', id: saved._id });
+          });
+        }
+      });
+    } catch (e) {
+      return res.status(500).json({ success: false, message: e.message });
+    }
+  });
+
+  // List all resumes for a user
+  app.post('/api/resume/list', (req, res) => {
+    try {
+      const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
+      
+      if (!token) {
+        return res.status(400).json({ success: false, message: 'Missing token' });
+      }
+
+      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
+        if (err) return res.status(500).json({ success: false, message: err.message });
+        if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
+
+        Resume.find({ user_id: user._id }).sort({ updatedAt: -1 }).exec((err, resumes) => {
+          if (err) return res.status(500).json({ success: false, message: err.message });
+          return res.json({ success: true, data: resumes });
+        });
+      });
+    } catch (e) {
+      return res.status(500).json({ success: false, message: e.message });
+    }
+  });
+
+  // Load a single resume
+  app.post('/api/resume/load', (req, res) => {
+    try {
+      const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
+      const { id } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ success: false, message: 'Missing token' });
+      }
+
+      if (!id) {
+        return res.status(400).json({ success: false, message: 'Missing resume id' });
+      }
+
+      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
+        if (err) return res.status(500).json({ success: false, message: err.message });
+        if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
+
+        Resume.findOne({ _id: id, user_id: user._id }, (err, resume) => {
+          if (err) return res.status(500).json({ success: false, message: err.message });
+          if (!resume) return res.status(404).json({ success: false, message: 'Resume not found' });
+          return res.json({ success: true, data: resume });
+        });
+      });
+    } catch (e) {
+      return res.status(500).json({ success: false, message: e.message });
+    }
+  });
+
+  // Delete a resume
+  app.post('/api/resume/delete', (req, res) => {
+    try {
+      const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
+      const { id } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ success: false, message: 'Missing token' });
+      }
+
+      if (!id) {
+        return res.status(400).json({ success: false, message: 'Missing resume id' });
+      }
+
+      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
+        if (err) return res.status(500).json({ success: false, message: err.message });
+        if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
+
+        Resume.findOneAndDelete({ _id: id, user_id: user._id }, (err, deleted) => {
+          if (err) return res.status(500).json({ success: false, message: err.message });
+          if (!deleted) return res.status(404).json({ success: false, message: 'Resume not found' });
+          return res.json({ success: true, message: 'Resume deleted' });
+        });
+      });
+    } catch (e) {
+      return res.status(500).json({ success: false, message: e.message });
+    }
+  });
+
+  // Rename a resume
+  app.post('/api/resume/rename', (req, res) => {
+    try {
+      const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
+      const { id, title } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ success: false, message: 'Missing token' });
+      }
+
+      if (!id || !title) {
+        return res.status(400).json({ success: false, message: 'Missing id or title' });
+      }
+
+      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
+        if (err) return res.status(500).json({ success: false, message: err.message });
+        if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
+
+        Resume.findByIdAndUpdate({ _id: id, user_id: user._id }, { title, updatedAt: new Date() }, { new: true }, (err, updated) => {
+          if (err) return res.status(500).json({ success: false, message: err.message });
+          if (!updated) return res.status(404).json({ success: false, message: 'Resume not found' });
+          return res.json({ success: true, message: 'Resume renamed' });
+        });
       });
     } catch (e) {
       return res.status(500).json({ success: false, message: e.message });
