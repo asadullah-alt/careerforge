@@ -23,6 +23,16 @@ export default function ResumePage() {
   const [activeTab, setActiveTab] = useState("personal")
   const [isSaving, setIsSaving] = useState(false)
 
+  // Ensure the page reflects any resume loaded into the store (e.g. via initializeResume)
+  React.useEffect(() => {
+    if (resume) {
+      // Reset to the personal tab when a resume is loaded
+      setActiveTab("personal")
+      // Scroll to top so the user sees the form
+      if (typeof window !== "undefined") window.scrollTo(0, 0)
+    }
+  }, [resume])
+
   async function handleSaveResume() {
     if (!resume) return
 
