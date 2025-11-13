@@ -25,12 +25,15 @@ export default function ResumePage() {
 
   // Ensure the page reflects any resume loaded into the store (e.g. via initializeResume)
   React.useEffect(() => {
+    console.log("Resume effect triggered. Resume state:", resume)
     if (resume) {
-      console.log(resume)
+      console.log("✅ Resume detected in store:", resume)
       // Reset to the personal tab when a resume is loaded
       setActiveTab("experiences")
       // Scroll to top so the user sees the form
       if (typeof window !== "undefined") window.scrollTo(0, 0)
+    } else {
+      console.log("❌ Resume is null or undefined in store")
     }
   }, [resume])
 
@@ -38,9 +41,11 @@ export default function ResumePage() {
     if (!resume) return
 
     setIsSaving(true)
+    console.log("💾 [Resume Page] Starting save process with resume:", resume)
     try {
       const token = getCfAuthCookie()
       const title = `${resume.personal_data?.firstName || ""} ${resume.personal_data?.lastName || ""}`.trim() || "Untitled Resume"
+      console.log("📤 [Resume Page] Sending save request with title:", title)
       const response = await fetch("/api/resume/save", {
         method: "POST",
         headers: {
@@ -54,13 +59,16 @@ export default function ResumePage() {
       }
 
       const json = await response.json()
+      console.log("✅ [Resume Page] Save response received:", json)
       if (json?.success) {
+        console.log("🎉 [Resume Page] Resume saved successfully!")
         toast.success("Resume saved successfully!")
       } else {
         throw new Error(json?.error || 'Failed to save resume')
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to save resume"
+      console.error("❌ [Resume Page] Save error:", errorMessage)
       toast.error(errorMessage)
     } finally {
       setIsSaving(false)

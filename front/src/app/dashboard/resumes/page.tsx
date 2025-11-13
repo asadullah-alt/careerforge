@@ -88,8 +88,11 @@ export default function ResumesListPage() {
         body: JSON.stringify({ id: item._id, token: token }),
       })
       const json = await res.json()
+      console.log("Resume load response:", json)
       if (json?.success && json.data) {
+        console.log("Calling initializeResume with data:", json.data.data)
         initializeResume(json.data.data)
+        console.log("initializeResume called successfully")
         router.push("/dashboard/resume")
       } else {
         toast.error('Failed to load resume')

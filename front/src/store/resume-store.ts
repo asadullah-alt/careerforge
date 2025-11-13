@@ -85,8 +85,16 @@ export const useResumeStore = create<ResumeState>()(
         isLoading: false,
         error: null,
         
-        initializeResume: (resume) => set({ resume }),
-        resetResume: () => set({ resume: defaultResume, error: null }),
+        initializeResume: (resume) => {
+          console.log("📥 [Store] initializeResume called with:", resume)
+          set({ resume })
+          console.log("✅ [Store] Resume initialized in store")
+        },
+        resetResume: () => {
+          console.log("🔄 [Store] resetResume called")
+          set({ resume: defaultResume, error: null })
+          console.log("✅ [Store] Resume reset to default")
+        },
         
         updatePersonalData: (data) =>
           set((state) => ({
