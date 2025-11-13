@@ -28,7 +28,7 @@ export default function ResumePage() {
     if (resume) {
       console.log(resume)
       // Reset to the personal tab when a resume is loaded
-      setActiveTab("personal")
+      setActiveTab("experiences")
       // Scroll to top so the user sees the form
       if (typeof window !== "undefined") window.scrollTo(0, 0)
     }
