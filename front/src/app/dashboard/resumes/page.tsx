@@ -179,7 +179,7 @@ export default function ResumesListPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">{initials}</div>
                       <div>
-                        <h3 className="font-semibold">{r.title || name || 'Untitled Resume'}</h3>
+                        <h3 className="font-semibold">{r.resume_name || name || 'Untitled Resume'}</h3>
                         <p className="text-sm text-muted-foreground">{experiences} experience(s) • {skills} skill(s)</p>
                         <p className="text-xs text-muted-foreground">Updated: {updated ? new Date(updated).toLocaleString() : '—'}</p>
                       </div>
