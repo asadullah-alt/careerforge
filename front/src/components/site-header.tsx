@@ -88,7 +88,7 @@ export function SiteHeader() {
           className="mx-2 data-[orientation=vertical]:h-4"
         />
         <h1
-          className={`text-base font-medium ${title === 'Dashboard' ? 'cursor-pointer hover:underline' : ''}`}
+          className={`text-base font-medium ${title === 'Dashboard' ? 'cursor-pointer' : ''}`}
           role={title === 'Dashboard' ? 'button' : undefined}
           tabIndex={title === 'Dashboard' ? 0 : undefined}
           onClick={() => {
@@ -132,7 +132,7 @@ export function SiteHeader() {
            <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/resumes')}
+            onClick={() => router.push('/dashboard/resume')}
             className="border border-gray-200 dark:border-gray-700 rounded-md px-2"
           >
             <BookOpenCheck className="size-4 mr-2" />
