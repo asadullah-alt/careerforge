@@ -2,6 +2,7 @@ import { getDashboardData } from '@/lib/resume-actions'
 import type { Resume } from '@/lib/types'
 import { Suspense } from 'react'
 import Link from 'next/link'
+import { Button } from '@/components/ui/buttonTable'
 
 import { MiniResumePreview } from '@/components/resume/shared/mini-resume-preview'
 import { ResumeSortControls } from '@/components/resume/management/resume-sort-controls'
@@ -52,7 +53,9 @@ export default async function ResumesPage({ searchParams }: { searchParams: Prom
             <Suspense>
               <ResumeSortControls />
             </Suspense>
-            <Link href="/resumes/new" className={cn("inline-flex items-center justify-center rounded-full text-sm font-medium transition-all duration-500 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/25 hover:-translate-y-0.5 h-10 px-6")}>Create Resume</Link>
+            <Link href="/resumes/new" className="inline-flex">
+              <Button className={cn("inline-flex items-center justify-center rounded-full text-sm font-medium transition-all duration-500 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/25 hover:-translate-y-0.5 h-10 px-6")}>Create Resume</Button>
+            </Link>
           </div>
         </div>
 

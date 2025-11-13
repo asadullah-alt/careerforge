@@ -20,18 +20,30 @@ export function MiniResumePreview({ name, type, createdAt, className }: MiniResu
   const accentBg = type === 'base' ? 'purple-50' : 'pink-50'
   const accentText = type === 'base' ? 'purple-600' : 'pink-600'
   const glowColor = type === 'base' ? 'shadow-purple-500/20 hover:shadow-purple-500/30' : 'shadow-rose-500/20 hover:shadow-rose-500/30'
+  const baseClasses = {
+    border: 'border-purple-200',
+    bg: 'bg-purple-50',
+    text: 'text-purple-600',
+    glow: 'shadow-purple-500/20 hover:shadow-purple-500/30',
+    overlay: 'from-purple-500/5 to-indigo-500/5'
+  }
+
+  const tailoredClasses = {
+    border: 'border-pink-200',
+    bg: 'bg-pink-50',
+    text: 'text-pink-600',
+    glow: 'shadow-rose-500/20 hover:shadow-rose-500/30',
+    overlay: 'from-pink-500/5 to-rose-500/5'
+  }
+
+  const vars = type === 'base' ? baseClasses : tailoredClasses
 
   return (
     <div className={cn(
-      'relative w-full aspect-[8.5/11]',
-      'rounded-lg overflow-hidden',
-      'border shadow-lg',
-      `border-${accentBorder}`,
-      'bg-white',
-      'transition-all duration-300',
-      'hover:shadow-xl hover:-translate-y-1',
-      glowColor,
-      'group',
+      'relative w-full aspect-[8.5/11] rounded-lg overflow-hidden transition-all duration-300 group',
+      'border shadow-lg bg-white hover:shadow-xl hover:-translate-y-1',
+      vars.border,
+      vars.glow,
       className
     )}>
       <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,rgba(0,0,0,0.02)_50%,transparent_100%)]" />
@@ -39,7 +51,7 @@ export function MiniResumePreview({ name, type, createdAt, className }: MiniResu
       <div className="relative h-full p-4 flex flex-col">
         <div className="text-center mb-3 pb-2 border-b border-gray-200">
           <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">{name}</h3>
-          <div className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium', `bg-${accentBg} text-${accentText}`)}>
+          <div className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium', vars.bg, vars.text)}>
             {type === 'base' ? 'Base Resume' : 'Tailored Resume'}
           </div>
         </div>
@@ -49,7 +61,7 @@ export function MiniResumePreview({ name, type, createdAt, className }: MiniResu
 
           <div className="space-y-1">
             <div className="h-1.5 w-16 rounded-full bg-gray-300" />
-            <div className="space-y-1">{[...Array(3)].map((_, i) => <div key={i} className={cn('h-1 rounded-full bg-gray-200', i === 0 && 'w-[95%]', i === 1 && 'w-[85%]', i === 2 && 'w-[90%]')} />)}</div>
+            <div className="space-y-1">{[...Array(3)].map((_, i) => <div key={i} className={cn('h-1 rounded-full bg-gray-200', i === 0 ? 'w-[95%]' : i === 1 ? 'w-[85%]' : 'w-[90%]')} />)}</div>
           </div>
 
           <div className="space-y-1">
@@ -61,7 +73,7 @@ export function MiniResumePreview({ name, type, createdAt, className }: MiniResu
                   <div className="h-1 w-16 rounded-full bg-gray-200" />
                 </div>
                 {[...Array(2)].map((_, i) => (
-                  <div key={i} className={cn('h-1 rounded-full bg-gray-200', groupIndex === 0 && i === 0 && 'w-[85%]', groupIndex === 0 && i === 1 && 'w-[90%]', groupIndex === 1 && i === 0 && 'w-[95%]', groupIndex === 1 && i === 1 && 'w-[80%]')} />
+                  <div key={i} className={cn('h-1 rounded-full bg-gray-200', groupIndex === 0 && i === 0 ? 'w-[85%]' : groupIndex === 0 && i === 1 ? 'w-[90%]' : groupIndex === 1 && i === 0 ? 'w-[95%]' : 'w-[80%]')} />
                 ))}
               </div>
             ))}
@@ -76,7 +88,7 @@ export function MiniResumePreview({ name, type, createdAt, className }: MiniResu
         {createdAt && <div className="absolute bottom-2 right-2 text-[10px] text-gray-400">{formatDate(createdAt)}</div>}
       </div>
 
-      <div className={cn('absolute inset-0 opacity-0 group-hover:opacity-100', 'transition-opacity duration-300', 'bg-gradient-to-br', type === 'base' ? 'from-purple-500/5 to-indigo-500/5' : 'from-pink-500/5 to-rose-500/5')} />
+      <div className={cn('absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br', vars.overlay)} />
     </div>
   )
 }
