@@ -1,10 +1,9 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { StructuredResume } from "@/lib/schemas/resume"
 import { Button } from "@/components/ui/button"
-import { PDFViewer, Document, Page, View, Text } from "@react-pdf/renderer"
-import { PdfStyles, defaultPdfStyles } from "@/lib/resume-pdf"
+import { PdfStyles, generateResumePDF } from "@/lib/resume-pdf"
 
 interface ResumePreviewProps {
   data: StructuredResume | null
@@ -13,6 +12,32 @@ interface ResumePreviewProps {
 
 export function ResumePreview({ data, pdfStyles }: ResumePreviewProps) {
   const [showPdf, setShowPdf] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  // Generate PDF blob URL when preview is toggled on
+  useEffect(() => {
+    let mounted = true
+    let url: string | null = null
+    async function build() {
+      if (!showPdf || !data) return
+      try {
+        const blob = await generateResumePDF(data, pdfStyles)
+        url = URL.createObjectURL(blob)
+        if (mounted) setPdfUrl(url)
+      } catch (err) {
+        console.error('PDF preview generation failed', err)
+        if (mounted) setPdfUrl(null)
+      }
+    }
+    build()
+    return () => {
+      mounted = false
+      if (url) {
+        URL.revokeObjectURL(url)
+      }
+      setPdfUrl(null)
+    }
+  }, [showPdf, data, pdfStyles])
+
   if (!data) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -22,63 +47,6 @@ export function ResumePreview({ data, pdfStyles }: ResumePreviewProps) {
   }
 
   const { personal_data, experiences, projects, skills, education, achievements, extracted_keywords } = data
-
-  const mergedStyles = { ...defaultPdfStyles, ...(pdfStyles || {}) }
-
-  const PdfDocument = () => (
-    <Document>
-      <Page size="A4" style={mergedStyles.page}>
-        <View style={mergedStyles.header}>
-          <Text style={mergedStyles.name}>{personal_data.firstName} {personal_data.lastName}</Text>
-          {personal_data.email && <Text style={mergedStyles.text}>{personal_data.email} {personal_data.phone ? ` | ${personal_data.phone}` : ''}</Text>}
-        </View>
-
-        {experiences && experiences.length > 0 && (
-          <View>
-            <Text style={mergedStyles.sectionTitle}>Professional Experience</Text>
-            {experiences.map((exp, i) => (
-              <View key={i} style={{ marginBottom: 6 }}>
-                <View style={mergedStyles.row}>
-                  <Text style={mergedStyles.entryTitle}>{exp.job_title}</Text>
-                  <Text style={mergedStyles.text}>{exp.start_date} - {exp.end_date}</Text>
-                </View>
-                {exp.company && <Text style={mergedStyles.text}>{exp.company}{exp.location ? ` • ${exp.location}` : ''}</Text>}
-                {exp.description && exp.description.length > 0 && (
-                  <View>
-                    {exp.description.map((d, idx) => (<Text key={idx} style={mergedStyles.text}>• {d}</Text>))}
-                  </View>
-                )}
-              </View>
-            ))}
-          </View>
-        )}
-
-        {projects && projects.length > 0 && (
-          <View>
-            <Text style={mergedStyles.sectionTitle}>Projects</Text>
-            {projects.map((p, i) => (
-              <View key={i} style={{ marginBottom: 6 }}>
-                <Text style={mergedStyles.entryTitle}>{p.project_name}</Text>
-                {p.description && <Text style={mergedStyles.text}>{p.description}</Text>}
-              </View>
-            ))}
-          </View>
-        )}
-
-        {education && education.length > 0 && (
-          <View>
-            <Text style={mergedStyles.sectionTitle}>Education</Text>
-            {education.map((e, i) => (
-              <View key={i} style={{ marginBottom: 6 }}>
-                <Text style={mergedStyles.entryTitle}>{e.degree}</Text>
-                <Text style={mergedStyles.text}>{e.institution}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-      </Page>
-    </Document>
-  )
 
   return (
     <div className="bg-white dark:bg-slate-950 text-black dark:text-white p-8 h-full overflow-y-auto print:p-0 space-y-4">
@@ -90,9 +58,16 @@ export function ResumePreview({ data, pdfStyles }: ResumePreviewProps) {
 
       {showPdf ? (
         <div className="w-full h-[800px] border">
-          <PDFViewer style={{ width: '100%', height: '100%' }}>
-            <PdfDocument />
-          </PDFViewer>
+          {/* Generate a blob URL preview to avoid runtime hooks inside PDFViewer */}
+          {pdfUrl ? (
+            <iframe
+              title="Resume PDF Preview"
+              src={pdfUrl}
+              style={{ width: '100%', height: '100%', border: 'none' }}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full">Generating PDF preview…</div>
+          )}
         </div>
       ) : null}
       {/* Header */}

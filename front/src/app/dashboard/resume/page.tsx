@@ -29,7 +29,7 @@ export default function ResumePage() {
     if (resume) {
       console.log("✅ Resume detected in store:", resume)
       // Reset to the personal tab when a resume is loaded
-      setActiveTab("experiences")
+      setActiveTab("personal")
       // Scroll to top so the user sees the form
       if (typeof window !== "undefined") window.scrollTo(0, 0)
     } else {
