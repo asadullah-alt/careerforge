@@ -37,6 +37,9 @@ export type FileUploadOptions = {
   onUploadSuccess?: (uploadedFile: FileWithPreview, response: Record<string, unknown>) => void
   onUploadError?: (file: FileWithPreview, error: string) => void
   uploadUrl?: string // API endpoint for uploading
+  // Optional callback to append additional fields to FormData before upload.
+  // Useful for adding metadata like resume name, title, etc.
+  getUploadFormData?: (formData: FormData, file: File) => void
 }
 
 export type FileUploadState = {
@@ -86,6 +89,7 @@ export const useFileUpload = (
     onFilesAdded,
     onUploadSuccess,
     onUploadError,
+    getUploadFormData,
     uploadUrl,
   } = options
 
@@ -197,6 +201,13 @@ export const useFileUpload = (
 
     const formData = new FormData()
     formData.append("file", fileToUpload.file) // FastAPI expects 'file' field
+    try {
+      if (getUploadFormData && fileToUpload.file instanceof File) {
+        getUploadFormData(formData, fileToUpload.file)
+      }
+    } catch (err) {
+      console.warn('getUploadFormData callback threw an error', err)
+    }
       
     const authCookie = getCfAuthCookie();
     setState(prev => ({ ...prev, isUploadingGlobal: true, errors: [] }))

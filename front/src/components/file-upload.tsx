@@ -28,6 +28,7 @@ export default function FileUpload() {
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+  const [resumeName, setResumeName] = useState('')
 
   const [
     { files, isDragging, errors: validationOrUploadErrors, isUploadingGlobal },
@@ -46,6 +47,14 @@ export default function FileUpload() {
     accept: acceptString,
     multiple: false,
     uploadUrl: API_RESUME_UPLOAD_URL,
+    getUploadFormData: (formData, file) => {
+      const stripExt = (n: string) => {
+        const idx = n.lastIndexOf('.')
+        return idx > 0 ? n.slice(0, idx) : n
+      }
+      const nameToSend = resumeName && resumeName.trim().length > 0 ? resumeName.trim() : stripExt(file.name)
+      formData.append('name', nameToSend)
+    },
     onUploadSuccess: (uploadedFile, response) => {
       console.log('Upload successful:', uploadedFile, response);
       const data = response as Record<string, unknown> & { resume_id?: string };
@@ -61,6 +70,10 @@ export default function FileUpload() {
         return;
       }
 
+      const storedName = resumeName && resumeName.trim().length > 0
+        ? resumeName.trim()
+        : (uploadedFile.file as FileMetadata).name.replace(/\.[^.]+$/, '')
+
       setUploadFeedback({
         type: 'success',
         message: `${(uploadedFile.file as FileMetadata).name} uploaded successfully!`,
@@ -69,10 +82,7 @@ export default function FileUpload() {
       try {
         if (typeof window !== 'undefined') {
           localStorage.setItem('resumeMatcher:lastResumeId', resumeId);
-          localStorage.setItem(
-            'resumeMatcher:lastResumeName',
-            (uploadedFile.file as FileMetadata).name ?? '',
-          );
+          localStorage.setItem('resumeMatcher:lastResumeName', storedName ?? '');
         }
       } catch (storageError) {
         console.warn('Unable to persist resume ID to localStorage', storageError);
@@ -104,6 +114,15 @@ export default function FileUpload() {
 
   return (
     <div className="flex w-full flex-col gap-4 rounded-lg">
+      <div className="flex flex-col gap-1">
+        <label className="text-sm text-muted-foreground">Resume name (optional)</label>
+        <input
+          value={resumeName}
+          onChange={(e) => setResumeName(e.target.value)}
+          placeholder="Defaults to file name (no extension)"
+          className="w-full rounded-md bg-gray-800 border border-gray-700 p-2 text-sm text-white"
+        />
+      </div>
       <div
         role="button"
         tabIndex={!currentFile && !isUploadingGlobal ? 0 : -1}
