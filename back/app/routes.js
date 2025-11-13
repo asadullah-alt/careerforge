@@ -546,7 +546,7 @@ responseGemini = response.response;
           console.error("Error fetching resumes for testing:", error);
         } else {
           console.log("All resumes in DB for testing:", results);
-        }
+        }}
       );
         // Get all resumes for the user   
         ProcessedResume.find({ user_id: user._id }).sort({ updatedAt: -1 }).exec((err, resumes) => {
