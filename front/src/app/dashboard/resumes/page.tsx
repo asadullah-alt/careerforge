@@ -23,12 +23,9 @@ type ResumeListItem = {
   id: string
   title: string
   resume_name: string
-  experiences: any[]
-  skills: any[]
   createdAt: string
   updatedAt?: string
-  data: StructuredResume
-}
+} &  StructuredResume
 
 export default function ResumesListPage() {
   const router = useRouter()
@@ -62,6 +59,7 @@ export default function ResumesListPage() {
       const json = await res.json()
       if (json?.success) setResumes(json.data || [])
       else setResumes([])
+      console.log(resumes[0])
     } catch (e) {
       console.error('Failed to load resumes from server:', e)
       setResumes([])
@@ -170,10 +168,10 @@ export default function ResumesListPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {resumes.map((r) => {
-              const name = r.data?.personal_data ? `${r.data.personal_data.firstName || ''} ${r.data.personal_data.lastName || ''}`.trim() : r.title
+              const name = r?.personal_data ? `${r.personal_data.firstName || ''} ${r.personal_data.lastName || ''}`.trim() : r.title
               const initials = (name || r.title || 'U').split(' ').map((s:string) => s.charAt(0)).slice(0,2).join('').toUpperCase()
-              const experiences = Array.isArray(r?.experiences) ? r.data.experiences.length : 0
-              const skills = Array.isArray(r?.skills) ? r.data.skills.length : 0
+              const experiences = Array.isArray(r?.experiences) ? r.experiences.length : 0
+              const skills = Array.isArray(r?.skills) ? r.skills.length : 0
               const updated = r.updatedAt || r.createdAt || ''
 
               return (
