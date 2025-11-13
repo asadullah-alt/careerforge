@@ -55,7 +55,11 @@ export default function ResumesListPage() {
   async function loadFromServer() {
     setIsLoading(true)
     try {
-      const res = await fetch(`https://careerback.bhaikaamdo.com/api/resume/list?token=${encodeURIComponent(token || '')}`)
+      const res = await fetch('https://careerback.bhaikaamdo.com/api/resume/list', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ "token":token }),
+      })
       const json = await res.json()
       if (json?.success) setResumes(json.data || [])
       else setResumes([])
@@ -73,11 +77,15 @@ export default function ResumesListPage() {
     resetResume()
     // Navigate to the resume builder
     router.push("/dashboard/resume")
-  }
+  }``
 
   async function handleEdit(item: ResumeListItem) {
     try {
-      const res = await fetch(`https://careerback.bhaikaamdo.com//api/resume/load?id=${encodeURIComponent(item.id)}&token=${encodeURIComponent(token || '')}`)
+      const res = await fetch('https://careerback.bhaikaamdo.com/api/resume/load', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: item.id, token }),
+      })
       const json = await res.json()
       if (json?.success && json.data) {
         initializeResume(json.data.data)
@@ -94,7 +102,11 @@ export default function ResumesListPage() {
   async function handleDelete(id: string) {
     if (!confirm("Delete this resume? This cannot be undone.")) return
     try {
-      const res = await fetch(`https://careerback.bhaikaamdo.com//api/resume/load?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token || '')}`, { method: 'DELETE' })
+      const res = await fetch('https://careerback.bhaikaamdo.com/api/resume/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, token }),
+      })
       const json = await res.json()
       if (json?.success) {
         toast.success('Resume deleted')
