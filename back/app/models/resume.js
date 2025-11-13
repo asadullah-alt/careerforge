@@ -73,7 +73,7 @@ const StructuredResumeSchema = new mongoose.Schema({
 // ProcessedResume schema
 const ProcessedResumeSchema = new mongoose.Schema({
   resume_id:{type:String,index:true},
-  user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  user_id: {type:String },
   title: { type: String, default: 'Untitled Resume' },
   resume: { type: StructuredResumeSchema, required: true },
   createdAt: { type: Date, default: Date.now },

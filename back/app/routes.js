@@ -541,16 +541,9 @@ responseGemini = response.response;
       User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
-      const testing = ProcessedResume.find().exec((error  , results) => {
-        if (error) {
-          console.error("Error fetching resumes for testing:", error);
-        } else {
-          console.log("All resumes in DB for testing:", results);
-        }}
-      );
-      console.log(user._id)
+    
         // Get all resumes for the user   
-        ProcessedResume.find({ user_id: user._id.toString().trim()}).sort({ updatedAt: -1 }).exec((err, resumes) => {
+        ProcessedResume.find({ user_id: user._id}).sort({ updatedAt: -1 }).exec((err, resumes) => {
           if (err) return res.status(500).json({ success: false, message: err.message });
           return res.json({ success: true, data: resumes });
         });
