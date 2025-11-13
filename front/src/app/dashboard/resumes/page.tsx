@@ -168,7 +168,7 @@ export default function ResumesListPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {resumes.map((r) => {
-                {r?.}
+                
               const name = r?.personal_data ? `${r.personal_data.firstName || ''} ${r.personal_data.lastName || ''}`.trim() : r.title
               const initials = (name || r.title || 'U').split(' ').map((s:string) => s.charAt(0)).slice(0,2).join('').toUpperCase()
               const experiences = Array.isArray(r?.experiences) ? r.experiences.length : 0
