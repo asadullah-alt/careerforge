@@ -87,7 +87,19 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <h1 className="text-base font-medium">{title}</h1>
+        <h1
+          className={`text-base font-medium ${title === 'Dashboard' ? 'cursor-pointer hover:underline' : ''}`}
+          role={title === 'Dashboard' ? 'button' : undefined}
+          tabIndex={title === 'Dashboard' ? 0 : undefined}
+          onClick={() => {
+            if (title === 'Dashboard') router.push('/dashboard')
+          }}
+          onKeyDown={(e) => {
+            if ((e as React.KeyboardEvent).key === 'Enter' && title === 'Dashboard') router.push('/dashboard')
+          }}
+        >
+          {title}
+        </h1>
 
         <div className="ml-4 hidden sm:flex items-center gap-2">
           <Button
