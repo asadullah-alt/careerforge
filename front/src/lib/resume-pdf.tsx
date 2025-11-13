@@ -1,92 +1,117 @@
-import { StructuredResume } from '@/lib/schemas/resume';
+import React from 'react'
+import { StructuredResume } from '@/lib/schemas/resume'
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  pdf,
+} from '@react-pdf/renderer'
+import type { Style } from '@react-pdf/types'
+import type { Experience, Project, Education } from '@/lib/schemas/resume'
+
+export type PdfStyles = {
+  page?: Style | Style[]
+  header?: Style | Style[]
+  name?: Style | Style[]
+  sectionTitle?: Style | Style[]
+  entryTitle?: Style | Style[]
+  text?: Style | Style[]
+  row?: Style | Style[]
+}
+
+export const defaultPdfStyles: Required<PdfStyles> = {
+  page: { padding: 20, fontSize: 11, fontFamily: 'Helvetica' },
+  header: { marginBottom: 8 },
+  name: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
+  sectionTitle: { fontSize: 12, fontWeight: 'bold', marginTop: 8, marginBottom: 4 },
+  entryTitle: { fontSize: 11, fontWeight: 'bold' },
+  text: { fontSize: 10, marginBottom: 2 },
+  row: { flexDirection: 'row', justifyContent: 'space-between' },
+}
 
 /**
- * Generates a PDF from resume data using @react-pdf/renderer
- * Install with: npm install @react-pdf/renderer
- * 
- * For now, this is a mock implementation.
- * Once you install @react-pdf/renderer, uncomment the code below.
+ * Generates a PDF Blob from resume data using @react-pdf/renderer
+ * Requires: npm install @react-pdf/renderer
  */
+export async function generateResumePDF(
+  resume: StructuredResume,
+  styles?: PdfStyles
+): Promise<Blob> {
+  const merged = { ...defaultPdfStyles, ...(styles || {}) } as Required<PdfStyles>
 
-export async function generateResumePDF(resume: StructuredResume): Promise<Blob> {
-  // Mock implementation - returns a simple text-based PDF
-  // In production, use @react-pdf/renderer:
-
-  /*
-  import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
-
-  const styles = StyleSheet.create({
-    page: {
-      flexDirection: 'column',
-      backgroundColor: '#FFFFFF',
-      padding: 40,
-    },
-    section: {
-      marginBottom: 10,
-      padding: 10,
-      flexGrow: 0,
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      marginBottom: 5,
-    },
-    heading: {
-      fontSize: 14,
-      fontWeight: 'bold',
-      marginBottom: 5,
-      marginTop: 10,
-    },
-    text: {
-      fontSize: 10,
-      marginBottom: 3,
-    },
-    bulletPoint: {
-      marginLeft: 10,
-      fontSize: 10,
-      marginBottom: 3,
-    },
-  });
-
-  const MyDocument = () => (
+  const PdfDocument = () => (
     <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.section}>
-          <Text style={styles.title}>
+      <Page size="A4" style={merged.page}>
+        <View style={merged.header}>
+          <Text style={merged.name}>
             {resume.personal_data.firstName} {resume.personal_data.lastName}
           </Text>
-          <Text style={styles.text}>{resume.personal_data.email}</Text>
-          <Text style={styles.text}>{resume.personal_data.phone}</Text>
+          {resume.personal_data.email && (
+            <Text style={merged.text}>
+              {resume.personal_data.email}
+              {resume.personal_data.phone ? ` | ${resume.personal_data.phone}` : ''}
+            </Text>
+          )}
         </View>
 
-        {resume.experiences.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.heading}>Professional Experience</Text>
-            {resume.experiences.map((exp, idx) => (
-              <View key={idx} style={{ marginBottom: 10 }}>
-                <Text style={{ fontWeight: 'bold' }}>{exp.job_title}</Text>
-                <Text style={styles.text}>{exp.company}</Text>
-                <Text style={styles.text}>{exp.start_date} - {exp.end_date}</Text>
+        {resume.experiences && resume.experiences.length > 0 && (
+          <View>
+            <Text style={merged.sectionTitle}>Professional Experience</Text>
+            {resume.experiences.map((exp: Experience, i: number) => (
+              <View key={i} style={{ marginBottom: 6 }}>
+                <View style={merged.row}>
+                  <Text style={merged.entryTitle}>{exp.job_title}</Text>
+                  <Text style={merged.text}>{exp.start_date} - {exp.end_date}</Text>
+                </View>
+                {exp.company && <Text style={merged.text}>{exp.company}{exp.location ? ` • ${exp.location}` : ''}</Text>}
+                {exp.description && exp.description.length > 0 && (
+                  <View>
+                    {exp.description.map((d: string, idx: number) => (<Text key={idx} style={merged.text}>• {d}</Text>))}
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {resume.projects && resume.projects.length > 0 && (
+          <View>
+            <Text style={merged.sectionTitle}>Projects</Text>
+            {resume.projects.map((p: Project, i: number) => (
+              <View key={i} style={{ marginBottom: 6 }}>
+                <Text style={merged.entryTitle}>{p.project_name}</Text>
+                {p.description && <Text style={merged.text}>{p.description}</Text>}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {resume.education && resume.education.length > 0 && (
+          <View>
+            <Text style={merged.sectionTitle}>Education</Text>
+            {resume.education.map((e: Education, i: number) => (
+              <View key={i} style={{ marginBottom: 6 }}>
+                <Text style={merged.entryTitle}>{e.degree}</Text>
+                <Text style={merged.text}>{e.institution}</Text>
               </View>
             ))}
           </View>
         )}
       </Page>
     </Document>
-  );
-  */
+  )
 
-  // For now, return a simple blob
-  throw new Error(
-    'PDF export requires @react-pdf/renderer. Install it with: npm install @react-pdf/renderer'
-  );
+  const asPdf = pdf(<PdfDocument />)
+  const blob = await asPdf.toBlob()
+  return blob
 }
 
 /**
  * Alternative: Generate a downloadable HTML string that can be printed to PDF
  */
 export function generateResumeHTML(resume: StructuredResume): string {
-  const { personal_data, experiences, projects, skills, education, achievements } = resume;
+  const { personal_data, experiences, projects, skills, education, achievements, extracted_keywords } = resume
 
   return `
     <!DOCTYPE html>
@@ -247,39 +272,40 @@ export function generateResumeHTML(resume: StructuredResume): string {
           ${achievements.map(ach => `<li>${ach}</li>`).join('')}
         </ul>
       ` : ''}
+
+      ${extracted_keywords && extracted_keywords.length > 0 ? `
+        <div class="section-title">Keywords</div>
+        <div class="keywords">
+          ${extracted_keywords.map(k => `<span class="tag">${k}</span>`).join('')}
+        </div>
+      ` : ''}
     </body>
     </html>
-  `;
+  `
 }
 
-/**
- * Download resume as HTML file (can be printed to PDF)
- */
 export function downloadResumeAsHTML(resume: StructuredResume) {
-  const html = generateResumeHTML(resume);
-  const blob = new Blob([html], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${resume.personal_data.firstName}_${resume.personal_data.lastName}_Resume.html`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const html = generateResumeHTML(resume)
+  const blob = new Blob([html], { type: 'text/html' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${resume.personal_data.firstName}_${resume.personal_data.lastName}_Resume.html`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 
-/**
- * Download resume as JSON
- */
 export function downloadResumeAsJSON(resume: StructuredResume) {
-  const json = JSON.stringify(resume, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${resume.personal_data.firstName}_${resume.personal_data.lastName}_Resume.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const json = JSON.stringify(resume, null, 2)
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${resume.personal_data.firstName}_${resume.personal_data.lastName}_Resume.json`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }

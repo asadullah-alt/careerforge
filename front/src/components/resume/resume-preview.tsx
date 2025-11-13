@@ -1,13 +1,18 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import { StructuredResume } from "@/lib/schemas/resume"
+import { Button } from "@/components/ui/button"
+import { PDFViewer, Document, Page, View, Text } from "@react-pdf/renderer"
+import { PdfStyles, defaultPdfStyles } from "@/lib/resume-pdf"
 
 interface ResumePreviewProps {
   data: StructuredResume | null
+  pdfStyles?: Partial<PdfStyles>
 }
 
-export function ResumePreview({ data }: ResumePreviewProps) {
+export function ResumePreview({ data, pdfStyles }: ResumePreviewProps) {
+  const [showPdf, setShowPdf] = useState(false)
   if (!data) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -18,8 +23,78 @@ export function ResumePreview({ data }: ResumePreviewProps) {
 
   const { personal_data, experiences, projects, skills, education, achievements, extracted_keywords } = data
 
+  const mergedStyles = { ...defaultPdfStyles, ...(pdfStyles || {}) }
+
+  const PdfDocument = () => (
+    <Document>
+      <Page size="A4" style={mergedStyles.page}>
+        <View style={mergedStyles.header}>
+          <Text style={mergedStyles.name}>{personal_data.firstName} {personal_data.lastName}</Text>
+          {personal_data.email && <Text style={mergedStyles.text}>{personal_data.email} {personal_data.phone ? ` | ${personal_data.phone}` : ''}</Text>}
+        </View>
+
+        {experiences && experiences.length > 0 && (
+          <View>
+            <Text style={mergedStyles.sectionTitle}>Professional Experience</Text>
+            {experiences.map((exp, i) => (
+              <View key={i} style={{ marginBottom: 6 }}>
+                <View style={mergedStyles.row}>
+                  <Text style={mergedStyles.entryTitle}>{exp.job_title}</Text>
+                  <Text style={mergedStyles.text}>{exp.start_date} - {exp.end_date}</Text>
+                </View>
+                {exp.company && <Text style={mergedStyles.text}>{exp.company}{exp.location ? ` • ${exp.location}` : ''}</Text>}
+                {exp.description && exp.description.length > 0 && (
+                  <View>
+                    {exp.description.map((d, idx) => (<Text key={idx} style={mergedStyles.text}>• {d}</Text>))}
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {projects && projects.length > 0 && (
+          <View>
+            <Text style={mergedStyles.sectionTitle}>Projects</Text>
+            {projects.map((p, i) => (
+              <View key={i} style={{ marginBottom: 6 }}>
+                <Text style={mergedStyles.entryTitle}>{p.project_name}</Text>
+                {p.description && <Text style={mergedStyles.text}>{p.description}</Text>}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {education && education.length > 0 && (
+          <View>
+            <Text style={mergedStyles.sectionTitle}>Education</Text>
+            {education.map((e, i) => (
+              <View key={i} style={{ marginBottom: 6 }}>
+                <Text style={mergedStyles.entryTitle}>{e.degree}</Text>
+                <Text style={mergedStyles.text}>{e.institution}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </Page>
+    </Document>
+  )
+
   return (
     <div className="bg-white dark:bg-slate-950 text-black dark:text-white p-8 h-full overflow-y-auto print:p-0 space-y-4">
+      <div className="mb-4 flex gap-2">
+        <Button variant="outline" size="sm" onClick={() => setShowPdf((s) => !s)}>
+          {showPdf ? 'Show HTML Preview' : 'Preview PDF'}
+        </Button>
+      </div>
+
+      {showPdf ? (
+        <div className="w-full h-[800px] border">
+          <PDFViewer style={{ width: '100%', height: '100%' }}>
+            <PdfDocument />
+          </PDFViewer>
+        </div>
+      ) : null}
       {/* Header */}
       <div className="border-b border-gray-300 dark:border-gray-700 pb-4">
         <h1 className="text-3xl font-bold">
