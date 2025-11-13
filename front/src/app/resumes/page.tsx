@@ -41,8 +41,8 @@ export default async function ResumesPage({ searchParams }: { searchParams: Prom
   const paginatedResumes = sortedResumes.slice((currentPage - 1) * RESUMES_PER_PAGE, currentPage * RESUMES_PER_PAGE)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50">
-      <div className="container max-w-7xl mx-auto p-6 space-y-8">
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-7xl p-6 space-y-8">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h1 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">My Resumes</h1>
@@ -59,7 +59,7 @@ export default async function ResumesPage({ searchParams }: { searchParams: Prom
           </div>
         </div>
 
-        <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl bg-white/40 border border-purple-200/50 shadow-xl">
+        <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl bg-white/40 dark:bg-zinc-900/40 border border-purple-200/50 dark:border-zinc-800/40 shadow-xl">
           <Suspense fallback={<ResumesLoadingSkeleton />}>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
               {paginatedResumes.map((resume) => (
