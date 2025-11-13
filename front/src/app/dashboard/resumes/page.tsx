@@ -90,8 +90,8 @@ export default function ResumesListPage() {
       const json = await res.json()
       console.log("Resume load response:", json)
       if (json?.success && json.data) {
-        console.log("Calling initializeResume with data:", json.data.data)
-        initializeResume(json.data.data)
+        console.log("Calling initializeResume with data:", json.data)
+        initializeResume(json.data)
         console.log("initializeResume called successfully")
         router.push("/dashboard/resume")
       } else {
