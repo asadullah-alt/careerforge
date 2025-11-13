@@ -8,7 +8,7 @@ const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({});
 const crypto = require('crypto');
 const { ProcessedJob } = require('./models/jobApplication');
-const Resume = require('./models/resume');
+const ProcessedResume = require('./models/resume');
 const {extractSkills, extractSkillsWithRegex, cleanHTML, parseLinkedInProjects} = require('./util');
 async function runGeminiFlash(model, prompt) {
   try {
