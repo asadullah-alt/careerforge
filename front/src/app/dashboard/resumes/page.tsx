@@ -20,7 +20,7 @@ import { StructuredResume } from '@/lib/schemas/resume'
 import { getCfAuthCookie } from "@/utils/cookie"
 
 type ResumeListItem = {
-  id: string
+  _id: string
   title: string
   resume_name: string
   createdAt: string
@@ -84,7 +84,7 @@ export default function ResumesListPage() {
       const res = await fetch('https://careerback.bhaikaamdo.com/api/resume/load', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: item.id, token }),
+        body: JSON.stringify({ id: item._id, token }),
       })
       const json = await res.json()
       if (json?.success && json.data) {
@@ -121,7 +121,7 @@ export default function ResumesListPage() {
   }
 
   function openRenameDialog(item: ResumeListItem) {
-    setRenameId(item.id)
+    setRenameId(item._id)
     setRenameTitle(item.title || '')
     setRenameOpen(true)
   }
@@ -188,7 +188,7 @@ export default function ResumesListPage() {
               const updated = r.updatedAt || r.createdAt || ''
 
               return (
-                <div key={r.id} className="border rounded-lg p-4 bg-card">
+                <div key={r._id} className="border rounded-lg p-4 bg-card">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">{initials}</div>
@@ -202,7 +202,7 @@ export default function ResumesListPage() {
                       <Button size="sm" variant="ghost" onClick={() => handleEdit(r)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => handleDelete(r.id)}>
+                      <Button size="sm" variant="ghost" onClick={() => handleDelete(r._id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

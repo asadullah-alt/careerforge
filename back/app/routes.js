@@ -557,7 +557,7 @@ responseGemini = response.response;
   app.post('/api/resume/load', (req, res) => {
     try {
       const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
-      const { id } = req.body;
+      const { id } = req.body.id;
       
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token' });
@@ -570,7 +570,7 @@ responseGemini = response.response;
       User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
-
+      console.log("ID for resume load:", id);
         ProcessedResume.findOne({ _id: id, user_id: user._id }, (err, resume) => {
           if (err) return res.status(500).json({ success: false, message: err.message });
           if (!resume) return res.status(404).json({ success: false, message: 'Resume not found' });
