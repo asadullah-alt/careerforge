@@ -557,8 +557,8 @@ responseGemini = response.response;
   app.post('/api/resume/load', (req, res) => {
     try {
       const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
-      const { id } = req.body.id;
-      console.log(req.body);
+      const  id  = req.body.id;
+      console.log(req.body);  
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token' });
       }
