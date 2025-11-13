@@ -55,7 +55,7 @@ export default function ResumesListPage() {
   async function loadFromServer() {
     setIsLoading(true)
     try {
-      const res = await fetch(`/api/resume/list?token=${encodeURIComponent(token || '')}`)
+      const res = await fetch(`https://careerback.bhaikaamdo.com/api/resume/list?token=${encodeURIComponent(token || '')}`)
       const json = await res.json()
       if (json?.success) setResumes(json.data || [])
       else setResumes([])
@@ -77,7 +77,7 @@ export default function ResumesListPage() {
 
   async function handleEdit(item: ResumeListItem) {
     try {
-      const res = await fetch(`/api/resume/load?id=${encodeURIComponent(item.id)}&token=${encodeURIComponent(token || '')}`)
+      const res = await fetch(`https://careerback.bhaikaamdo.com//api/resume/load?id=${encodeURIComponent(item.id)}&token=${encodeURIComponent(token || '')}`)
       const json = await res.json()
       if (json?.success && json.data) {
         initializeResume(json.data.data)
@@ -94,7 +94,7 @@ export default function ResumesListPage() {
   async function handleDelete(id: string) {
     if (!confirm("Delete this resume? This cannot be undone.")) return
     try {
-      const res = await fetch(`/api/resume/load?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token || '')}`, { method: 'DELETE' })
+      const res = await fetch(`https://careerback.bhaikaamdo.com//api/resume/load?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token || '')}`, { method: 'DELETE' })
       const json = await res.json()
       if (json?.success) {
         toast.success('Resume deleted')
@@ -117,7 +117,7 @@ export default function ResumesListPage() {
   async function submitRename() {
     if (!renameId) return
     try {
-      const res = await fetch('/api/resume/rename', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: renameId, title: renameTitle, token }) })
+      const res = await fetch('https://careerback.bhaikaamdo.com//api/resume/rename', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: renameId, title: renameTitle, token }) })
       const json = await res.json()
       if (json?.success) {
         toast.success('Renamed')
@@ -168,6 +168,7 @@ export default function ResumesListPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {resumes.map((r) => {
+                {r?.}
               const name = r?.personal_data ? `${r.personal_data.firstName || ''} ${r.personal_data.lastName || ''}`.trim() : r.title
               const initials = (name || r.title || 'U').split(' ').map((s:string) => s.charAt(0)).slice(0,2).join('').toUpperCase()
               const experiences = Array.isArray(r?.experiences) ? r.experiences.length : 0
