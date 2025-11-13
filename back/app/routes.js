@@ -550,7 +550,7 @@ responseGemini = response.response;
       );
       console.log(user._id)
         // Get all resumes for the user   
-        ProcessedResume.find({ user_id: user._id }).sort({ updatedAt: -1 }).exec((err, resumes) => {
+        ProcessedResume.find({ user_id: user._id.toString().trim()}).sort({ updatedAt: -1 }).exec((err, resumes) => {
           if (err) return res.status(500).json({ success: false, message: err.message });
           return res.json({ success: true, data: resumes });
         });
