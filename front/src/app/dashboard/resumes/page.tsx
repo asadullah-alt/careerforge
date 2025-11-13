@@ -81,10 +81,11 @@ export default function ResumesListPage() {
 
   async function handleEdit(item: ResumeListItem) {
     try {
+        console.log("Editing resume with ID:", item);
       const res = await fetch('https://careerback.bhaikaamdo.com/api/resume/load', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: item._id, token }),
+        body: JSON.stringify({ id: item._id, token: token }),
       })
       const json = await res.json()
       if (json?.success && json.data) {
