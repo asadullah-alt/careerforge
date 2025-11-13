@@ -21,6 +21,19 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { getCfAuthCookie } from "@/utils/cookie"
 
+// Add button blink animation styles
+const buttonAnimationStyle = `
+  @keyframes double-blink {
+    0%, 100% { opacity: 1; }
+    25% { opacity: 0.3; }
+    50% { opacity: 1; }
+    75% { opacity: 0.3; }
+  }
+  .animate-double-blink {
+    animation: double-blink 0.6s ease-in-out;
+  }
+`
+
 export function SiteHeader() {
   const pathname = usePathname() || "/"
   const isLifecycle = pathname.startsWith("/lifecycle")
@@ -31,6 +44,22 @@ export function SiteHeader() {
   const [resumes, setResumes] = useState<Array<{ id: string; resume_name?: string }>>([])
   const [activeResume, setActiveResume] = useState<string | null>(null)
   const [loadingResumes, setLoadingResumes] = useState(false)
+  const [blinkingButton, setBlinkingButton] = useState<string | null>(null)
+
+  // Inject animation styles
+  useEffect(() => {
+    const style = document.createElement('style')
+    style.textContent = buttonAnimationStyle
+    document.head.appendChild(style)
+    return () => {
+      document.head.removeChild(style)
+    }
+  }, [])
+
+  const handleButtonClick = (buttonId: string) => {
+    setBlinkingButton(buttonId)
+    setTimeout(() => setBlinkingButton(null), 600)
+  }
 
   const { theme, toggle } = useTheme()
   // Log theme changes only (avoids logging on every render)
@@ -105,8 +134,11 @@ export function SiteHeader() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLinkedinOpen(true)}
-            className="border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer"
+            onClick={() => {
+              handleButtonClick('linkedin')
+              setLinkedinOpen(true)
+            }}
+            className={`border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'linkedin' ? 'animate-double-blink' : ''}`}
           >
             <Linkedin className="size-4 mr-2" />
             <span className="hidden md:inline">Connect to LinkedIn</span>
@@ -114,8 +146,11 @@ export function SiteHeader() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setSheetOpen(true)}
-            className="border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer"
+            onClick={() => {
+              handleButtonClick('upload')
+              setSheetOpen(true)
+            }}
+            className={`border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'upload' ? 'animate-double-blink' : ''}`}
           >
             <UploadCloud className="size-4 mr-2" />
             <span className="hidden md:inline">Upload Base CV</span>
@@ -124,7 +159,8 @@ export function SiteHeader() {
             variant="ghost"
             size="sm"
            
-            className="border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer"
+            className={`border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'email' ? 'animate-double-blink' : ''}`}
+            onClick={() => handleButtonClick('email')}
           >
             <Mail className="size-4 mr-2" />
             <span className="hidden md:inline">Connect with Email</span>
@@ -132,8 +168,11 @@ export function SiteHeader() {
            <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/dashboard/resumes')}
-            className="border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer"
+            onClick={() => {
+              handleButtonClick('resumebuilder')
+              router.push('/dashboard/resumes')
+            }}
+            className={`border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'resumebuilder' ? 'animate-double-blink' : ''}`}
           >
             <BookOpenCheck className="size-4 mr-2" />
             <span className="hidden md:inline">Resume Builder</span>
@@ -179,15 +218,18 @@ export function SiteHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button variant="ghost" size="sm" onClick={() => { console.log('[SiteHeader] toggle clicked'); toggle() }} className="border border-gray-200 dark:border-gray-700 rounded-md px-2">
+          <Button variant="ghost" size="sm" onClick={() => { console.log('[SiteHeader] toggle clicked'); handleButtonClick('theme'); toggle() }} className={`border border-gray-200 dark:border-gray-700 rounded-md px-2 transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'theme' ? 'animate-double-blink' : ''}`}>
             {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
            
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleLogout}
-            className="hidden sm:flex border border-gray-200 dark:border-gray-700 rounded-md px-2"
+            onClick={() => {
+              handleButtonClick('logout')
+              handleLogout()
+            }}
+            className={`hidden sm:flex border border-gray-200 dark:border-gray-700 rounded-md px-2 transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'logout' ? 'animate-double-blink' : ''}`}
           >
             Logout
           </Button>
