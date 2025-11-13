@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Download, FileJson } from "lucide-react"
 import { toast } from "sonner"
-import { downloadResumeAsHTML, downloadResumeAsJSON } from "@/lib/resume-pdf"
+import { downloadResumeAsHTML, downloadResumeAsJSON, generateResumePDF, generateResumeHTML } from "@/lib/resume-pdf"
 
 interface ExportResumeDialogProps {
   open?: boolean
@@ -104,14 +104,61 @@ export function ExportResumeDialog({ open: controlledOpen, onOpenChange }: Expor
 
           <Button
             variant="outline"
-            className="justify-start h-auto py-3 opacity-50 cursor-not-allowed"
-            disabled
+            className="justify-start h-auto py-3"
+            onClick={async () => {
+              if (!resume) {
+                toast.error("No resume data to export")
+                return
+              }
+
+              try {
+                // Try generating PDF via generateResumePDF (requires @react-pdf/renderer)
+                const blob = await generateResumePDF(resume)
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `${resume.personal_data.firstName || 'resume'}_${resume.personal_data.lastName || ''}_Resume.pdf`
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                URL.revokeObjectURL(url)
+                toast.success('PDF downloaded')
+                setOpenState(false)
+              } catch (error) {
+                // Fallback: open printable HTML and trigger browser print (user can Save as PDF)
+                console.warn('PDF generation failed, falling back to printable HTML:', error)
+                try {
+                  const html = generateResumeHTML(resume)
+                  const win = window.open('', '_blank')
+                  if (!win) {
+                    toast.error('Unable to open printable view. Please allow popups or install @react-pdf/renderer for direct PDF export.')
+                    return
+                  }
+                  win.document.write(html)
+                  win.document.close()
+                  // Give the new window a moment to render before calling print
+                  setTimeout(() => {
+                    try {
+                      win.focus()
+                      win.print()
+                      setOpenState(false)
+                    } catch (printErr) {
+                      console.warn('Print fallback failed:', printErr)
+                      toast.success('Opened printable view — use your browser Print > Save as PDF')
+                    }
+                  }, 500)
+                } catch (innerErr) {
+                  console.error('Printable HTML fallback failed:', innerErr)
+                  toast.error('PDF export failed. Install @react-pdf/renderer for direct PDF export.')
+                }
+              }
+            }}
           >
             <Download className="mr-2 h-4 w-4" />
             <div className="flex flex-col text-left">
-              <span className="font-semibold">PDF (Coming Soon)</span>
+              <span className="font-semibold">PDF</span>
               <span className="text-xs text-muted-foreground">
-                Install @react-pdf/renderer to enable PDF export
+                Generate PDF
               </span>
             </div>
           </Button>
