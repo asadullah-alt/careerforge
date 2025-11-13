@@ -34,8 +34,10 @@ export function ProjectsForm() {
 
   // Reset projects when resume changes
   React.useEffect(() => {
-    form.reset({ projects: resume?.projects || [] })
-  }, [resume])
+    if (resume?.projects) {
+      form.reset({ projects: resume.projects })
+    }
+  }, [resume?.projects, form])
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,

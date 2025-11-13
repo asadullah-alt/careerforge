@@ -41,8 +41,10 @@ export function PersonalDataForm() {
 
   // Reset form values when resume changes (e.g., when navigating from resumes list)
   React.useEffect(() => {
-    form.reset(resume?.personal_data || defaultPersonal)
-  }, [resume])
+    if (resume?.personal_data) {
+      form.reset(resume.personal_data)
+    }
+  }, [resume?.personal_data, form])
 
   function onSubmit(data: PersonalData) {
     updatePersonalData(data)

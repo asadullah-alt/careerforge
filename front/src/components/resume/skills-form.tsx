@@ -33,8 +33,10 @@ export function SkillsForm() {
 
   // Reset skills when resume changes
   React.useEffect(() => {
-    form.reset({ skills: resume?.skills || [] })
-  }, [resume])
+    if (resume?.skills) {
+      form.reset({ skills: resume.skills })
+    }
+  }, [resume?.skills, form])
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,

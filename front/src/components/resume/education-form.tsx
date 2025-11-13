@@ -34,8 +34,10 @@ export function EducationForm() {
 
   // Reset education when resume changes
   React.useEffect(() => {
-    form.reset({ education: resume?.education || [] })
-  }, [resume])
+    if (resume?.education) {
+      form.reset({ education: resume.education })
+    }
+  }, [resume?.education, form])
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
