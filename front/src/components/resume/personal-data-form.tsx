@@ -21,22 +21,6 @@ import { Button } from "@/components/ui/button"
 export function PersonalDataForm() {
   const resume = useResumeStore((state) => state.resume)
   const updatePersonalData = useResumeStore((state) => state.updatePersonalData)
-  const form = useForm<PersonalData>({
-    resolver: zodResolver(PersonalDataSchema),
-    defaultValues: resume?.personal_data || {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      linkedin: "",
-      portfolio: "",
-      location: {
-        city: "",
-        country: "",
-      },
-    },
-  })
-
   const defaultPersonal = {
     firstName: "",
     lastName: "",
