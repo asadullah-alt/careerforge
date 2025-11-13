@@ -106,7 +106,7 @@ export function SiteHeader() {
             variant="ghost"
             size="sm"
             onClick={() => setLinkedinOpen(true)}
-            className="border border-gray-200 dark:border-gray-700 rounded-md px-2"
+            className="border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer"
           >
             <Linkedin className="size-4 mr-2" />
             <span className="hidden md:inline">Connect to LinkedIn</span>
@@ -115,7 +115,7 @@ export function SiteHeader() {
             variant="ghost"
             size="sm"
             onClick={() => setSheetOpen(true)}
-            className="border border-gray-200 dark:border-gray-700 rounded-md px-2"
+            className="border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer"
           >
             <UploadCloud className="size-4 mr-2" />
             <span className="hidden md:inline">Upload Base CV</span>
@@ -124,7 +124,7 @@ export function SiteHeader() {
             variant="ghost"
             size="sm"
            
-            className="border border-gray-200 dark:border-gray-700 rounded-md px-2"
+            className="border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer"
           >
             <Mail className="size-4 mr-2" />
             <span className="hidden md:inline">Connect with Email</span>
@@ -133,7 +133,7 @@ export function SiteHeader() {
             variant="ghost"
             size="sm"
             onClick={() => router.push('/dashboard/resumes')}
-            className="border border-gray-200 dark:border-gray-700 rounded-md px-2"
+            className="border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer"
           >
             <BookOpenCheck className="size-4 mr-2" />
             <span className="hidden md:inline">Resume Builder</span>
