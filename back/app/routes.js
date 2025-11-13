@@ -6,6 +6,7 @@ const { raw } = require('body-parser');
 const { default: ollamaClient } = require('ollama');
 const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({});
+const crypto = require('crypto');
 const { ProcessedJob } = require('./models/jobApplication');
 const Resume = require('./models/resume');
 const {extractSkills, extractSkillsWithRegex, cleanHTML, parseLinkedInProjects} = require('./util');
@@ -507,14 +508,15 @@ responseGemini = response.response;
 
         if (id) {
           // Update existing resume
-          Resume.findByIdAndUpdate(id, { title: resumeTitle, data, updatedAt: new Date() }, { new: true }, (err, updated) => {
+          ProcessedResume.findByIdAndUpdate(id, { title: resumeTitle, data, updatedAt: new Date() }, { new: true }, (err, updated) => {
             if (err) return res.status(500).json({ success: false, message: err.message });
             if (!updated) return res.status(404).json({ success: false, message: 'Resume not found' });
             return res.json({ success: true, message: 'Resume updated', id: updated._id });
           });
         } else {
           // Create new resume
-          const resume = new Resume({ user_id: user._id, title: resumeTitle, data });
+          const uuid = crypto.randomUUID();
+          const resume = new ProcessedResume({ resume_id: uuid, user_id: user._id, title: resumeTitle, data });
           resume.save((err, saved) => {
             if (err) return res.status(500).json({ success: false, message: err.message });
             return res.json({ success: true, message: 'Resume saved', id: saved._id });
@@ -539,7 +541,7 @@ responseGemini = response.response;
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
 
-        Resume.find({ user_id: user._id }).sort({ updatedAt: -1 }).exec((err, resumes) => {
+        ProcessedResume.find({ user_id: user._id }).sort({ updatedAt: -1 }).exec((err, resumes) => {
           if (err) return res.status(500).json({ success: false, message: err.message });
           return res.json({ success: true, data: resumes });
         });
