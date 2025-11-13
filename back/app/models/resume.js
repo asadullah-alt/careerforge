@@ -78,7 +78,9 @@ const ProcessedResumeSchema = new mongoose.Schema({
   resume: { type: StructuredResumeSchema, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-});
+}, {
+    collection : 'ProcessedResume' // the collection to use for this schema
+  });
 
 ProcessedResumeSchema.index({ user_id: 1, updatedAt: -1 });
 
