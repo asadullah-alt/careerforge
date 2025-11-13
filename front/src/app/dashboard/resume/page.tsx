@@ -28,19 +28,26 @@ export default function ResumePage() {
     setIsSaving(true)
     try {
       // In a real application, this would call your backend API
+      const title = `${resume.personal_data?.firstName || ""} ${resume.personal_data?.lastName || ""}`.trim() || "Untitled Resume"
       const response = await fetch("/api/resume/save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(resume),
+        body: JSON.stringify({ data: resume, title }),
       })
 
       if (!response.ok) {
         throw new Error("Failed to save resume")
       }
 
-      toast.success("Resume saved successfully!")
+      if (!response.ok) throw new Error('Failed to save resume')
+      const json = await response.json()
+      if (json?.success) {
+        toast.success("Resume saved successfully!")
+      } else {
+        throw new Error(json?.error || 'Failed to save resume')
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to save resume"
       toast.error(errorMessage)
