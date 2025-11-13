@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button"
 export function PersonalDataForm() {
   const resume = useResumeStore((state) => state.resume)
   const updatePersonalData = useResumeStore((state) => state.updatePersonalData)
-
   const form = useForm<PersonalData>({
     resolver: zodResolver(PersonalDataSchema),
     defaultValues: resume?.personal_data || {
@@ -37,6 +36,29 @@ export function PersonalDataForm() {
       },
     },
   })
+
+  const defaultPersonal = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    linkedin: "",
+    portfolio: "",
+    location: {
+      city: "",
+      country: "",
+    },
+  }
+
+  const form = useForm<PersonalData>({
+    resolver: zodResolver(PersonalDataSchema),
+    defaultValues: resume?.personal_data || defaultPersonal,
+  })
+
+  // Reset form values when resume changes (e.g., when navigating from resumes list)
+  React.useEffect(() => {
+    form.reset(resume?.personal_data || defaultPersonal)
+  }, [resume])
 
   function onSubmit(data: PersonalData) {
     updatePersonalData(data)

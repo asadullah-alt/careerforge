@@ -34,6 +34,11 @@ export function ExperiencesForm() {
     },
   })
 
+  // Reset experiences when resume changes (so opening a saved resume populates fields)
+  React.useEffect(() => {
+    form.reset({ experiences: resume?.experiences || [] })
+  }, [resume])
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "experiences",
