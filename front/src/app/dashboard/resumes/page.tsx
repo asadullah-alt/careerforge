@@ -22,6 +22,7 @@ import { getCfAuthCookie } from "@/utils/cookie"
 type ResumeListItem = {
   id: string
   title: string
+  resume_name: string
   createdAt: string
   updatedAt?: string
   data: StructuredResume
