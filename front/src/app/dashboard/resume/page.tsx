@@ -26,6 +26,33 @@ export default function ResumePage() {
   const [template, setTemplate] = useState('classic')
   const [pdfStyles, setPdfStyles] = useState<Partial<PdfStyles>>({})
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [isLoadingPdfWorker, setIsLoadingPdfWorker] = useState(true)
+
+  // Preload PDF worker on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const link = document.createElement('link')
+      link.rel = 'preload'
+      link.as = 'script'
+      link.href = 'https://bhaikaamdo.com/pdf.worker.min.mjs'
+      
+      const onLoad = () => {
+        setIsLoadingPdfWorker(false)
+      }
+      
+      link.addEventListener('load', onLoad)
+      link.addEventListener('error', () => {
+        // Still mark as loaded even if there's an error
+        setIsLoadingPdfWorker(false)
+      })
+      
+      document.head.appendChild(link)
+      
+      return () => {
+        link.removeEventListener('load', onLoad)
+      }
+    }
+  }, [])
 
   // Generate PDF when resume, template, or styles change
   useEffect(() => {
@@ -119,6 +146,33 @@ export default function ResumePage() {
 
   return (
     <AuthGuard>
+      {/* Loading Progress Bar */}
+      {isLoadingPdfWorker && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4">
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-center">Compiling PDF Rendering Components</h2>
+              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div 
+                  className="bg-blue-600 h-full rounded-full transition-all duration-500"
+                  style={{
+                    animation: 'progress 2s ease-in-out infinite'
+                  }}
+                />
+              </div>
+              <p className="text-sm text-gray-600 text-center">Loading PDF rendering engine...</p>
+            </div>
+          </div>
+          <style>{`
+            @keyframes progress {
+              0% { width: 10%; }
+              50% { width: 60%; }
+              100% { width: 90%; }
+            }
+          `}</style>
+        </div>
+      )}
+
       <div className="@container/main flex flex-1 flex-col gap-4 p-4 md:p-6">
         {/* Header */}
         <div className="flex flex-col gap-2">
