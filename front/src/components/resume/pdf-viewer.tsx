@@ -10,11 +10,13 @@ interface PdfViewerProps {
 // Configure PDF.js worker. Use CDN fallback to avoid build-time dependency issues.
 if (typeof window !== 'undefined') {
   try {
-    // prefer local worker if available (bundlers often provide this)
-    // otherwise fallback to a CDN copy
+    // prefer bundler-provided worker if available; otherwise fallback to a CDN copy
+    // Use pdfjs.version when available to align versions
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    pdfjs.GlobalWorkerOptions.workerSrc = (pdfjs.GlobalWorkerOptions && pdfjs.GlobalWorkerOptions.workerSrc) || 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js'
+    const version = (pdfjs && (pdfjs as any).version) || '2.16.105'
+    // @ts-ignore
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.js`
   } catch (e) {
     // ignore
   }
@@ -25,11 +27,42 @@ export default function PdfViewer({ blobUrl }: PdfViewerProps) {
   const [page, setPage] = useState<number>(1)
   const [scale, setScale] = useState<number>(1.0)
   const [showThumbs, setShowThumbs] = useState<boolean>(true)
+  const [fileData, setFileData] = useState<Blob | string | null>(null)
 
   useEffect(() => {
     // reset when blob changes
     setPage(1)
     setNumPages(0)
+  }, [blobUrl])
+
+  // When a blob URL is provided, fetch it as a Blob and pass that to react-pdf.
+  useEffect(() => {
+    let mounted = true
+    async function load() {
+      if (!blobUrl) {
+        if (mounted) setFileData(null)
+        return
+      }
+
+      try {
+        // If it's a blob: URL, fetch the blob and pass it directly to react-pdf
+        if (blobUrl.startsWith('blob:') || blobUrl.startsWith('data:')) {
+          const resp = await fetch(blobUrl)
+          const b = await resp.blob()
+          if (mounted) setFileData(b)
+        } else {
+          // For absolute URLs, just pass the URL string
+          if (mounted) setFileData(blobUrl)
+        }
+      } catch (err) {
+        console.error('Failed to fetch PDF blob', err)
+        if (mounted) setFileData(null)
+      }
+    }
+    load()
+    return () => {
+      mounted = false
+    }
   }, [blobUrl])
 
   function onDocumentLoadSuccess({ numPages: n }: { numPages: number }) {
@@ -38,13 +71,17 @@ export default function PdfViewer({ blobUrl }: PdfViewerProps) {
   }
 
   function download() {
-    if (!blobUrl) return
+    if (!fileData) return
+    const url = fileData instanceof Blob ? URL.createObjectURL(fileData) : String(fileData)
     const a = document.createElement('a')
-    a.href = blobUrl
+    a.href = url
     a.download = 'resume.pdf'
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
+    if (fileData instanceof Blob) {
+      URL.revokeObjectURL(url)
+    }
   }
 
   function printPdf() {
@@ -126,7 +163,7 @@ export default function PdfViewer({ blobUrl }: PdfViewerProps) {
       <div className="flex flex-1 min-h-0 overflow-hidden">
         {showThumbs && (
           <div className="w-20 overflow-auto border-r bg-surface">
-            <Document file={blobUrl} onLoadSuccess={onDocumentLoadSuccess} loading={<div className="p-2 text-xs">Loading…</div>}>
+            <Document file={fileData} onLoadSuccess={onDocumentLoadSuccess} onLoadError={(err) => console.error('Document load error', err)} loading={<div className="p-2 text-xs">Loading…</div>}>
               {Array.from({ length: numPages || 0 }, (_, i) => (
                 <div key={i} className={`p-1 cursor-pointer ${page === i + 1 ? 'ring-2 ring-primary' : ''}`} onClick={() => setPage(i + 1)}>
                   <Page pageNumber={i + 1} width={80} renderTextLayer={false} renderAnnotationLayer={false} />
@@ -137,8 +174,8 @@ export default function PdfViewer({ blobUrl }: PdfViewerProps) {
         )}
 
         <div className="flex-1 overflow-auto p-3">
-          {blobUrl ? (
-            <Document file={blobUrl} onLoadSuccess={onDocumentLoadSuccess} loading={<div className="text-center py-10">Loading PDF…</div>}>
+          {fileData ? (
+            <Document file={fileData} onLoadSuccess={onDocumentLoadSuccess} onLoadError={(err) => console.error('Document load error', err)} loading={<div className="text-center py-10">Loading PDF…</div>}>
               <div className="flex justify-center">
                 <Page pageNumber={page} scale={scale} />
               </div>
