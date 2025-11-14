@@ -31,11 +31,8 @@ interface PdfViewerProps {
 // This ensures API version matches Worker version.
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
   try {
-    // Use a CDN-hosted worker that matches the pdfjs API version to avoid
-    // file:// paths (browsers block loading local resources) and version
-    // mismatches. `react-pdf` exposes `pdfjs.version`.
-    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
-    console.warn('pdfjs worker not bundled; fallback to /pdf.worker.min.js. To bundle the worker, install `pdfjs-dist` and rebuild.')
+    // Use CDN-hosted worker for consistency
+    pdfjs.GlobalWorkerOptions.workerSrc = 'https://bhaikaamdo.com/pdf.worker.min.mjs'
   } catch {
     // If anything fails, react-pdf will try to use its bundled worker.
   }
@@ -101,6 +98,13 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
   function onDocumentLoadSuccess({ numPages: n }: { numPages: number }) {
     // Only update if it's different to prevent re-renders
     setNumPages((prev) => (prev !== n ? n : prev))
+  }
+
+  function onThumbnailsLoadSuccess({ numPages: n }: { numPages: number }) {
+    // Silently handle thumbnails load without triggering main rendering
+    if (numPages === 0) {
+      setNumPages(n)
+    }
   }
 
   function handleTemplateChange(newTemplate: string) {
@@ -243,7 +247,7 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
       <div className="flex flex-1 min-h-0 overflow-hidden">
         {showThumbs && (
           <div className="w-20 overflow-auto border-r bg-surface">
-            <Document file={fileData} onLoadSuccess={onDocumentLoadSuccess} onLoadError={(err) => console.error('Document load error', err)} loading={<div className="p-2 text-xs">Loading…</div>}>
+            <Document file={fileData} onLoadSuccess={onThumbnailsLoadSuccess} onLoadError={(err) => console.error('Document load error', err)} loading={<div className="p-2 text-xs">Loading…</div>}>
               {Array.from({ length: numPages || 0 }, (_, i) => (
                 <div key={i} className={`p-1 cursor-pointer ${page === i + 1 ? 'ring-2 ring-primary' : ''}`} onClick={() => setPage(i + 1)}>
                   <Page pageNumber={i + 1} width={80} renderTextLayer={false} renderAnnotationLayer={false} />

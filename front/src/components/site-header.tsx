@@ -56,6 +56,18 @@ export function SiteHeader() {
     }
   }, [])
 
+  // Preload PDF worker when user is authenticated
+  useEffect(() => {
+    const token = getCfAuthCookie()
+    if (token && typeof window !== 'undefined') {
+      const link = document.createElement('link')
+      link.rel = 'preload'
+      link.as = 'script'
+      link.href = 'https://bhaikaamdo.com/pdf.worker.min.mjs'
+      document.head.appendChild(link)
+    }
+  }, [])
+
   const handleButtonClick = (buttonId: string) => {
     setBlinkingButton(buttonId)
     setTimeout(() => setBlinkingButton(null), 600)
