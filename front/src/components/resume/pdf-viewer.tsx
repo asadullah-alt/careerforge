@@ -11,13 +11,16 @@ interface PdfViewerProps {
 // This ensures API version matches Worker version.
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
   try {
-    // Import worker module dynamically from pdfjs-dist
-    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-      'pdfjs-dist/build/pdf.worker.min.js',
-      import.meta.url,
-    ).toString()
+    // Use a CDN-hosted worker that matches the pdfjs API version to avoid
+    // file:// paths (browsers block loading local resources) and version
+    // mismatches. `react-pdf` exposes `pdfjs.version`.
+    const pdfjsTyped = pdfjs as unknown as { version?: string }
+    const ver = pdfjsTyped.version ?? '5.4.296'
+    // Use unpkg which serves the package at the requested version. This
+    // ensures the worker version matches the API version used by react-pdf.
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${ver}/build/pdf.worker.min.js`
   } catch {
-    // If import.meta is not available (older environments), fallback is handled by react-pdf
+    // If anything fails, react-pdf will try to use its bundled worker.
   }
 }
 
