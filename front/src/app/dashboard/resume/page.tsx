@@ -60,6 +60,7 @@ export default function ResumePage() {
     let url: string | null = null
 
     async function buildPdf() {
+      console.log("THIS DANGEROUS EFFECT IS TRIGGERED")
       if (!resume) return
       try {
         const mod = await import('@/lib/resume-pdf')
