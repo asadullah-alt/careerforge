@@ -7,19 +7,18 @@ interface PdfViewerProps {
   blobUrl: string | null
 }
 
-// Configure PDF.js worker. Use CDN fallback to avoid build-time dependency issues.
+// Configure PDF.js worker using react-pdf's built-in handling.
+// For newer versions of pdfjs-dist, use the CDN with a version that exists.
 if (typeof window !== 'undefined') {
   try {
-    // prefer bundler-provided worker if available; otherwise fallback to a CDN copy
-    // Use pdfjs.version when available to align versions
-    const pdfjsTyped = pdfjs as unknown as { version?: string; GlobalWorkerOptions?: { workerSrc?: string } }
-    const version = pdfjsTyped.version ?? '2.16.105'
+    const pdfjsTyped = pdfjs as unknown as { GlobalWorkerOptions?: { workerSrc?: string } }
     if (!pdfjsTyped.GlobalWorkerOptions) {
-      pdfjsTyped.GlobalWorkerOptions = { workerSrc: '' }
+      pdfjsTyped.GlobalWorkerOptions = {}
     }
-    pdfjsTyped.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.js`
+    // Use a stable version on cdnjs that is known to exist
+    pdfjsTyped.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
   } catch {
-    // ignore
+    // ignore - react-pdf will attempt to use its own bundled worker
   }
 }
 
