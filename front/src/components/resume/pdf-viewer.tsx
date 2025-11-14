@@ -12,12 +12,13 @@ if (typeof window !== 'undefined') {
   try {
     // prefer bundler-provided worker if available; otherwise fallback to a CDN copy
     // Use pdfjs.version when available to align versions
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const version = (pdfjs && (pdfjs as any).version) || '2.16.105'
-    // @ts-ignore
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.js`
-  } catch (e) {
+    const pdfjsTyped = pdfjs as unknown as { version?: string; GlobalWorkerOptions?: { workerSrc?: string } }
+    const version = pdfjsTyped.version ?? '2.16.105'
+    if (!pdfjsTyped.GlobalWorkerOptions) {
+      pdfjsTyped.GlobalWorkerOptions = { workerSrc: '' }
+    }
+    pdfjsTyped.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.js`
+  } catch {
     // ignore
   }
 }
