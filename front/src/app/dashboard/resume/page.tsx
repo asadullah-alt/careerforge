@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback, useRef } from "react"
 import { useResumeStore } from "@/store/resume-store"
 import { PersonalDataForm } from "@/components/resume/personal-data-form"
 import { ExperiencesForm } from "@/components/resume/experiences-form"
@@ -30,19 +30,92 @@ export default function ResumePage() {
 
   // Generate PDF when resume, template, or styles change
   useEffect(() => {
+    // Worker ref for offloading network + (optionally) client generation
+    // We create a blob-based worker that will call the server API to generate a PDF
+    // and return the ArrayBuffer back to the main thread as a transferable.
+    const workerRef = { current: null as Worker | null }
+    const workerCode = `self.onmessage = async (e) => {
+  const { id, resume, pdfStyles, template } = e.data || {}
+  try {
+    const resp = await fetch('/api/resume/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resume, styles: pdfStyles, template }),
+    })
+    if (!resp.ok) {
+      self.postMessage({ id, success: false, error: 'Server returned ' + resp.status })
+      return
+    }
+    const ab = await resp.arrayBuffer()
+    // Transfer the ArrayBuffer back to the main thread to avoid copy
+    self.postMessage({ id, success: true, buffer: ab }, [ab])
+  } catch (err) {
+    self.postMessage({ id, success: false, error: String(err) })
+  }
+}`
+
+    const workerBlob = new Blob([workerCode], { type: 'application/javascript' })
+    const workerUrl = URL.createObjectURL(workerBlob)
+    workerRef.current = new Worker(workerUrl)
+    // clean up the temporary object URL when effect tears down
+    const cleanupWorker = () => {
+      if (workerRef.current) workerRef.current.terminate()
+      URL.revokeObjectURL(workerUrl)
+      workerRef.current = null
+    }
     let mounted = true
     let url: string | null = null
     let timeoutId: ReturnType<typeof setTimeout> | null = null
+    // message id generator for worker replies
+    const nextIdRef = { current: 1 }
+    // expose worker for buildPdf usage via closure
+    const worker = workerRef.current
 
     async function buildPdf() {
       if (!resume) return
+      // indicate worker/pdf generation is in progress
+      setIsLoadingPdfWorker(true)
+      // Prefer using the worker which calls the server API and returns an ArrayBuffer
+      if (worker) {
+        const id = nextIdRef.current++
+        try {
+          const result: { id?: number; success: boolean; buffer?: ArrayBuffer; error?: string } = await new Promise((resolve) => {
+            const onMessage = (ev: MessageEvent) => {
+              const data = ev.data || {}
+              if (data.id !== id) return
+              worker.removeEventListener('message', onMessage)
+              resolve(data)
+            }
+            worker.addEventListener('message', onMessage)
+            worker.postMessage({ id, resume, pdfStyles, template })
+          })
+
+          if (result.success && result.buffer) {
+            const blob = new Blob([result.buffer], { type: 'application/pdf' })
+            url = URL.createObjectURL(blob)
+            if (mounted) setPdfUrl(url)
+            setIsLoadingPdfWorker(false)
+            return
+          }
+          throw new Error(result.error || 'Worker failed to generate PDF')
+        } catch (err) {
+          console.error('PDF generation (worker) failed', err)
+          // fallback to client-side generation below
+          setIsLoadingPdfWorker(false)
+        }
+      }
+
+      // Fallback: client-side generation (may be CPU intensive)
       try {
+        setIsLoadingPdfWorker(true)
         const mod = await import('@/lib/resume-pdf')
         const blob = await mod.generateResumePDF(resume, pdfStyles, template)
         url = URL.createObjectURL(blob)
         if (mounted) setPdfUrl(url)
+        setIsLoadingPdfWorker(false)
       } catch (err) {
         console.error('PDF generation failed', err)
+        setIsLoadingPdfWorker(false)
         if (mounted) setPdfUrl(null)
       }
     }
@@ -63,6 +136,14 @@ export default function ResumePage() {
         URL.revokeObjectURL(url)
       }
       setPdfUrl(null)
+      // terminate worker and revoke its blob URL
+      try {
+        cleanupWorker()
+      } catch {
+        /* ignore */
+      }
+      // ensure loading state is cleared
+      setIsLoadingPdfWorker(false)
     }
   }, [resume, template, pdfStyles])
 
@@ -197,7 +278,7 @@ export default function ResumePage() {
 
           {/* Right Panel - PDF Viewer */}
           <div className="lg:col-span-1 border border-input rounded-lg overflow-hidden bg-card">
-            <div className="h-full flex flex-col">
+            <div className="h-full flex flex-col relative">
               <PdfViewer 
                 blobUrl={pdfUrl} 
                 data={resume}
@@ -206,6 +287,14 @@ export default function ResumePage() {
                 onTemplateChange={setTemplate}
                 onStylesChange={setPdfStyles}
               />
+              {isLoadingPdfWorker && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 dark:bg-black/50">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent" />
+                    <div className="text-sm text-muted-foreground">Generating PDF preview…</div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
