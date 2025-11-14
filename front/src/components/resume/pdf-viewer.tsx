@@ -23,7 +23,7 @@ if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     // and file:// issues. After installing `pdfjs-dist` (matching react-pdf)
     // copy `node_modules/pdfjs-dist/build/pdf.worker.min.js` to `public/pdf.worker.min.js`.
     // The worker will then be served same-origin at `/pdf.worker.min.js`.
-    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
+    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
     // eslint-disable-next-line no-console
     console.warn('pdfjs worker not bundled; fallback to /pdf.worker.min.js. To bundle the worker, install `pdfjs-dist` and rebuild.')
   } catch {
