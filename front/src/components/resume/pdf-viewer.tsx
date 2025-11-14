@@ -7,18 +7,17 @@ interface PdfViewerProps {
   blobUrl: string | null
 }
 
-// Configure PDF.js worker using react-pdf's built-in handling.
-// For newer versions of pdfjs-dist, use the CDN with a version that exists.
-if (typeof window !== 'undefined') {
+// Configure PDF.js worker to use pdfjs-dist bundler entry.
+// This ensures API version matches Worker version.
+if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
   try {
-    const pdfjsTyped = pdfjs as unknown as { GlobalWorkerOptions?: { workerSrc?: string } }
-    if (!pdfjsTyped.GlobalWorkerOptions) {
-      pdfjsTyped.GlobalWorkerOptions = {}
-    }
-    // Use a stable version on cdnjs that is known to exist
-    pdfjsTyped.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+    // Import worker module dynamically from pdfjs-dist
+    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+      'pdfjs-dist/build/pdf.worker.min.js',
+      import.meta.url,
+    ).toString()
   } catch {
-    // ignore - react-pdf will attempt to use its own bundled worker
+    // If import.meta is not available (older environments), fallback is handled by react-pdf
   }
 }
 
