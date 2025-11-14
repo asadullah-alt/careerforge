@@ -99,8 +99,8 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
   }, [blobUrl])
 
   function onDocumentLoadSuccess({ numPages: n }: { numPages: number }) {
-    setNumPages(n)
-    setPage(1)
+    // Only update if it's different to prevent re-renders
+    setNumPages((prev) => (prev !== n ? n : prev))
   }
 
   function handleTemplateChange(newTemplate: string) {
@@ -117,36 +117,6 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/50 flex-wrap gap-2">
-        <div className="flex items-center gap-2">
-          <button
-            className="btn px-2 py-1 rounded border bg-white/80 text-sm"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page <= 1}
-          >
-            Prev
-          </button>
-          <button
-            className="btn px-2 py-1 rounded border bg-white/80 text-sm"
-            onClick={() => setPage((p) => Math.min(numPages || 1, p + 1))}
-            disabled={page >= numPages}
-          >
-            Next
-          </button>
-          <span className="text-sm text-muted-foreground">Page</span>
-          <input
-            type="number"
-            min={1}
-            max={numPages || 1}
-            value={page}
-            onChange={(e) => {
-              const v = Number(e.target.value || 1)
-              if (!isNaN(v)) setPage(Math.max(1, Math.min(v, numPages || 1)))
-            }}
-            className="w-16 text-sm rounded border px-2 py-1 bg-card"
-          />
-          <span className="text-sm text-muted-foreground">of {numPages || '—'}</span>
-        </div>
-
         <div className="flex items-center gap-2">
           <label htmlFor="template" className="text-xs text-muted-foreground font-medium">Template:</label>
           <select
@@ -294,6 +264,36 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
             <div className="flex items-center justify-center h-full text-muted-foreground">Generating PDF preview…</div>
           )}
         </div>
+      </div>
+
+      <div className="flex items-center justify-center gap-2 px-3 py-2 border-t bg-muted/50">
+        <button
+          className="btn px-2 py-1 rounded border bg-white/80 text-sm"
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          disabled={page <= 1}
+        >
+          Prev
+        </button>
+        <button
+          className="btn px-2 py-1 rounded border bg-white/80 text-sm"
+          onClick={() => setPage((p) => Math.min(numPages || 1, p + 1))}
+          disabled={page >= numPages}
+        >
+          Next
+        </button>
+        <span className="text-sm text-muted-foreground">Page</span>
+        <input
+          type="number"
+          min={1}
+          max={numPages || 1}
+          value={page}
+          onChange={(e) => {
+            const v = Number(e.target.value || 1)
+            if (!isNaN(v)) setPage(Math.max(1, Math.min(v, numPages || 1)))
+          }}
+          className="w-16 text-sm rounded border px-2 py-1 bg-card"
+        />
+        <span className="text-sm text-muted-foreground">of {numPages || '—'}</span>
       </div>
     </div>
   )
