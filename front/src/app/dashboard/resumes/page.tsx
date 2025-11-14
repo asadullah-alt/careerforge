@@ -213,8 +213,8 @@ export default function ResumesListPage() {
                   </div>
 
                   <div className="mt-3 flex gap-2">
-                    <Button onClick={() => handleEdit(r)}>Open</Button>
-                    <Button variant="outline" onClick={() => openRenameDialog(r)}>Rename</Button>
+                    <Button className={'cursor-pointer'} onClick={() => handleEdit(r)}>Open</Button>
+                    <Button className={'cursor-pointer'} variant="outline" onClick={() => openRenameDialog(r)}>Rename</Button>
                   </div>
                 </div>
               )

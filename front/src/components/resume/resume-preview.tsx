@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react"
 import { StructuredResume } from "@/lib/schemas/resume"
 import { PdfStyles, generateResumePDF } from "@/lib/resume-pdf"
+import PdfViewer from "@/components/resume/pdf-viewer"
 
 interface ResumePreviewProps {
   data: StructuredResume | null
@@ -55,16 +56,8 @@ export function ResumePreview({ data, pdfStyles, template = 'classic' }: ResumeP
       </div>
 
       <div className="w-full h-[800px] border">
-        {/* Generate a blob URL preview to avoid runtime hooks inside PDFViewer */}
-        {pdfUrl ? (
-          <iframe
-            title="Resume PDF Preview"
-            src={pdfUrl}
-            style={{ width: '100%', height: '100%', border: 'none' }}
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full">Generating PDF preview…</div>
-        )}
+        {/* Generate a blob URL preview and show in PdfViewer */}
+        <PdfViewer blobUrl={pdfUrl} />
       </div>
       {/* Header */}
       <div className="border-b border-gray-300 dark:border-gray-700 pb-4">
