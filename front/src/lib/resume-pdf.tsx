@@ -36,9 +36,11 @@ export const defaultPdfStyles: Required<PdfStyles> = {
  */
 export async function generateResumePDF(
   resume: StructuredResume,
-  styles?: PdfStyles
+  styles?: PdfStyles,
+  template: string = 'classic'
 ): Promise<Blob> {
-  const merged = { ...defaultPdfStyles, ...(styles || {}) } as Required<PdfStyles>
+  const templateStyles = getTemplateStyles(template)
+  const merged = { ...defaultPdfStyles, ...templateStyles, ...(styles || {}) } as Required<PdfStyles>
 
   const PdfDocument = () => (
     <Document>
@@ -105,6 +107,49 @@ export async function generateResumePDF(
   const asPdf = pdf(<PdfDocument />)
   const blob = await asPdf.toBlob()
   return blob
+}
+
+function getTemplateStyles(template: string): Partial<PdfStyles> {
+  switch (template) {
+    case 'modern':
+      return {
+        page: { padding: 24, fontSize: 11, fontFamily: 'Helvetica' },
+        header: { marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between' },
+        name: { fontSize: 20, fontWeight: '700', marginBottom: 2 },
+        sectionTitle: { fontSize: 12, fontWeight: '700', marginTop: 10, marginBottom: 6 },
+      }
+    case 'minimal':
+      return {
+        page: { padding: 18, fontSize: 10, fontFamily: 'Helvetica' },
+        header: { marginBottom: 6 },
+        name: { fontSize: 16, fontWeight: '600', marginBottom: 2 },
+        sectionTitle: { fontSize: 11, fontWeight: '600', marginTop: 8, marginBottom: 4 },
+        text: { fontSize: 9, marginBottom: 1 },
+      }
+    case 'bold':
+      return {
+        page: { padding: 22, fontSize: 11, fontFamily: 'Helvetica' },
+        header: { marginBottom: 10 },
+        name: { fontSize: 22, fontWeight: '900', marginBottom: 4 },
+        sectionTitle: { fontSize: 13, fontWeight: '800', marginTop: 10, marginBottom: 6 },
+      }
+    case 'compact':
+      return {
+        page: { padding: 12, fontSize: 9, fontFamily: 'Helvetica' },
+        header: { marginBottom: 6 },
+        name: { fontSize: 14, fontWeight: '700', marginBottom: 2 },
+        sectionTitle: { fontSize: 10, fontWeight: '700', marginTop: 6, marginBottom: 3 },
+        row: { flexDirection: 'row', justifyContent: 'space-between' },
+      }
+    case 'classic':
+    default:
+      return {
+        page: { padding: 20, fontSize: 11, fontFamily: 'Helvetica' },
+        header: { marginBottom: 8 },
+        name: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
+        sectionTitle: { fontSize: 12, fontWeight: 'bold', marginTop: 8, marginBottom: 4 },
+      }
+  }
 }
 
 /**

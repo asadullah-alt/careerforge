@@ -22,6 +22,7 @@ export default function ResumePage() {
   const resetResume = useResumeStore((state) => state.resetResume)
   const [activeTab, setActiveTab] = useState("personal")
   const [isSaving, setIsSaving] = useState(false)
+  const [template, setTemplate] = useState('classic')
 
   // Ensure the page reflects any resume loaded into the store (e.g. via initializeResume)
   React.useEffect(() => {
@@ -155,11 +156,26 @@ export default function ResumePage() {
           {/* Right Panel - Preview (30%) */}
           <div className="lg:col-span-1 border border-input rounded-lg overflow-hidden bg-card">
             <div className="h-full flex flex-col">
-              <div className="border-b border-input px-4 py-3 bg-muted/50 sticky top-0">
-                <h2 className="font-semibold text-sm">Resume Preview</h2>
+                <div className="border-b border-input px-4 py-3 bg-muted/50 sticky top-0 flex items-center justify-between gap-2">
+                  <h2 className="font-semibold text-sm">Resume Preview</h2>
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="template" className="text-xs text-muted-foreground">Template</label>
+                    <select
+                      id="template"
+                      className="text-sm rounded-md border px-2 py-1 bg-card"
+                      value={template}
+                      onChange={(e) => setTemplate(e.target.value)}
+                    >
+                      <option value="classic">Classic</option>
+                      <option value="modern">Modern</option>
+                      <option value="minimal">Minimal</option>
+                      <option value="bold">Bold</option>
+                      <option value="compact">Compact</option>
+                    </select>
+                  </div>
+                </div>
+                <ResumePreview data={resume} template={template} />
               </div>
-              <ResumePreview data={resume} />
-            </div>
           </div>
         </div>
       </div>

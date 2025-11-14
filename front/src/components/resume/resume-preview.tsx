@@ -2,25 +2,25 @@
 
 import React, { useState, useEffect } from "react"
 import { StructuredResume } from "@/lib/schemas/resume"
-import { Button } from "@/components/ui/button"
 import { PdfStyles, generateResumePDF } from "@/lib/resume-pdf"
 
 interface ResumePreviewProps {
   data: StructuredResume | null
   pdfStyles?: Partial<PdfStyles>
+  template?: string
 }
 
-export function ResumePreview({ data, pdfStyles }: ResumePreviewProps) {
-  const [showPdf, setShowPdf] = useState(false)
+export function ResumePreview({ data, pdfStyles, template = 'classic' }: ResumePreviewProps) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
-  // Generate PDF blob URL when preview is toggled on
+
+  // Always generate PDF preview automatically when data changes
   useEffect(() => {
     let mounted = true
     let url: string | null = null
     async function build() {
-      if (!showPdf || !data) return
+      if (!data) return
       try {
-        const blob = await generateResumePDF(data, pdfStyles)
+        const blob = await generateResumePDF(data, pdfStyles, template)
         url = URL.createObjectURL(blob)
         if (mounted) setPdfUrl(url)
       } catch (err) {
@@ -36,7 +36,7 @@ export function ResumePreview({ data, pdfStyles }: ResumePreviewProps) {
       }
       setPdfUrl(null)
     }
-  }, [showPdf, data, pdfStyles])
+  }, [data, pdfStyles, template])
 
   if (!data) {
     return (
@@ -51,25 +51,21 @@ export function ResumePreview({ data, pdfStyles }: ResumePreviewProps) {
   return (
     <div className="bg-white dark:bg-slate-950 text-black dark:text-white p-8 h-full overflow-y-auto print:p-0 space-y-4">
       <div className="mb-4 flex gap-2">
-        <Button variant="outline" size="sm" onClick={() => setShowPdf((s) => !s)}>
-          {showPdf ? 'Show HTML Preview' : 'Preview PDF'}
-        </Button>
+        {/* PDF preview is shown automatically; no toggle button */}
       </div>
 
-      {showPdf ? (
-        <div className="w-full h-[800px] border">
-          {/* Generate a blob URL preview to avoid runtime hooks inside PDFViewer */}
-          {pdfUrl ? (
-            <iframe
-              title="Resume PDF Preview"
-              src={pdfUrl}
-              style={{ width: '100%', height: '100%', border: 'none' }}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full">Generating PDF preview…</div>
-          )}
-        </div>
-      ) : null}
+      <div className="w-full h-[800px] border">
+        {/* Generate a blob URL preview to avoid runtime hooks inside PDFViewer */}
+        {pdfUrl ? (
+          <iframe
+            title="Resume PDF Preview"
+            src={pdfUrl}
+            style={{ width: '100%', height: '100%', border: 'none' }}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full">Generating PDF preview…</div>
+        )}
+      </div>
       {/* Header */}
       <div className="border-b border-gray-300 dark:border-gray-700 pb-4">
         <h1 className="text-3xl font-bold">
