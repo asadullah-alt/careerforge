@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { useResumeStore } from "@/store/resume-store"
 import { PersonalDataForm } from "@/components/resume/personal-data-form"
 import { ExperiencesForm } from "@/components/resume/experiences-form"
@@ -58,9 +58,9 @@ export default function ResumePage() {
   useEffect(() => {
     let mounted = true
     let url: string | null = null
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
 
     async function buildPdf() {
-      console.log("THIS DANGEROUS EFFECT IS TRIGGERED")
       if (!resume) return
       try {
         const mod = await import('@/lib/resume-pdf')
@@ -74,11 +74,17 @@ export default function ResumePage() {
     }
 
     if (resume) {
-      buildPdf()
+      // Debounce PDF generation to prevent double triggers
+      timeoutId = setTimeout(() => {
+        if (mounted) {
+          buildPdf()
+        }
+      }, 100)
     }
 
     return () => {
       mounted = false
+      if (timeoutId) clearTimeout(timeoutId)
       if (url) {
         URL.revokeObjectURL(url)
       }
@@ -104,11 +110,9 @@ export default function ResumePage() {
     if (!resume) return
 
     setIsSaving(true)
-    console.log("💾 [Resume Page] Starting save process with resume:", resume)
     try {
       const token = getCfAuthCookie()
       const title = `${resume.personal_data?.firstName || ""} ${resume.personal_data?.lastName || ""}`.trim() || "Untitled Resume"
-      console.log("📤 [Resume Page] Sending save request with title:", title)
       const response = await fetch("/api/resume/save", {
         method: "POST",
         headers: {
@@ -122,21 +126,20 @@ export default function ResumePage() {
       }
 
       const json = await response.json()
-      console.log("✅ [Resume Page] Save response received:", json)
       if (json?.success) {
-        console.log("🎉 [Resume Page] Resume saved successfully!")
         toast.success("Resume saved successfully!")
       } else {
         throw new Error(json?.error || 'Failed to save resume')
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to save resume"
-      console.error("❌ [Resume Page] Save error:", errorMessage)
       toast.error(errorMessage)
     } finally {
       setIsSaving(false)
     }
   }
+
+  const memoizedHandleSaveResume = useCallback(handleSaveResume, [resume])
 
   function handleClearResume() {
     if (confirm("Are you sure you want to clear all resume data? This cannot be undone.")) {
@@ -144,6 +147,8 @@ export default function ResumePage() {
       toast.success("Resume cleared")
     }
   }
+
+  const memoizedHandleClearResume = useCallback(handleClearResume, [resetResume])
 
   return (
     <AuthGuard>
@@ -188,7 +193,7 @@ export default function ResumePage() {
           <GenerateResumeDialog />
           <Button
             variant="outline"
-            onClick={handleSaveResume}
+            onClick={memoizedHandleSaveResume}
             disabled={!resume || isSaving}
           >
             <Save className="mr-2 h-4 w-4" />
@@ -197,7 +202,7 @@ export default function ResumePage() {
           <ExportResumeDialog />
           <Button
             variant="outline"
-            onClick={handleClearResume}
+            onClick={memoizedHandleClearResume}
             disabled={!resume}
             className="text-gray-600 hover:bg-gray-100"
           >
