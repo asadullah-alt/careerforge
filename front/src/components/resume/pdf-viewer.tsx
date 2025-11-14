@@ -2,6 +2,11 @@
 
 import React, { useEffect, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
+// Bundle the pdf.js worker so it is served with the app and version-matched.
+// Requires `pdfjs-dist` to be installed in the project.
+// Use the bundler entry which most bundlers handle correctly.
+// @ts-expect-error - module may not have type declarations in this project
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry'
 
 interface PdfViewerProps {
   blobUrl: string | null
@@ -16,9 +21,11 @@ if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     // mismatches. `react-pdf` exposes `pdfjs.version`.
     const pdfjsTyped = pdfjs as unknown as { version?: string }
     const ver = pdfjsTyped.version ?? '5.4.296'
-    // Use unpkg which serves the package at the requested version. This
-    // ensures the worker version matches the API version used by react-pdf.
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${ver}/build/pdf.worker.min.js`
+    // Prefer serving the worker from our app's `public/` directory to avoid CORS
+    // and file:// issues. After installing `pdfjs-dist` (matching react-pdf)
+    // copy `node_modules/pdfjs-dist/build/pdf.worker.min.js` to `public/pdf.worker.min.js`.
+    // The worker will then be served same-origin at `/pdf.worker.min.js`.
+    pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker
   } catch {
     // If anything fails, react-pdf will try to use its bundled worker.
   }

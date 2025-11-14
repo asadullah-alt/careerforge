@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { StructuredResume } from "@/lib/schemas/resume"
-import { PdfStyles, generateResumePDF } from "@/lib/resume-pdf"
+import type { PdfStyles } from "@/lib/resume-pdf"
 import PdfViewer from "@/components/resume/pdf-viewer"
 
 interface ResumePreviewProps {
@@ -14,14 +14,21 @@ interface ResumePreviewProps {
 export function ResumePreview({ data, pdfStyles, template = 'classic' }: ResumePreviewProps) {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
 
-  // Always generate PDF preview automatically when data changes
+  // Generate PDF blob URL when data/template changes, but do it lazily so
+  // route navigation and initial render are not blocked by heavy PDF work.
   useEffect(() => {
     let mounted = true
     let url: string | null = null
+    let idleHandle: number | null = null
+    let timeoutHandle: number | null = null
+
     async function build() {
       if (!data) return
       try {
-        const blob = await generateResumePDF(data, pdfStyles, template)
+        // Dynamically import the PDF generator to avoid bundling heavy code
+        // into the initial route bundle.
+        const mod = await import('@/lib/resume-pdf')
+        const blob = await mod.generateResumePDF(data, pdfStyles, template)
         url = URL.createObjectURL(blob)
         if (mounted) setPdfUrl(url)
       } catch (err) {
@@ -29,9 +36,28 @@ export function ResumePreview({ data, pdfStyles, template = 'classic' }: ResumeP
         if (mounted) setPdfUrl(null)
       }
     }
-    build()
+
+    // Schedule build using requestIdleCallback if available so it runs when
+    // the main thread is idle. Fallback to setTimeout to avoid blocking.
+    const schedule = () => {
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        // @ts-expect-error - DOM lib sometimes lacks types for this in the environment
+        idleHandle = window.requestIdleCallback(() => { build().catch(() => {}) }, { timeout: 2000 }) as unknown as number
+      } else {
+        timeoutHandle = window.setTimeout(() => { build().catch(() => {}) }, 200)
+      }
+    }
+
+    // Only schedule generation if there's resume data.
+    if (data) schedule()
+
     return () => {
       mounted = false
+      if (idleHandle != null && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        // @ts-expect-error - types for cancelIdleCallback may be missing
+        window.cancelIdleCallback(idleHandle)
+      }
+      if (timeoutHandle != null) clearTimeout(timeoutHandle)
       if (url) {
         URL.revokeObjectURL(url)
       }
