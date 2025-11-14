@@ -5,6 +5,13 @@ import { StructuredResume } from "@/lib/schemas/resume"
 import type { PdfStyles } from "@/lib/resume-pdf"
 import PdfViewer from "@/components/resume/pdf-viewer"
 
+declare global {
+  interface GlobalThis {
+    requestIdleCallback?: (callback: (deadline: { didTimeout: boolean; timeRemaining: () => number }) => void, options?: { timeout?: number }) => number
+    cancelIdleCallback?: (handle: number) => void
+  }
+}
+
 interface ResumePreviewProps {
   data: StructuredResume | null
   pdfStyles?: Partial<PdfStyles>
@@ -20,7 +27,7 @@ export function ResumePreview({ data, pdfStyles, template = 'classic' }: ResumeP
     let mounted = true
     let url: string | null = null
     let idleHandle: number | null = null
-    let timeoutHandle: number | null = null
+    let timeoutHandle: ReturnType<typeof setTimeout> | null = null
 
     async function build() {
       if (!data) return
@@ -40,11 +47,11 @@ export function ResumePreview({ data, pdfStyles, template = 'classic' }: ResumeP
     // Schedule build using requestIdleCallback if available so it runs when
     // the main thread is idle. Fallback to setTimeout to avoid blocking.
     const schedule = () => {
-      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-        // @ts-expect-error - DOM lib sometimes lacks types for this in the environment
-        idleHandle = window.requestIdleCallback(() => { build().catch(() => {}) }, { timeout: 2000 }) as unknown as number
+      // Use globalThis so TypeScript picks up the correct global timer types
+      if (typeof globalThis !== 'undefined' && typeof globalThis.requestIdleCallback === 'function') {
+        idleHandle = globalThis.requestIdleCallback(() => { build().catch(() => {}) }, { timeout: 2000 })
       } else {
-        timeoutHandle = window.setTimeout(() => { build().catch(() => {}) }, 200)
+        timeoutHandle = globalThis.setTimeout(() => { build().catch(() => {}) }, 200)
       }
     }
 
@@ -53,11 +60,10 @@ export function ResumePreview({ data, pdfStyles, template = 'classic' }: ResumeP
 
     return () => {
       mounted = false
-      if (idleHandle != null && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
-        // @ts-expect-error - types for cancelIdleCallback may be missing
-        window.cancelIdleCallback(idleHandle)
+      if (idleHandle != null && typeof globalThis !== 'undefined' && typeof globalThis.cancelIdleCallback === 'function') {
+        globalThis.cancelIdleCallback!(idleHandle)
       }
-      if (timeoutHandle != null) clearTimeout(timeoutHandle)
+      if (timeoutHandle != null) globalThis.clearTimeout(timeoutHandle)
       if (url) {
         URL.revokeObjectURL(url)
       }
