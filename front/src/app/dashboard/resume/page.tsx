@@ -37,7 +37,8 @@ export default function ResumePage() {
     const workerCode = `self.onmessage = async (e) => {
   const { id, resume, pdfStyles, template } = e.data || {}
   try {
-    const resp = await fetch('/api/resume/generate', {
+    const url = self.location.origin + '/api/resume/generate'
+    const resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ resume, styles: pdfStyles, template }),
