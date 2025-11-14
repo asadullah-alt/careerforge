@@ -6,7 +6,7 @@ import { Document, Page, pdfjs } from 'react-pdf'
 // Requires `pdfjs-dist` to be installed in the project.
 // Use the bundler entry which most bundlers handle correctly.
 // @ts-expect-error - module may not have type declarations in this project
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry'
+// import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry'
 
 interface PdfViewerProps {
   blobUrl: string | null
@@ -35,12 +35,36 @@ export default function PdfViewer({ blobUrl }: PdfViewerProps) {
   const [numPages, setNumPages] = useState<number>(0)
   const [page, setPage] = useState<number>(1)
   const [scale, setScale] = useState<number>(1.0)
-  const [showThumbs, setShowThumbs] = useState<boolean>(true)
+        // pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker
   const [fileData, setFileData] = useState<Blob | string | null>(null)
 
   useEffect(() => {
     // reset when blob changes
     setPage(1)
+    if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+      // Try to dynamically import the worker entry so we don't cause a build-time
+      // error when `pdfjs-dist` isn't installed. If dynamic import fails, fall
+      // back to serving a worker at `/pdf.worker.min.js` (copy from
+      // `node_modules/pdfjs-dist/build/pdf.worker.min.js` to `public/`).
+      ;(async () => {
+        try {
+          const mod = await import('pdfjs-dist/build/pdf.worker.entry')
+          // Some bundlers expose the worker as the default export (string URL),
+          // others expose a module. Use `mod.default` when available.
+          // @ts-ignore
+          const workerSrc = (mod && (mod as any).default) || mod
+          // @ts-ignore - set workerSrc to the imported worker
+          pdfjs.GlobalWorkerOptions.workerSrc = workerSrc
+        } catch (err) {
+          // Fallback: expect the developer to copy the worker to `public/pdf.worker.min.js`.
+          // This avoids CORS and file:// issues.
+          pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
+          // Helpful console message for debugging/setup
+          // eslint-disable-next-line no-console
+          console.warn('pdfjs worker not bundled; falling back to /pdf.worker.min.js. To bundle the worker, install `pdfjs-dist` and rebuild.')
+        }
+      })()
+    }
     setNumPages(0)
   }, [blobUrl])
 
