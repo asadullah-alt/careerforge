@@ -1,13 +1,12 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useResumeStore } from "@/store/resume-store"
 import { PersonalDataForm } from "@/components/resume/personal-data-form"
 import { ExperiencesForm } from "@/components/resume/experiences-form"
 import { ProjectsForm } from "@/components/resume/projects-form"
 import { SkillsForm } from "@/components/resume/skills-form"
 import { EducationForm } from "@/components/resume/education-form"
-import { ResumePreview } from "@/components/resume/resume-preview"
 import { GenerateResumeDialog } from "@/components/resume/generate-resume-dialog"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
@@ -16,6 +15,8 @@ import { toast } from "sonner"
 import AuthGuard from "@/components/auth-guard"
 import { ExportResumeDialog } from "@/components/resume/export-resume-dialog"
 import { getCfAuthCookie } from "@/utils/cookie"
+import PdfViewer from "@/components/resume/pdf-viewer"
+import type { PdfStyles } from "@/lib/resume-pdf"
 
 export default function ResumePage() {
   const resume = useResumeStore((state) => state.resume)
@@ -23,6 +24,39 @@ export default function ResumePage() {
   const [activeTab, setActiveTab] = useState("personal")
   const [isSaving, setIsSaving] = useState(false)
   const [template, setTemplate] = useState('classic')
+  const [pdfStyles, setPdfStyles] = useState<Partial<PdfStyles>>({})
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+
+  // Generate PDF when resume, template, or styles change
+  useEffect(() => {
+    let mounted = true
+    let url: string | null = null
+
+    async function buildPdf() {
+      if (!resume) return
+      try {
+        const mod = await import('@/lib/resume-pdf')
+        const blob = await mod.generateResumePDF(resume, pdfStyles, template)
+        url = URL.createObjectURL(blob)
+        if (mounted) setPdfUrl(url)
+      } catch (err) {
+        console.error('PDF generation failed', err)
+        if (mounted) setPdfUrl(null)
+      }
+    }
+
+    if (resume) {
+      buildPdf()
+    }
+
+    return () => {
+      mounted = false
+      if (url) {
+        URL.revokeObjectURL(url)
+      }
+      setPdfUrl(null)
+    }
+  }, [resume, template, pdfStyles])
 
   // Ensure the page reflects any resume loaded into the store (e.g. via initializeResume)
   React.useEffect(() => {
@@ -107,9 +141,10 @@ export default function ResumePage() {
           </Button>
           <ExportResumeDialog />
           <Button
-            variant="destructive"
+            variant="outline"
             onClick={handleClearResume}
             disabled={!resume}
+            className="text-gray-600 hover:bg-gray-100"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Clear
@@ -153,29 +188,18 @@ export default function ResumePage() {
             </Tabs>
           </div>
 
-          {/* Right Panel - Preview (30%) */}
+          {/* Right Panel - PDF Viewer */}
           <div className="lg:col-span-1 border border-input rounded-lg overflow-hidden bg-card">
             <div className="h-full flex flex-col">
-                <div className="border-b border-input px-4 py-3 bg-muted/50 sticky top-0 flex items-center justify-between gap-2">
-                  <h2 className="font-semibold text-sm">Resume Preview</h2>
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="template" className="text-xs text-muted-foreground">Template</label>
-                    <select
-                      id="template"
-                      className="text-sm rounded-md border px-2 py-1 bg-card"
-                      value={template}
-                      onChange={(e) => setTemplate(e.target.value)}
-                    >
-                      <option value="classic">Classic</option>
-                      <option value="modern">Modern</option>
-                      <option value="minimal">Minimal</option>
-                      <option value="bold">Bold</option>
-                      <option value="compact">Compact</option>
-                    </select>
-                  </div>
-                </div>
-                <ResumePreview data={resume} template={template} />
-              </div>
+              <PdfViewer 
+                blobUrl={pdfUrl} 
+                data={resume}
+                currentTemplate={template}
+                currentStyles={pdfStyles}
+                onTemplateChange={setTemplate}
+                onStylesChange={setPdfStyles}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -2,12 +2,29 @@
 
 import React, { useEffect, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
+import { StructuredResume } from '@/lib/schemas/resume'
+import type { PdfStyles } from '@/lib/resume-pdf'
+import { Settings } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+
 // Bundle the pdf.js worker so it is served with the app and version-matched.
 // Requires `pdfjs-dist` to be installed in the project.
 // import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry'
 
 interface PdfViewerProps {
   blobUrl: string | null
+  data?: StructuredResume | null
+  onTemplateChange?: (template: string) => void
+  onStylesChange?: (styles: PdfStyles) => void
+  currentTemplate?: string
+  currentStyles?: Partial<PdfStyles>
 }
 
 // Configure PDF.js worker to use pdfjs-dist bundler entry.
@@ -17,26 +34,32 @@ if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
     // Use a CDN-hosted worker that matches the pdfjs API version to avoid
     // file:// paths (browsers block loading local resources) and version
     // mismatches. `react-pdf` exposes `pdfjs.version`.
-    const pdfjsTyped = pdfjs as unknown as { version?: string }
-    const ver = pdfjsTyped.version ?? '5.4.296'
-    // Prefer serving the worker from our app's `public/` directory to avoid CORS
-    // and file:// issues. After installing `pdfjs-dist` (matching react-pdf)
-    // copy `node_modules/pdfjs-dist/build/pdf.worker.min.js` to `public/pdf.worker.min.js`.
-    // The worker will then be served same-origin at `/pdf.worker.min.js`.
     pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
-    // eslint-disable-next-line no-console
     console.warn('pdfjs worker not bundled; fallback to /pdf.worker.min.js. To bundle the worker, install `pdfjs-dist` and rebuild.')
   } catch {
     // If anything fails, react-pdf will try to use its bundled worker.
   }
 }
 
-export default function PdfViewer({ blobUrl }: PdfViewerProps) {
+export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, currentTemplate = 'classic', currentStyles }: PdfViewerProps) {
   const [numPages, setNumPages] = useState<number>(0)
   const [page, setPage] = useState<number>(1)
   const [scale, setScale] = useState<number>(1.0)
-    const [showThumbs, setShowThumbs] = useState<boolean>(true)
+  const [showThumbs, setShowThumbs] = useState<boolean>(false)
   const [fileData, setFileData] = useState<Blob | string | null>(null)
+  const [template, setTemplate] = useState(currentTemplate)
+  const [showStylesModal, setShowStylesModal] = useState(false)
+  const [customStyles, setCustomStyles] = useState<Partial<PdfStyles>>(currentStyles || {})
+
+  useEffect(() => {
+    setTemplate(currentTemplate)
+  }, [currentTemplate])
+
+  useEffect(() => {
+    if (currentStyles) {
+      setCustomStyles(currentStyles)
+    }
+  }, [currentStyles])
 
   useEffect(() => {
     // reset when blob changes
@@ -80,29 +103,20 @@ export default function PdfViewer({ blobUrl }: PdfViewerProps) {
     setPage(1)
   }
 
-  function download() {
-    if (!fileData) return
-    const url = fileData instanceof Blob ? URL.createObjectURL(fileData) : String(fileData)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'resume.pdf'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    if (fileData instanceof Blob) {
-      URL.revokeObjectURL(url)
-    }
+  function handleTemplateChange(newTemplate: string) {
+    setTemplate(newTemplate)
+    onTemplateChange?.(newTemplate)
   }
 
-  function printPdf() {
-    if (!blobUrl) return
-    const w = window.open(blobUrl, '_blank')
-    if (w) w.print()
+  function handleStyleUpdate(key: keyof PdfStyles, value: Record<string, number | string>) {
+    const updated = { ...customStyles, [key]: value }
+    setCustomStyles(updated)
+    onStylesChange?.(updated)
   }
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/50">
+      <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/50 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <button
             className="btn px-2 py-1 rounded border bg-white/80 text-sm"
@@ -134,6 +148,20 @@ export default function PdfViewer({ blobUrl }: PdfViewerProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          <label htmlFor="template" className="text-xs text-muted-foreground font-medium">Template:</label>
+          <select
+            id="template"
+            className="text-sm rounded-md border px-2 py-1 bg-card"
+            value={template}
+            onChange={(e) => handleTemplateChange(e.target.value)}
+          >
+            <option value="classic">Classic</option>
+            <option value="modern">Modern</option>
+            <option value="minimal">Minimal</option>
+            <option value="bold">Bold</option>
+            <option value="compact">Compact</option>
+          </select>
+
           <button
             className="px-2 py-1 rounded border bg-white/80 text-sm"
             onClick={() => setScale((s) => Math.max(0.5, s - 0.1))}
@@ -153,16 +181,88 @@ export default function PdfViewer({ blobUrl }: PdfViewerProps) {
           >
             {showThumbs ? 'Hide Thumbs' : 'Show Thumbs'}
           </button>
+
+          <Dialog open={showStylesModal} onOpenChange={setShowStylesModal}>
+            <DialogTrigger asChild>
+              <button className="px-2 py-1 rounded border bg-white/80 text-sm flex items-center gap-1">
+                <Settings size={14} />
+                Styles
+              </button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>PDF Styles Settings</DialogTitle>
+                <DialogDescription>
+                  Customize the appearance of your resume PDF
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Page Padding</label>
+                  <input
+                    type="number"
+                    value={(customStyles.page as Record<string, number | string>)?.padding || 20}
+                    onChange={(e) => handleStyleUpdate('page', { ...(customStyles.page as Record<string, number | string>), padding: parseInt(e.target.value) })}
+                    className="w-full px-2 py-1 rounded border text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Font Size</label>
+                  <input
+                    type="number"
+                    value={(customStyles.page as Record<string, number | string>)?.fontSize || 11}
+                    onChange={(e) => handleStyleUpdate('page', { ...(customStyles.page as Record<string, number | string>), fontSize: parseInt(e.target.value) })}
+                    className="w-full px-2 py-1 rounded border text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Name Font Size</label>
+                  <input
+                    type="number"
+                    value={(customStyles.name as Record<string, number | string>)?.fontSize || 18}
+                    onChange={(e) => handleStyleUpdate('name', { ...(customStyles.name as Record<string, number | string>), fontSize: parseInt(e.target.value) })}
+                    className="w-full px-2 py-1 rounded border text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Section Title Font Size</label>
+                  <input
+                    type="number"
+                    value={(customStyles.sectionTitle as Record<string, number | string>)?.fontSize || 12}
+                    onChange={(e) => handleStyleUpdate('sectionTitle', { ...(customStyles.sectionTitle as Record<string, number | string>), fontSize: parseInt(e.target.value) })}
+                    className="w-full px-2 py-1 rounded border text-sm"
+                  />
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <button
             className="px-2 py-1 rounded border bg-white/80 text-sm"
-            onClick={download}
+            onClick={() => {
+              if (!fileData) return
+              const url = fileData instanceof Blob ? URL.createObjectURL(fileData) : String(fileData)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = 'resume.pdf'
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              if (fileData instanceof Blob) {
+                URL.revokeObjectURL(url)
+              }
+            }}
             disabled={!blobUrl}
           >
             Download
           </button>
           <button
             className="px-2 py-1 rounded border bg-white/80 text-sm"
-            onClick={printPdf}
+            onClick={() => {
+              if (!blobUrl) return
+              const w = window.open(blobUrl, '_blank')
+              if (w) w.print()
+            }}
             disabled={!blobUrl}
           >
             Print
