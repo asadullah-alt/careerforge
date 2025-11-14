@@ -115,10 +115,10 @@ export default function ResumePage() {
           </Button>
         </div>
 
-        {/* Main Layout - Two Column */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+        {/* Main Layout - Two Column (50/50 on large screens) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
           {/* Left Panel - Forms (70%) */}
-          <div className="lg:col-span-2 overflow-y-auto">
+          <div className="lg:col-span-1 overflow-y-auto">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-5 mb-4">
                 <TabsTrigger value="personal">Personal</TabsTrigger>
