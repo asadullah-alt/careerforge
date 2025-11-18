@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('./models/user');
-const LinkedInProcessedResume = require('./models/profile');
+const LinkedInProcessedResume = require('./models/resume');
 const JobApplication = require('./models/jobApplication');
 const { raw } = require('body-parser');
 const { default: ollamaClient } = require('ollama');

@@ -58,9 +58,14 @@ const EducationSchema = new mongoose.Schema({
   description: { type: String, default: null },
 });
 
-// Structured resume schema
-const StructuredResumeSchema = new mongoose.Schema({
-  personal_data: { type: PersonalDataSchema, required: true },
+
+
+// ProcessedResume schema
+const ProcessedResumeSchema = new mongoose.Schema({
+  resume_id:{type:String,index:true},
+  user_id: {type:String },
+  title: { type: String, default: 'Untitled Resume' },
+   personal_data: { type: PersonalDataSchema, required: true },
   experiences: { type: [ExperienceSchema], default: [] },
   projects: { type: [ProjectSchema], default: [] },
   skills: { type: [SkillSchema], default: [] },
@@ -68,14 +73,6 @@ const StructuredResumeSchema = new mongoose.Schema({
   achievements: { type: [String], default: [] },
   education: { type: [EducationSchema], default: [] },
   extracted_keywords: { type: [String], default: [] },
-}, { _id: false });
-
-// ProcessedResume schema
-const ProcessedResumeSchema = new mongoose.Schema({
-  resume_id:{type:String,index:true},
-  user_id: {type:String },
-  title: { type: String, default: 'Untitled Resume' },
-  resume: { type: StructuredResumeSchema, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 }, {
