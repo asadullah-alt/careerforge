@@ -36,23 +36,22 @@ function extractSkills(html) {
 // Alternative approach using regex (works without DOM parser)
 function extractSkillsWithRegex(html) {
   const skills = new Set();
-  
+
   // Pattern to match skill names in the specific HTML structure
   const pattern = /<span aria-hidden="true"><!---->([^<]+?)<!----><\/span>/g;
-  
+
   let match;
   while ((match = pattern.exec(html)) !== null) {
     const skill = match[1].trim();
-    
+
     // Filter out endorsement text and empty strings
-    if (skill && 
-        !skill.includes('endorsement') && 
-        !skill.includes('Show more')) {
+    if (skill && !skill.includes('endorsement') && !skill.includes('Show more')) {
       skills.add(skill);
     }
   }
-  
-  return Array.from(skills);
+
+  // Return array of Skill objects compatible with ProcessedResume schema
+  return Array.from(skills).map(s => ({ category: null, skill_name: s }));
 }
 
 function cleanHTML(htmlContent, moduleTypeCV = 'default') {
@@ -163,11 +162,13 @@ function parseLinkedInProjects(html) {
   
   projectItems.each((i, item) => {
     const project = {
-      projectName: null,
-      startTime: null,
-      endTime: null,
+      project_name: null,
+      start_date: null,
+      end_date: null,
       associatedWith: null,
-      description: null
+      description: null,
+      technologies_used: [],
+      link: null
     };
     
     // Extract project name
@@ -182,7 +183,7 @@ function parseLinkedInProjects(html) {
           !text.includes('Mar ') && !text.includes('Apr ') && !text.includes('May ') &&
           !text.includes('Jun ') && !text.includes('Jul ') && !text.includes('Oct ') &&
           !text.includes('Nov ') && !text.includes('Dec ')) {
-        project.projectName = text;
+        project.project_name = text;
         foundName = true;
       }
     });
@@ -195,8 +196,10 @@ function parseLinkedInProjects(html) {
       const text = $(elem).text().trim();
       if (text.includes(' - ')) {
         const [start, end] = text.split(' - ').map(s => s.trim());
-        project.startTime = parseDate(start);
-        project.endTime = parseDate(end);
+        const sd = parseDate(start);
+        const ed = parseDate(end);
+        project.start_date = sd ? sd.toISOString().slice(0,10) : null;
+        project.end_date = ed ? ed.toISOString().slice(0,10) : null;
         foundDate = true;
       }
     });
@@ -218,18 +221,28 @@ function parseLinkedInProjects(html) {
     allSpans.each((j, elem) => {
       const text = $(elem).text().trim();
       // Description is typically a long paragraph
-      if (text.length > longestText.length && 
-          text.length > 50 && 
-          !text.startsWith('Associated with') &&
-          text !== project.projectName) {
+      if (text.length > longestText.length && text.length > 50 && !text.startsWith('Associated with') && text !== project.project_name) {
         longestText = text;
       }
     });
     if (longestText) {
       project.description = longestText;
+      // Attempt to extract technologies used by splitting on common separators
+      const techMatches = longestText.match(/\b(JavaScript|TypeScript|React|Node|Python|Django|Flask|MongoDB|Postgres|SQL|AWS|Docker|Kubernetes|C\+\+|Java|Go)\b/ig);
+      if (techMatches) {
+        project.technologies_used = Array.from(new Set(techMatches.map(t => t.trim())));
+      }
     }
     
-    projects.push(project);
+    projects.push({
+      project_name: project.project_name,
+      description: project.description,
+      technologies_used: project.technologies_used,
+      link: project.link,
+      start_date: project.start_date,
+      end_date: project.end_date,
+      associatedWith: project.associatedWith
+    });
   });
   
   return projects;
@@ -274,117 +287,79 @@ function parseLinkedInExperience(html) {
     const $item = $(item);
     
     const job = {
-      jobTitle: null,
-      startTime: null,
-      endTime: null,
-      address: null,
-      description: null,
-      companyName: null,
-      companyPicURL: null
+      job_title: null,
+      start_date: null,
+      end_date: null,
+      location: null,
+      description: [],
+      company: null,
+      companyPicURL: null,
+      technologies_used: []
     };
     
     // Extract all span elements with aria-hidden="true"
     const spans = $item.find('span[aria-hidden="true"]');
     const spanTexts = [];
-    
+
     spans.each((i, span) => {
       const text = $(span).text().trim();
-      if (text) {
-        spanTexts.push(text);
-      }
+      if (text) spanTexts.push(text);
     });
     
     // Extract job title (usually the first span that doesn't contain · or dates)
     if (spanTexts.length > 0) {
       const titleText = spanTexts[0];
       if (titleText && !titleText.includes('·') && !titleText.includes('-') && !titleText.match(/\d{4}/)) {
-        job.jobTitle = titleText;
+        job.job_title = titleText;
       }
     }
     
     // Extract company name (span that contains · and employment type)
-    const companySpan = spanTexts.find(text => 
-      text.includes('·') && 
-      (text.includes('Full-time') || 
-       text.includes('Part-time') || 
-       text.includes('Contract') ||
-       text.includes('Internship'))
-    );
-    
+    const companySpan = spanTexts.find(text => text.includes('·') && (text.includes('Full-time') || text.includes('Part-time') || text.includes('Contract') || text.includes('Internship')));
     if (companySpan) {
       const companyText = companySpan.split('·')[0].trim();
-      if (companyText) {
-        job.companyName = companyText;
-      }
+      if (companyText) job.company = companyText;
     }
     
     // Extract date range (start and end time)
-    const dateSpan = spanTexts.find(text => {
-      return text.includes('Present') || 
-             (text.match(/\d{4}/) && (text.includes('-') || text.includes('to')));
-    });
-    
+    const dateSpan = spanTexts.find(text => text.includes('Present') || (text.match(/\d{4}/) && (text.includes('-') || text.includes('to'))));
     if (dateSpan) {
       const dateMatch = dateSpan.match(/([\w\s]+\d{4})\s*[-–to]+\s*([\w\s]+\d{4}|Present)/i);
-      
       if (dateMatch) {
         const startStr = dateMatch[1].trim();
         const endStr = dateMatch[2].trim();
-        
-        // Parse start date
-        job.startTime = parseDateExp(startStr);
-        
-        // Parse end date
+        const sd = parseDateExp(startStr);
+        job.start_date = sd ? sd.toISOString().slice(0,10) : null;
         if (endStr.toLowerCase().includes('present')) {
-          job.endTime = 'present';
+          job.end_date = 'Present';
         } else {
-          job.endTime = endStr;
+          const ed = parseDateExp(endStr);
+          job.end_date = ed ? ed.toISOString().slice(0,10) : endStr;
         }
       }
     }
     
     // Extract location/address
-    const locationSpan = spanTexts.find(text => {
-      return !text.includes('·') && 
-             !text.includes('-') && 
-             !text.match(/\d{4}/) && 
-             text.length > 2 && 
-             text.length < 100 &&
-             text !== job.jobTitle &&
-             text !== job.companyName &&
-             (text.includes('Pakistan') || 
-              text.includes('Islamabad') || 
-              text.includes('On-site') || 
-              text.includes('Hybrid') || 
-              text.includes('Remote') ||
-              text.includes('Comsats'));
-    });
-    
-    if (locationSpan) {
-      job.address = locationSpan;
-    }
+    const locationSpan = spanTexts.find(text => !text.includes('·') && !text.includes('-') && !text.match(/\d{4}/) && text.length > 2 && text.length < 100 && text !== job.job_title && text !== job.company && (text.includes('Pakistan') || text.includes('Islamabad') || text.includes('On-site') || text.includes('Hybrid') || text.includes('Remote') || text.includes('Comsats')));
+    if (locationSpan) job.location = locationSpan;
     
     // Extract description (look for bullet point content)
     const descriptionElements = $item.find('div ul li div span[aria-hidden="true"]');
     const descriptions = [];
-    
     descriptionElements.each((i, el) => {
       const text = $(el).text().trim();
-      if (text && text.includes('-') && text.length > 50) {
-        descriptions.push(text);
-      }
+      if (text && text.length > 20) descriptions.push(text);
     });
-    
-    if (descriptions.length > 0) {
-      job.description = descriptions.join('\n');
-    }
+    if (descriptions.length > 0) job.description = descriptions;
     
     // Extract company picture URL
     const img = $item.find('img').first();
-    if (img.length && img.attr('src')) {
-      job.companyPicURL = img.attr('src');
-    }
+    if (img.length && img.attr('src')) job.companyPicURL = img.attr('src');
     
+    // Try extracting simple technology mentions from spanTexts or descriptions
+    const techMatches = spanTexts.join(' ').match(/\b(JavaScript|TypeScript|React|Node|Python|Django|Flask|MongoDB|Postgres|SQL|AWS|Docker|Kubernetes|C\+\+|Java|Go)\b/ig);
+    if (techMatches) job.technologies_used = Array.from(new Set(techMatches.map(t => t.trim())));
+
     jobs.push(job);
   });
   

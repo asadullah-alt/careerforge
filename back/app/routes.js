@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('./models/user');
-const Profile = require('./models/profile');
+const LinkedInProcessedResume = require('./models/profile');
 const JobApplication = require('./models/jobApplication');
 const { raw } = require('body-parser');
 const { default: ollamaClient } = require('ollama');
@@ -273,26 +273,52 @@ module.exports = function (app, passport) {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found.' });
          
-          const profileData = {
-          user: user._id,
-          profileUrl: payload.profileUrl || '',
-          name: payload.name || '',
-          headline: payload.headline || '',
-          location: payload.location || '',
-          about: payload.about || '',
-          education: cleanHTML(payload.details_education_main,"education") || [],
-          skills: cleanHTML(payload.details_skills_main,"skills") || '',
-          projects: cleanHTML(payload.details_projects_main,"projects")  || '', 
-          experience: cleanHTML(payload.details_experience_main,"experience") || [],
-        };
-        console.log("user found for profile save:", user._id);
-        // Upsert profile by user + profileUrl
-        Profile.findOneAndUpdate({ user: user._id }, profileData, { upsert: true, new: true, setDefaultsOnInsert: true }, (err2, savedProfile) => {
-          if (err2) {console.log(err2.message);
-            return res.status(500).json({ success: false, message: err2.message });}
-            console.log("Profile saved for user:", user._id);
-          return res.json({ success: true, message: 'Profile saved successfully.', profile: savedProfile });
-        });
+          // Build a ProcessedResume-compatible object from the incoming payload
+          const resumeId = payload.profileUrl || crypto.randomBytes(8).toString('hex');
+
+          let rawSkills = cleanHTML(payload.details_skills_main, "skills") || [];
+          if (!Array.isArray(rawSkills) && typeof rawSkills === 'string') {
+            rawSkills = rawSkills.split(',').map(s => s.trim()).filter(Boolean);
+          }
+
+          const skills = Array.isArray(rawSkills) ? rawSkills.map(s => ({ skill_name: s })) : [];
+
+          const processedResumeData = {
+            user_id: user._id.toString(),
+            resume_name: payload.name || 'LinkedIn Import',
+            resume_id: resumeId,
+
+            personal_data: {
+              first_name: (payload.name || '').split(' ')[0] || '',
+              last_name: (payload.name || '').split(' ').slice(1).join(' ') || null,
+              linkedin: payload.profileUrl || null,
+              location: { city: payload.location || null }
+            },
+
+            experiences: cleanHTML(payload.details_experience_main, "experience") || [],
+            projects: cleanHTML(payload.details_projects_main, "projects") || [],
+            education: cleanHTML(payload.details_education_main, "education") || [],
+            skills: skills,
+            extracted_keywords: [],
+            processed_at: new Date()
+          };
+
+          console.log("user found for profile save:", user._id);
+
+          // Upsert ProcessedResume record (based on user_id + resume_id)
+          LinkedInProcessedResume.findOneAndUpdate(
+            { user_id: user._id.toString(), resume_id: resumeId },
+            processedResumeData,
+            { upsert: true, new: true, setDefaultsOnInsert: true },
+            (err2, savedResume) => {
+              if (err2) {
+                console.error('Error saving processed resume:', err2);
+                return res.status(500).json({ success: false, message: err2.message });
+              }
+              console.log("Processed resume saved for user:", user._id);
+              return res.json({ success: true, message: 'Processed resume saved successfully.', resume: savedResume });
+            }
+          );
       });
     } catch (e) {
       console.log(e.message);
