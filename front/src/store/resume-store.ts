@@ -119,7 +119,7 @@ export const useResumeStore = create<ResumeState>()(
                 resume_id: resumeId || undefined,
               }
 
-              await fetch('https://careerback.datapsx.com/api/savePersonalData', {
+              await fetch('https://careerback.bhaikaamdo.com/api/savePersonalData', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
