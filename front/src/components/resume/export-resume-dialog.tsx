@@ -117,7 +117,7 @@ export function ExportResumeDialog({ open: controlledOpen, onOpenChange }: Expor
                 const url = URL.createObjectURL(blob)
                 const a = document.createElement('a')
                 a.href = url
-                a.download = `${resume.personal_data.firstName || 'resume'}_${resume.personal_data.lastName || ''}_Resume.pdf`
+                a.download = `${resume.personal_data.first_name || 'resume'}_${resume.personal_data.last_name || ''}_Resume.pdf`
                 document.body.appendChild(a)
                 a.click()
                 document.body.removeChild(a)

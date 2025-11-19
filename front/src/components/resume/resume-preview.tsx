@@ -94,7 +94,7 @@ export function ResumePreview({ data, pdfStyles, template = 'classic' }: ResumeP
       {/* Header */}
       <div className="border-b border-gray-300 dark:border-gray-700 pb-4">
         <h1 className="text-3xl font-bold">
-          {personal_data.firstName} {personal_data.lastName}
+          {personal_data.first_name} {personal_data.last_name}
         </h1>
         <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mt-2">
           {personal_data.email && <span>{personal_data.email}</span>}
