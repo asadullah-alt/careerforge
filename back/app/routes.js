@@ -332,6 +332,7 @@ module.exports = function (app, passport) {
       const payload = req.body || {};
       const { personal_data, resume_id } = payload;
       console.log(resume_id);
+      console.log(personal_data);
       if (!personal_data) {
         return res.status(400).json({ success: false, message: 'Missing personal_data in request body' });
       }
