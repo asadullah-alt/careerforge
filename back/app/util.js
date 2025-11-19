@@ -56,6 +56,12 @@ function extractSkillsWithRegex(html) {
 
 function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   // Default options - remove everything by default
+    if (htmlContent == null) {
+    if (moduleTypeCV === 'skills' || moduleTypeCV === 'projects' || moduleTypeCV === 'experience' || moduleTypeCV === 'education') {
+      return [];
+    }
+    return '';
+  }
   const defaultOptions = {
     removeScript: true,
     removeStyle: true,
