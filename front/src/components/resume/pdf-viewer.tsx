@@ -261,7 +261,10 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
           {fileData ? (
             <Document file={fileData} onLoadSuccess={onDocumentLoadSuccess} onLoadError={(err) => console.error('Document load error', err)} loading={<div className="text-center py-10">Loading PDF…</div>}>
               <div className="flex justify-center">
-                <Page renderTextLayer={false} pageNumber={page} scale={scale} />
+                <Page renderTextLayer={false}
+                 renderAnnotationLayer={false}
+        
+         pageNumber={page} scale={1.0} />
               </div>
             </Document>
           ) : (
