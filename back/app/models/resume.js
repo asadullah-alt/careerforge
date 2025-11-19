@@ -7,8 +7,8 @@ const LocationSchema = new mongoose.Schema({
 });
 
 const PersonalDataSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, default: null },
+  first_name: { type: String, required: true },
+  last_name: { type: String, default: null },
   email: { type: String, default: null },
   phone: { type: String, default: null },
   linkedin: { type: String, default: null },
@@ -17,27 +17,27 @@ const PersonalDataSchema = new mongoose.Schema({
 });
 
 const ExperienceSchema = new mongoose.Schema({
-  jobTitle: { type: String, required: true },
+  job_title: { type: String, required: true },
   company: { type: String, default: null },
   location: { type: String, default: null },
-  startDate: { type: String, required: true },
-  endDate: { type: String, required: true },
+  start_date: { type: String, required: true },
+  end_date: { type: String, required: true },
   description: { type: [String], default: [] },
-  technologiesUsed: { type: [String], default: [] },
+  technologies_used: { type: [String], default: [] },
 });
 
 const ProjectSchema = new mongoose.Schema({
-  projectName: { type: String, required: true },
+  project_name: { type: String, required: true },
   description: { type: String, default: null },
-  technologiesUsed: { type: [String], default: [] },
+  technologies_used: { type: [String], default: [] },
   link: { type: String, default: null },
-  startDate: { type: String, default: null },
-  endDate: { type: String, default: null },
+  start_date: { type: String, default: null },
+  end_date: { type: String, default: null },
 });
 
 const SkillSchema = new mongoose.Schema({
   category: { type: String, default: null },
-  skillName: { type: String, required: true },
+  skill_name: { type: String, required: true },
 });
 
 const ResearchWorkSchema = new mongoose.Schema({
@@ -51,9 +51,9 @@ const ResearchWorkSchema = new mongoose.Schema({
 const EducationSchema = new mongoose.Schema({
   institution: { type: String, default: null },
   degree: { type: String, default: null },
-  fieldOfStudy: { type: String, default: null },
-  startDate: { type: String, default: null },
-  endDate: { type: String, default: null },
+  field_of_study: { type: String, default: null },
+  start_date: { type: String, default: null },
+  end_date: { type: String, default: null },
   grade: { type: String, default: null },
   description: { type: String, default: null },
 });

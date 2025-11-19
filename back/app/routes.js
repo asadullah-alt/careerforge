@@ -349,7 +349,7 @@ module.exports = function (app, passport) {
         const filter = userIdFilter ? { resume_id: resume_id, user_id: userIdFilter } : { resume_id: resume_id };
         const update = { personal_data, updatedAt: new Date(), processed_at: new Date() };
         // Upsert so we create a minimal record if none exists
-        ProcessedResume.findOneAndUpdate(filter, { $set: update, $setOnInsert: { resume_id: resume_id, user_id: userIdFilter || undefined } }, { upsert: true, new: true, setDefaultsOnInsert: true }, (err, saved) => {
+        ProcessedResume.findOneAndUpdate(filter, { $set: update, $setOnInsert: { resume_id: resume_id} }, { upsert: true, new: true, setDefaultsOnInsert: true }, (err, saved) => {
           if (err) return res.status(500).json({ success: false, message: err.message });
           return res.json({ success: true, message: 'Personal data saved', resume: saved });
         });
