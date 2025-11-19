@@ -168,7 +168,7 @@ export default function ResumePage() {
     setIsSaving(true)
     try {
       const token = getCfAuthCookie()
-      const title = `${resume.personal_data?.firstName || ""} ${resume.personal_data?.lastName || ""}`.trim() || "Untitled Resume"
+      const title = `${resume.personal_data?.first_name || ""} ${resume.personal_data?.last_name || ""}`.trim() || "Untitled Resume"
       const response = await fetch("/api/resume/save", {
         method: "POST",
         headers: {

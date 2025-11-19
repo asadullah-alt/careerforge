@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     // If id provided, update existing entry
     const id = body.id || `resume_${Date.now()}`
-    const title = body.title || `${validatedResume.personal_data?.firstName || ''} ${validatedResume.personal_data?.lastName || ''}`.trim() || 'Untitled Resume'
+    const title = body.title || `${validatedResume.personal_data?.first_name || ''} ${validatedResume.personal_data?.last_name || ''}`.trim() || 'Untitled Resume'
 
     const existingIndex = list.findIndex((r) => r.id === id)
     const item: ResumeItem = { id, title, createdAt: existingIndex === -1 ? new Date().toISOString() : list[existingIndex].createdAt, updatedAt: new Date().toISOString(), data: validatedResume }
