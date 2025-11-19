@@ -39,37 +39,83 @@ export async function generateResumePDF(
   styles?: PdfStyles,
   template: string = 'classic'
 ): Promise<Blob> {
-  const templateStyles = getTemplateStyles(template)
-  const merged = { ...defaultPdfStyles, ...templateStyles, ...(styles || {}) } as Required<PdfStyles>
+  let PdfDocument: React.FC
 
-  const PdfDocument = () => (
+  switch (template) {
+    case 'modern': {
+      const ModernDoc = () => <ModernTemplate resume={resume} styles={styles} />
+      ModernDoc.displayName = 'ModernDocument'
+      PdfDocument = ModernDoc
+      break
+    }
+    case 'minimal': {
+      const MinimalDoc = () => <MinimalTemplate resume={resume} styles={styles} />
+      MinimalDoc.displayName = 'MinimalDocument'
+      PdfDocument = MinimalDoc
+      break
+    }
+    case 'bold': {
+      const BoldDoc = () => <BoldTemplate resume={resume} styles={styles} />
+      BoldDoc.displayName = 'BoldDocument'
+      PdfDocument = BoldDoc
+      break
+    }
+    case 'compact': {
+      const CompactDoc = () => <CompactTemplate resume={resume} styles={styles} />
+      CompactDoc.displayName = 'CompactDocument'
+      PdfDocument = CompactDoc
+      break
+    }
+    case 'classic':
+    default: {
+      const ClassicDoc = () => <ClassicTemplate resume={resume} styles={styles} />
+      ClassicDoc.displayName = 'ClassicDocument'
+      PdfDocument = ClassicDoc
+      break
+    }
+  }
+
+  const asPdf = pdf(<PdfDocument />)
+  const blob = await asPdf.toBlob()
+  return blob
+}
+
+// Classic Template - Traditional with left-aligned sections
+function ClassicTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
+  const pdfStyles = { ...defaultPdfStyles, ...styles } as Required<PdfStyles>
+
+  return (
     <Document>
-      <Page size="A4" style={merged.page}>
-        <View style={merged.header}>
-          <Text style={merged.name}>
+      <Page size="A4" style={pdfStyles.page}>
+        {/* Header */}
+        <View style={pdfStyles.header}>
+          <Text style={pdfStyles.name}>
             {resume.personal_data.firstName} {resume.personal_data.lastName}
           </Text>
-          {resume.personal_data.email && (
-            <Text style={merged.text}>
+            {resume.personal_data.email && (
+            <Text style={pdfStyles.text}>
               {resume.personal_data.email}
               {resume.personal_data.phone ? ` | ${resume.personal_data.phone}` : ''}
             </Text>
           )}
         </View>
 
+        {/* Professional Experience */}
         {resume.experiences && resume.experiences.length > 0 && (
           <View>
-            <Text style={merged.sectionTitle}>Professional Experience</Text>
+            <Text style={pdfStyles.sectionTitle}>PROFESSIONAL EXPERIENCE</Text>
             {resume.experiences.map((exp: Experience, i: number) => (
-              <View key={i} style={{ marginBottom: 6 }}>
-                <View style={merged.row}>
-                  <Text style={merged.entryTitle}>{exp.job_title}</Text>
-                  <Text style={merged.text}>{exp.start_date} - {exp.end_date}</Text>
+              <View key={i} style={{ marginBottom: 8 }}>
+                <View style={pdfStyles.row}>
+                  <Text style={pdfStyles.entryTitle}>{exp.job_title}</Text>
+                  <Text style={pdfStyles.text}>{exp.start_date} - {exp.end_date}</Text>
                 </View>
-                {exp.company && <Text style={merged.text}>{exp.company}{exp.location ? ` • ${exp.location}` : ''}</Text>}
+                {exp.company && <Text style={pdfStyles.text}>{exp.company}{exp.location ? ` • ${exp.location}` : ''}</Text>}
                 {exp.description && exp.description.length > 0 && (
-                  <View>
-                    {exp.description.map((d: string, idx: number) => (<Text key={idx} style={merged.text}>• {d}</Text>))}
+                  <View style={{ marginTop: 3 }}>
+                    {exp.description.map((d: string, idx: number) => (
+                      <Text key={idx} style={pdfStyles.text}>• {d}</Text>
+                    ))}
                   </View>
                 )}
               </View>
@@ -77,25 +123,37 @@ export async function generateResumePDF(
           </View>
         )}
 
-        {resume.projects && resume.projects.length > 0 && (
+        {/* Education */}
+        {resume.education && resume.education.length > 0 && (
           <View>
-            <Text style={merged.sectionTitle}>Projects</Text>
-            {resume.projects.map((p: Project, i: number) => (
+            <Text style={pdfStyles.sectionTitle}>EDUCATION</Text>
+            {resume.education.map((e: Education, i: number) => (
               <View key={i} style={{ marginBottom: 6 }}>
-                <Text style={merged.entryTitle}>{p.project_name}</Text>
-                {p.description && <Text style={merged.text}>{p.description}</Text>}
+                <Text style={pdfStyles.entryTitle}>{e.degree}</Text>
+                <Text style={pdfStyles.text}>{e.institution}</Text>
               </View>
             ))}
           </View>
         )}
 
-        {resume.education && resume.education.length > 0 && (
+        {/* Skills */}
+        {resume.skills && resume.skills.length > 0 && (
           <View>
-            <Text style={merged.sectionTitle}>Education</Text>
-            {resume.education.map((e: Education, i: number) => (
+            <Text style={pdfStyles.sectionTitle}>SKILLS</Text>
+            <Text style={pdfStyles.text}>
+              {resume.skills.map((s: { skill_name: string }) => s.skill_name).join(', ')}
+            </Text>
+          </View>
+        )}
+
+        {/* Projects */}
+        {resume.projects && resume.projects.length > 0 && (
+          <View>
+            <Text style={pdfStyles.sectionTitle}>PROJECTS</Text>
+            {resume.projects.map((p: Project, i: number) => (
               <View key={i} style={{ marginBottom: 6 }}>
-                <Text style={merged.entryTitle}>{e.degree}</Text>
-                <Text style={merged.text}>{e.institution}</Text>
+                <Text style={pdfStyles.entryTitle}>{p.project_name}</Text>
+                {p.description && <Text style={pdfStyles.text}>{p.description}</Text>}
               </View>
             ))}
           </View>
@@ -103,54 +161,331 @@ export async function generateResumePDF(
       </Page>
     </Document>
   )
+}
+ClassicTemplate.displayName = 'ClassicTemplate'
 
-  const asPdf = pdf(<PdfDocument />)
-  const blob = await asPdf.toBlob()
-  return blob
+// Modern Template - Sidebar layout with color accents
+function ModernTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
+  const accentColor = '#2563eb'
+
+  return (
+    <Document>
+      <Page size="A4" style={{ padding: 0 }}>
+        <View style={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
+          {/* Sidebar */}
+          <View style={{ width: '30%', backgroundColor: accentColor, padding: 20, color: '#fff' }}>
+            {/* Name in sidebar */}
+            <Text style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 15, color: '#fff' }}>
+              {resume.personal_data.firstName} {resume.personal_data.lastName}
+            </Text>
+
+            {/* Contact Info */}
+            {resume.personal_data.email && (
+              <View style={{ marginBottom: 15 }}>
+                <Text style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 2, color: '#fff' }}>EMAIL</Text>
+                <Text style={{ fontSize: 8, color: '#fff' }}>{resume.personal_data.email}</Text>
+              </View>
+            )}
+            {resume.personal_data.phone && (
+              <View style={{ marginBottom: 15 }}>
+                <Text style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 2, color: '#fff' }}>PHONE</Text>
+                <Text style={{ fontSize: 8, color: '#fff' }}>{resume.personal_data.phone}</Text>
+              </View>
+            )}
+            {resume.personal_data.location && (
+              <View style={{ marginBottom: 15 }}>
+                <Text style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 2, color: '#fff' }}>LOCATION</Text>
+                <Text style={{ fontSize: 8, color: '#fff' }}>
+                  {resume.personal_data.location.city}
+                  {resume.personal_data.location.country ? `, ${resume.personal_data.location.country}` : ''}
+                </Text>
+              </View>
+            )}
+
+            {/* Skills in sidebar */}
+            {resume.skills && resume.skills.length > 0 && (
+              <View>
+                <Text style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 8, color: '#fff' }}>SKILLS</Text>
+                {resume.skills.map((s: { skill_name: string }, i: number) => (
+                  <Text key={i} style={{ fontSize: 8, marginBottom: 3, color: '#fff' }}>
+                    • {s.skill_name}
+                  </Text>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {/* Main Content */}
+          <View style={{ width: '70%', padding: 20, fontSize: 10 }}>
+            {/* Experience */}
+            {resume.experiences && resume.experiences.length > 0 && (
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ fontSize: 12, fontWeight: 'bold', borderBottomWidth: 1, borderBottomColor: accentColor, paddingBottom: 4, marginBottom: 8 }}>
+                  EXPERIENCE
+                </Text>
+                {resume.experiences.map((exp: Experience, i: number) => (
+                  <View key={i} style={{ marginBottom: 8 }}>
+                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={{ fontWeight: 'bold', fontSize: 10 }}>{exp.job_title}</Text>
+                      <Text style={{ fontSize: 9, color: '#666' }}>{exp.start_date} - {exp.end_date}</Text>
+                    </View>
+                    {exp.company && <Text style={{ fontSize: 9, color: '#666', marginBottom: 2 }}>{exp.company}{exp.location ? ` • ${exp.location}` : ''}</Text>}
+                    {exp.description && exp.description.length > 0 && (
+                      <View style={{ marginTop: 2 }}>
+                        {exp.description.slice(0, 2).map((d: string, idx: number) => (
+                          <Text key={idx} style={{ fontSize: 9, marginBottom: 1 }}>• {d}</Text>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Education */}
+            {resume.education && resume.education.length > 0 && (
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ fontSize: 12, fontWeight: 'bold', borderBottomWidth: 1, borderBottomColor: accentColor, paddingBottom: 4, marginBottom: 8 }}>
+                  EDUCATION
+                </Text>
+                {resume.education.map((e: Education, i: number) => (
+                  <View key={i} style={{ marginBottom: 6 }}>
+                    <Text style={{ fontWeight: 'bold', fontSize: 10 }}>{e.degree}</Text>
+                    <Text style={{ fontSize: 9, color: '#666' }}>{e.institution}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Projects */}
+            {resume.projects && resume.projects.length > 0 && (
+              <View>
+                <Text style={{ fontSize: 12, fontWeight: 'bold', borderBottomWidth: 1, borderBottomColor: accentColor, paddingBottom: 4, marginBottom: 8 }}>
+                  PROJECTS
+                </Text>
+                {resume.projects.slice(0, 2).map((p: Project, i: number) => (
+                  <View key={i} style={{ marginBottom: 6 }}>
+                    <Text style={{ fontWeight: 'bold', fontSize: 10 }}>{p.project_name}</Text>
+                    {p.description && <Text style={{ fontSize: 9 }}>{p.description.substring(0, 100)}...</Text>}
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        </View>
+      </Page>
+    </Document>
+  )
 }
 
-function getTemplateStyles(template: string): Partial<PdfStyles> {
-  switch (template) {
-    case 'modern':
-      return {
-        page: { padding: 24, fontSize: 11, fontFamily: 'Helvetica' },
-        header: { marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between' },
-        name: { fontSize: 20, fontWeight: '700', marginBottom: 2 },
-        sectionTitle: { fontSize: 12, fontWeight: '700', marginTop: 10, marginBottom: 6 },
-      }
-    case 'minimal':
-      return {
-        page: { padding: 18, fontSize: 10, fontFamily: 'Helvetica' },
-        header: { marginBottom: 6 },
-        name: { fontSize: 16, fontWeight: '600', marginBottom: 2 },
-        sectionTitle: { fontSize: 11, fontWeight: '600', marginTop: 8, marginBottom: 4 },
-        text: { fontSize: 9, marginBottom: 1 },
-      }
-    case 'bold':
-      return {
-        page: { padding: 22, fontSize: 11, fontFamily: 'Helvetica' },
-        header: { marginBottom: 10 },
-        name: { fontSize: 22, fontWeight: '900', marginBottom: 4 },
-        sectionTitle: { fontSize: 13, fontWeight: '800', marginTop: 10, marginBottom: 6 },
-      }
-    case 'compact':
-      return {
-        page: { padding: 12, fontSize: 9, fontFamily: 'Helvetica' },
-        header: { marginBottom: 6 },
-        name: { fontSize: 14, fontWeight: '700', marginBottom: 2 },
-        sectionTitle: { fontSize: 10, fontWeight: '700', marginTop: 6, marginBottom: 3 },
-        row: { flexDirection: 'row', justifyContent: 'space-between' },
-      }
-    case 'classic':
-    default:
-      return {
-        page: { padding: 20, fontSize: 11, fontFamily: 'Helvetica' },
-        header: { marginBottom: 8 },
-        name: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-        sectionTitle: { fontSize: 12, fontWeight: 'bold', marginTop: 8, marginBottom: 4 },
-      }
-  }
+// Minimal Template - Clean, spacious, minimal decorations
+function MinimalTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
+  return (
+    <Document>
+      <Page size="A4" style={{ padding: 24, fontSize: 10, fontFamily: 'Helvetica' }}>
+        {/* Centered Header */}
+        <View style={{ textAlign: 'center', marginBottom: 20 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 4 }}>
+            {resume.personal_data.firstName} {resume.personal_data.lastName}
+          </Text>
+          {resume.personal_data.email && (
+            <Text style={{ fontSize: 9 }}>
+              {resume.personal_data.email}
+              {resume.personal_data.phone ? ` • ${resume.personal_data.phone}` : ''}
+              {resume.personal_data.location?.city ? ` • ${resume.personal_data.location.city}` : ''}
+            </Text>
+          )}
+        </View>
+
+        {/* Experience - Simplified */}
+        {resume.experiences && resume.experiences.length > 0 && (
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 8, letterSpacing: 1 }}>EXPERIENCE</Text>
+            {resume.experiences.slice(0, 3).map((exp: Experience, i: number) => (
+              <View key={i} style={{ marginBottom: 10 }}>
+                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Text style={{ fontWeight: 'bold' }}>{exp.job_title}</Text>
+                  <Text style={{ fontSize: 9 }}>{exp.start_date}</Text>
+                </View>
+                <Text style={{ fontSize: 9, color: '#555' }}>{exp.company}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Education */}
+        {resume.education && resume.education.length > 0 && (
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 8, letterSpacing: 1 }}>EDUCATION</Text>
+            {resume.education.map((e: Education, i: number) => (
+              <View key={i} style={{ marginBottom: 6 }}>
+                <Text style={{ fontWeight: 'bold' }}>{e.degree}</Text>
+                <Text style={{ fontSize: 9, color: '#555' }}>{e.institution}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Skills */}
+        {resume.skills && resume.skills.length > 0 && (
+          <View>
+            <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 8, letterSpacing: 1 }}>SKILLS</Text>
+            <Text style={{ fontSize: 9, lineHeight: 1.6 }}>
+              {resume.skills.map((s: { skill_name: string }) => s.skill_name).join(' • ')}
+            </Text>
+          </View>
+        )}
+      </Page>
+    </Document>
+  )
 }
+MinimalTemplate.displayName = 'MinimalTemplate'
+
+// Bold Template - High contrast, strong typography
+function BoldTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
+  const darkColor = '#1a1a1a'
+
+  return (
+    <Document>
+      <Page size="A4" style={{ padding: 28, fontSize: 11, fontFamily: 'Helvetica' }}>
+        {/* Large Name Header */}
+        <View style={{ marginBottom: 24, borderBottomWidth: 3, borderBottomColor: darkColor, paddingBottom: 12 }}>
+          <Text style={{ fontSize: 28, fontWeight: '900', color: darkColor, lineHeight: 1.2 }}>
+            {resume.personal_data.firstName}
+          </Text>
+          <Text style={{ fontSize: 28, fontWeight: '900', color: darkColor }}>
+            {resume.personal_data.lastName}
+          </Text>
+          {resume.personal_data.email && (
+            <Text style={{ fontSize: 10, marginTop: 8, color: '#555' }}>
+              {resume.personal_data.email} | {resume.personal_data.phone || 'No phone'}
+            </Text>
+          )}
+        </View>
+
+        {/* Professional Summary - Optional intro */}
+        {resume.experiences && resume.experiences.length > 0 && (
+          <View style={{ marginBottom: 20 }}>
+            <View style={{ backgroundColor: darkColor, padding: 12, marginBottom: 12 }}>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>PROFESSIONAL EXPERIENCE</Text>
+            </View>
+            {resume.experiences.map((exp: Experience, i: number) => (
+              <View key={i} style={{ marginBottom: 14 }}>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: darkColor }}>{exp.job_title}</Text>
+                <Text style={{ fontSize: 11, color: '#333', marginBottom: 4 }}>
+                  {exp.company} — {exp.start_date} to {exp.end_date}
+                </Text>
+                {exp.description && exp.description.length > 0 && (
+                  <View style={{ marginTop: 4 }}>
+                    {exp.description.slice(0, 3).map((d: string, idx: number) => (
+                      <Text key={idx} style={{ fontSize: 10, marginBottom: 2 }}>▸ {d}</Text>
+                    ))}
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Education */}
+        {resume.education && resume.education.length > 0 && (
+          <View style={{ marginBottom: 20 }}>
+            <View style={{ backgroundColor: darkColor, padding: 12, marginBottom: 12 }}>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>EDUCATION</Text>
+            </View>
+            {resume.education.map((e: Education, i: number) => (
+              <View key={i} style={{ marginBottom: 8 }}>
+                <Text style={{ fontSize: 11, fontWeight: '700' }}>{e.degree}</Text>
+                <Text style={{ fontSize: 10, color: '#555' }}>{e.institution}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Skills */}
+        {resume.skills && resume.skills.length > 0 && (
+          <View>
+            <View style={{ backgroundColor: darkColor, padding: 12, marginBottom: 12 }}>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>TECHNICAL SKILLS</Text>
+            </View>
+            <Text style={{ fontSize: 10, lineHeight: 1.8 }}>
+              {resume.skills.map((s: { skill_name: string }) => s.skill_name).join(' • ')}
+            </Text>
+          </View>
+        )}
+      </Page>
+    </Document>
+  )
+}
+BoldTemplate.displayName = 'BoldTemplate'
+
+// Compact Template - Maximum content density, single column
+function CompactTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
+  return (
+    <Document>
+      <Page size="A4" style={{ padding: 14, fontSize: 9, fontFamily: 'Helvetica' }}>
+        {/* Compact Header */}
+        <View style={{ marginBottom: 6, paddingBottom: 4, borderBottomWidth: 1, borderBottomColor: '#000' }}>
+          <Text style={{ fontSize: 13, fontWeight: 'bold' }}>
+            {resume.personal_data.firstName} {resume.personal_data.lastName}
+          </Text>
+          {resume.personal_data.email && (
+            <Text style={{ fontSize: 8 }}>
+              {resume.personal_data.email} • {resume.personal_data.phone || ''} • {resume.personal_data.location?.city || ''}
+            </Text>
+          )}
+        </View>
+
+        {/* Experience - Dense */}
+        {resume.experiences && resume.experiences.length > 0 && (
+          <View style={{ marginBottom: 6 }}>
+            <Text style={{ fontSize: 10, fontWeight: 'bold', marginBottom: 3 }}>EXPERIENCE</Text>
+            {resume.experiences.map((exp: Experience, i: number) => (
+              <View key={i} style={{ marginBottom: 4, paddingLeft: 8 }}>
+                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Text style={{ fontWeight: 'bold', fontSize: 8 }}>{exp.job_title}</Text>
+                  <Text style={{ fontSize: 8 }}>{exp.start_date} - {exp.end_date}</Text>
+                </View>
+                <Text style={{ fontSize: 8, color: '#555' }}>{exp.company}{exp.location ? `, ${exp.location}` : ''}</Text>
+                {exp.description && exp.description.length > 0 && (
+                  <View>
+                    {exp.description.slice(0, 1).map((d: string, idx: number) => (
+                      <Text key={idx} style={{ fontSize: 7.5, marginTop: 1 }}>• {d}</Text>
+                    ))}
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Education - Compact */}
+        {resume.education && resume.education.length > 0 && (
+          <View style={{ marginBottom: 6 }}>
+            <Text style={{ fontSize: 10, fontWeight: 'bold', marginBottom: 3 }}>EDUCATION</Text>
+            {resume.education.slice(0, 2).map((e: Education, i: number) => (
+              <View key={i} style={{ marginBottom: 2, paddingLeft: 8 }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 8 }}>{e.degree}</Text>
+                <Text style={{ fontSize: 8, color: '#555' }}>{e.institution}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Skills - Tags style */}
+        {resume.skills && resume.skills.length > 0 && (
+          <View>
+            <Text style={{ fontSize: 10, fontWeight: 'bold', marginBottom: 3 }}>SKILLS</Text>
+            <Text style={{ fontSize: 8, lineHeight: 1.4, paddingLeft: 8 }}>
+              {resume.skills.map((s: { skill_name: string }) => s.skill_name).join(' • ')}
+            </Text>
+          </View>
+        )}
+      </Page>
+    </Document>
+  )
+}
+CompactTemplate.displayName = 'CompactTemplate'
 
 /**
  * Alternative: Generate a downloadable HTML string that can be printed to PDF

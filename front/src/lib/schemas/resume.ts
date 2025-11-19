@@ -80,6 +80,7 @@ export type Education = z.infer<typeof EducationSchema>;
 
 // Main Structured Resume Schema
 export const StructuredResumeSchema = z.object({
+  displayName: z.string().optional().nullable(),
   personal_data: PersonalDataSchema,
   experiences: z.array(ExperienceSchema).default([]),
   projects: z.array(ProjectSchema).default([]),

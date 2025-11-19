@@ -5,6 +5,7 @@ import { Document, Page, pdfjs } from 'react-pdf'
 import { StructuredResume } from '@/lib/schemas/resume'
 import type { PdfStyles } from '@/lib/resume-pdf'
 import { Settings } from 'lucide-react'
+import { useTheme } from '@/context/theme-context'
 import {
   Dialog,
   DialogContent,
@@ -39,6 +40,10 @@ if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
 }
 
 export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, currentTemplate = 'classic', currentStyles }: PdfViewerProps) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const btnClass = isDark ? 'px-2 py-1 rounded border bg-black text-white text-sm' : 'px-2 py-1 rounded border bg-white/80 text-sm'
+  
   const [numPages, setNumPages] = useState<number>(0)
   const [page, setPage] = useState<number>(1)
   const [scale, setScale] = useState<number>(1.0)
@@ -137,20 +142,20 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
           </select>
 
           <button
-            className="px-2 py-1 rounded border bg-white/80 text-sm"
+            className={btnClass}
             onClick={() => setScale((s) => Math.max(0.5, s - 0.1))}
           >
             −
           </button>
           <span className="text-sm">{Math.round(scale * 100)}%</span>
           <button
-            className="px-2 py-1 rounded border bg-white/80 text-sm"
+            className={btnClass}
             onClick={() => setScale((s) => Math.min(2.0, s + 0.1))}
           >
             +
           </button>
           <button
-            className="px-2 py-1 rounded border bg-white/80 text-sm"
+            className={btnClass}
             onClick={() => setShowThumbs((t) => !t)}
           >
             {showThumbs ? 'Hide Thumbs' : 'Show Thumbs'}
@@ -158,7 +163,7 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
 
           <Dialog open={showStylesModal} onOpenChange={setShowStylesModal}>
             <DialogTrigger asChild>
-              <button className="px-2 py-1 rounded border bg-white/80 text-sm flex items-center gap-1">
+              <button className={`${btnClass} flex items-center gap-1`}>
                 <Settings size={14} />
                 Styles
               </button>
@@ -212,7 +217,7 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
           </Dialog>
 
           <button
-            className="px-2 py-1 rounded border bg-white/80 text-sm"
+            className={btnClass}
             onClick={() => {
               if (!fileData) return
               const url = fileData instanceof Blob ? URL.createObjectURL(fileData) : String(fileData)
@@ -231,7 +236,7 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
             Download
           </button>
           <button
-            className="px-2 py-1 rounded border bg-white/80 text-sm"
+            className={btnClass}
             onClick={() => {
               if (!blobUrl) return
               const w = window.open(blobUrl, '_blank')
@@ -275,14 +280,14 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
 
       <div className="flex items-center justify-center gap-2 px-3 py-2 border-t bg-muted/50">
         <button
-          className="btn px-2 py-1 rounded border bg-white/80 text-sm"
+          className={`btn ${btnClass}`}
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page <= 1}
         >
           Prev
         </button>
         <button
-          className="btn px-2 py-1 rounded border bg-white/80 text-sm"
+          className={`btn ${btnClass}`}
           onClick={() => setPage((p) => Math.min(numPages || 1, p + 1))}
           disabled={page >= numPages}
         >
