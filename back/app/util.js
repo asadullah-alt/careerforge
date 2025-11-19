@@ -6,31 +6,33 @@ const cheerio = require('cheerio');
  * @returns {Array<string>} - Array of unique skills
  */
 function extractSkills(html) {
-  const skills = [];
+  const skills = new Set(); // Use a Set to automatically handle duplicates
   const $ = cheerio.load(html);
-  
-  // Find all list items in the skills section
-  const listItems = $('li[id*="profilePagedListComponent"]');
-  
-  listItems.each((i, item) => {
-    // Look for span elements that contain skill names
-    const spans = $(item).find('span[aria-hidden="true"]');
-    
-    spans.each((j, span) => {
-      const text = $(span).text().trim();
+
+  // 1. Target the containers that specifically look like skills
+  // The HTML shows a pattern: componentkey="com.linkedin.sdui.profile.skill..."
+  const skillContainers = $('div[componentkey*="com.linkedin.sdui.profile.skill"]');
+
+  skillContainers.each((i, item) => {
+    // 2. Inside these containers, the text is located in a <p> tag
+    const pTag = $(item).find('p');
+    const text = pTag.text().trim();
+
+    // 3. Validate the text
+    if (text && 
+        !text.includes('endorsement') && 
+        !text.includes('Show more') &&
+        text.length > 0) {
       
-      // Filter out empty strings, endorsement text, and other non-skill content
-      if (text && 
-          !text.includes('endorsement') && 
-          !text.includes('Show more') &&
-          text.length > 0) {
-        skills.push({ category: null, skill_name: text });
-      }
-    });
+      skills.add(text);
+    }
   });
-  
-  // Remove duplicates and return
-  return [...new Set(skills)];
+
+  // 4. Convert Set back to the array format you wanted
+  return Array.from(skills).map(skill => ({ 
+      category: null, 
+      skill_name: skill 
+  }));
 }
 
 // Alternative approach using regex (works without DOM parser)
