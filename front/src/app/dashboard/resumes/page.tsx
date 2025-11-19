@@ -19,6 +19,19 @@ import { Input } from "@/components/ui/input"
 import { StructuredResume } from '@/lib/schemas/resume'
 import { getCfAuthCookie } from "@/utils/cookie"
 
+// Add button blink animation styles
+const buttonAnimationStyle = `
+  @keyframes double-blink {
+    0%, 100% { opacity: 1; }
+    25% { opacity: 0.3; }
+    50% { opacity: 1; }
+    75% { opacity: 0.3; }
+  }
+  .animate-double-blink {
+    animation: double-blink 0.6s ease-in-out;
+  }
+`
+
 type ResumeListItem = {
   _id: string
   title: string
@@ -39,6 +52,22 @@ export default function ResumesListPage() {
   const [renameId, setRenameId] = useState<string | null>(null)
   const [renameTitle, setRenameTitle] = useState("")
   const [token, setToken] = useState<string | null>(null)
+  const [blinkingButton, setBlinkingButton] = useState<string | null>(null)
+
+  // Inject animation styles
+  useEffect(() => {
+    const style = document.createElement('style')
+    style.textContent = buttonAnimationStyle
+    document.head.appendChild(style)
+    return () => {
+      document.head.removeChild(style)
+    }
+  }, [])
+
+  const handleButtonClick = (buttonId: string) => {
+    setBlinkingButton(buttonId)
+    setTimeout(() => setBlinkingButton(null), 600)
+  }
 
   useEffect(() => {
     // Get auth token
@@ -213,7 +242,7 @@ export default function ResumesListPage() {
                   </div>
 
                   <div className="mt-3 flex gap-2">
-                    <Button className={'cursor-pointer'} onClick={() => handleEdit(r)}>Open</Button>
+                    <Button className={`cursor-pointer ${blinkingButton === r._id ? 'animate-double-blink' : ''}`} onClick={() => { handleButtonClick(r._id); handleEdit(r) }}>Open</Button>
                     <Button className={'cursor-pointer'} variant="outline" onClick={() => openRenameDialog(r)}>Rename</Button>
                   </div>
                 </div>

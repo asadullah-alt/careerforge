@@ -221,7 +221,7 @@ const SignIn2 = () => {
           <button
             type="button"
             onClick={() => (window.location.href = 'https://careerback.bhaikaamdo.com/auth/google')}
-            className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow"
+            className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow cursor-pointer"
           >
             <Image
               src="/google-color.svg"
@@ -231,7 +231,7 @@ const SignIn2 = () => {
               height={24}
             />
           </button>
-          <button className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow">
+          <button className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow cursor-pointer">
             <Image
               src="/facebook.svg"
               alt="Facebook"
@@ -240,7 +240,7 @@ const SignIn2 = () => {
               height={24}
             />
           </button>
-          <button className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow">
+          <button className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow cursor-pointer">
             <Image
               src="/apple-173.svg"
               alt="Apple"
