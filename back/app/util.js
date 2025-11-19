@@ -137,6 +137,7 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   }
 
   if (moduleTypeCV === 'skills') {
+    console.log(cleaned);
     const skillsArray = extractSkills(cleaned);
     return skillsArray;
   }
