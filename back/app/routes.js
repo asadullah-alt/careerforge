@@ -263,7 +263,7 @@ module.exports = function (app, passport) {
       const payload = req.body || {};
       const token = payload.token || (req.headers && (req.headers.authorization || req.headers.Authorization) ? (req.headers.authorization || req.headers.Authorization).replace(/^Bearer\s+/i, '') : null);
       
-      console.log(payload);
+     
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token in request body or Authorization header.' });
       }
@@ -277,6 +277,7 @@ module.exports = function (app, passport) {
           const resumeId = payload.profileUrl || crypto.randomBytes(8).toString('hex');
 
           let rawSkills = cleanHTML(payload.details_skills_main, "skills") || [];
+          console.log(rawSkills)
           if (!Array.isArray(rawSkills) && typeof rawSkills === 'string') {
             rawSkills = rawSkills.split(',').map(s => s.trim()).filter(Boolean);
           }
