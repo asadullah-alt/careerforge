@@ -90,7 +90,7 @@ function ClassicTemplate({ resume, styles }: { resume: StructuredResume; styles?
         {/* Header */}
         <View style={pdfStyles.header}>
           <Text style={pdfStyles.name}>
-            {resume.personal_data.firstName} {resume.personal_data.lastName}
+            {resume.personal_data.first_name} {resume.personal_data.last_name}
           </Text>
             {resume.personal_data.email && (
             <Text style={pdfStyles.text}>
@@ -293,7 +293,7 @@ function NovoTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
             {/* Left: Name and Summary */}
             <View style={{ flex: 2, paddingRight: 20 }}>
               <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                {resume.personal_data.firstName} {resume.personal_data.lastName}
+                {resume.personal_data.first_name} {resume.personal_data.last_name}
               </Text>
               {resume.achievements && resume.achievements.length > 0 && (
                 <Text style={{ fontSize: 11, color: '#666', textAlign: 'justify', lineHeight: 1.4 }}>
@@ -452,10 +452,10 @@ function BoldTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
         {/* Large Name Header */}
         <View style={{ marginBottom: 24, borderBottomWidth: 3, borderBottomColor: darkColor, paddingBottom: 12 }}>
           <Text style={{ fontSize: 28, fontWeight: '900', color: darkColor, lineHeight: 1.2 }}>
-            {resume.personal_data.firstName}
+            {resume.personal_data.first_name}
           </Text>
           <Text style={{ fontSize: 28, fontWeight: '900', color: darkColor }}>
-            {resume.personal_data.lastName}
+            {resume.personal_data.last_name}
           </Text>
           {resume.personal_data.email && (
             <Text style={{ fontSize: 10, marginTop: 8, color: '#555' }}>
@@ -528,7 +528,7 @@ function ExecutiveTemplate({ resume, styles }: { resume: StructuredResume; style
         {/* Compact Header */}
         <View style={{ marginBottom: 12, paddingBottom: 8, borderBottomWidth: 2, borderBottomColor: '#2563eb' }}>
           <Text style={{ fontSize: 22, fontWeight: 'bold', marginBottom: 4 }}>
-            {resume.personal_data.firstName} {resume.personal_data.lastName}
+            {resume.personal_data.first_name} {resume.personal_data.last_name}
           </Text>
           <View style={{ display: 'flex', flexDirection: 'row', gap: 15, fontSize: 9 }}>
             {resume.personal_data.email && <Text>{resume.personal_data.email}</Text>}
@@ -657,7 +657,7 @@ export function generateResumeHTML(resume: StructuredResume): string {
     <html>
     <head>
       <meta charset="UTF-8">
-      <title>${personal_data.firstName} ${personal_data.lastName} - Resume</title>
+      <title>${personal_data.first_name} ${personal_data.last_name} - Resume</title>
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -742,7 +742,7 @@ export function generateResumeHTML(resume: StructuredResume): string {
     </head>
     <body>
       <div class="header">
-        <h1>${personal_data.firstName} ${personal_data.lastName}</h1>
+        <h1>${personal_data.first_name} ${personal_data.last_name}</h1>
         <div class="contact-info">
           ${personal_data.email ? `${personal_data.email}` : ''}
           ${personal_data.phone ? `| ${personal_data.phone}` : ''}
@@ -829,7 +829,7 @@ export function downloadResumeAsHTML(resume: StructuredResume) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${resume.personal_data.firstName}_${resume.personal_data.lastName}_Resume.html`
+  a.download = `${resume.personal_data.first_name}_${resume.personal_data.last_name}_Resume.html`
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
@@ -842,7 +842,7 @@ export function downloadResumeAsJSON(resume: StructuredResume) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${resume.personal_data.firstName}_${resume.personal_data.lastName}_Resume.json`
+  a.download = `${resume.personal_data.first_name}_${resume.personal_data.last_name}_Resume.json`
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
