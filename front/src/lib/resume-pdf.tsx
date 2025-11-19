@@ -176,7 +176,7 @@ function ModernTemplate({ resume, styles }: { resume: StructuredResume; styles?:
           <View style={{ width: '30%', backgroundColor: accentColor, padding: 20, color: '#fff' }}>
             {/* Name in sidebar */}
             <Text style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 15, color: '#fff' }}>
-              {resume.personal_data.firstName} {resume.personal_data.lastName}
+              {resume.personal_data.first_name} {resume.personal_data.last_name}
             </Text>
 
             {/* Contact Info */}

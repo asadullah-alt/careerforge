@@ -10,8 +10,8 @@ export type Location = z.infer<typeof LocationSchema>;
 
 // Personal Data Schema
 export const PersonalDataSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().optional().nullable(),
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().optional().nullable(),
   email: z.string().email().optional().nullable(),
   phone: z.string().optional().nullable(),
   linkedin: z.string().url().optional().nullable(),

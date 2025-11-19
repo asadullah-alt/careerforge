@@ -326,6 +326,51 @@ module.exports = function (app, passport) {
     }
   });
 
+  // Save personal data for an existing resume by resume_id
+  app.post('/api/savePersonalData', (req, res) => {
+    try {
+      const payload = req.body || {};
+      const { personal_data, resume_id } = payload;
+      console.log(resume_id);
+      if (!personal_data) {
+        return res.status(400).json({ success: false, message: 'Missing personal_data in request body' });
+      }
+
+      if (!resume_id) {
+        // If no resume_id provided, still accept but require token-based user lookup to create a new resume
+        return res.status(400).json({ success: false, message: 'Missing resume_id in request body' });
+      }
+
+      // Optionally accept a token to narrow update to a user's resume
+      const token = payload.token || (req.headers && (req.headers.authorization || req.headers.Authorization) ? (req.headers.authorization || req.headers.Authorization).replace(/^Bearer\s+/i, '') : null);
+
+      const proceedUpdate = (userIdFilter) => {
+        const filter = userIdFilter ? { resume_id: resume_id, user_id: userIdFilter } : { resume_id: resume_id };
+        const update = { personal_data, updatedAt: new Date(), processed_at: new Date() };
+        // Upsert so we create a minimal record if none exists
+        ProcessedResume.findOneAndUpdate(filter, { $set: update, $setOnInsert: { resume_id: resume_id, user_id: userIdFilter || undefined } }, { upsert: true, new: true, setDefaultsOnInsert: true }, (err, saved) => {
+          if (err) return res.status(500).json({ success: false, message: err.message });
+          return res.json({ success: true, message: 'Personal data saved', resume: saved });
+        });
+      };
+
+      if (token) {
+        // find user by token and restrict update to that user's resume
+        User.findOne({ $or: [{ 'Extensiontoken': token },{ 'local.token':token},{'google.token':token}, { 'linkedin.token': token }] }, (err, user) => {
+          if (err) return res.status(500).json({ success: false, message: err.message });
+          if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found.' });
+          proceedUpdate(user._id.toString());
+        });
+      } else {
+        // No token: update by resume_id alone
+        proceedUpdate(null);
+      }
+    } catch (e) {
+      console.error('Error in savePersonalData:', e);
+      return res.status(500).json({ success: false, message: e.message });
+    }
+  });
+
   // Save job application (HTML + url) sent from extension or client
   app.post('/api/SaveJobApplication', async (req, res) => {
     try {

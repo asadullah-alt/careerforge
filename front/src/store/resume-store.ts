@@ -55,7 +55,7 @@ export interface ResumeState {
   setError: (error: string | null) => void;
 }
 
-const defaultResume: StructuredResume = {
+const defaultResume = {
   personal_data: {
     firstName: '',
     lastName: '',
@@ -75,12 +75,12 @@ const defaultResume: StructuredResume = {
   achievements: [],
   education: [],
   extracted_keywords: [],
-};
+} as unknown as StructuredResume;
 
 export const useResumeStore = create<ResumeState>()(
   devtools(
     persist(
-      (set) => ({
+      (set, get) => ({
         resume: defaultResume,
         isLoading: false,
         error: null,
@@ -96,12 +96,44 @@ export const useResumeStore = create<ResumeState>()(
           console.log("✅ [Store] Resume reset to default")
         },
         
-        updatePersonalData: (data) =>
+        updatePersonalData: (data) => {
+          // Update local store first
           set((state) => ({
             resume: state.resume
               ? { ...state.resume, personal_data: { ...state.resume.personal_data, ...data } }
               : null,
-          })),
+          }))
+
+          // Fire-and-forget async POST to external backend to persist personal data
+          ;(async () => {
+            try {
+              const state = get()
+              const personal = state.resume?.personal_data
+              // If resume id is stored in localStorage by upload flow, read it
+              const resumeId = typeof window !== 'undefined' ? localStorage.getItem('resumeMatcher:lastResumeId') : null
+
+              if (!personal) return
+
+              const payload = {
+                personal_data: personal,
+                resume_id: resumeId || undefined,
+              }
+
+              await fetch('https://careerback.datapsx.com/api/savePersonalData', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+              })
+            } catch (err: unknown) {
+              try {
+                const message = err instanceof Error ? err.message : String(err)
+                set({ error: `Failed saving personal data: ${message}` })
+              } catch (_) {}
+            }
+          })()
+        },
         
         addExperience: (experience) =>
           set((state) => ({
