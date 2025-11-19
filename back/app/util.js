@@ -24,7 +24,7 @@ function extractSkills(html) {
           !text.includes('endorsement') && 
           !text.includes('Show more') &&
           text.length > 0) {
-        skills.push(text);
+        skills.push({ category: null, skill_name: text });
       }
     });
   });
@@ -131,7 +131,7 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   }
 
   if (moduleTypeCV === 'skills') {
-    const skillsArray = extractSkillsWithRegex(cleaned);
+    const skillsArray = extractSkills(cleaned);
     return skillsArray;
   }
 
