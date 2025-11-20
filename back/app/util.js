@@ -195,7 +195,7 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   if(moduleTypeCV === "education") {
     console.log("Education");
     console.log(cleaned);
-    const educationArray = parseEducation(cleaned);
+    const educationArray = extractEducation(cleaned);
     return educationArray;
   }
 
@@ -479,7 +479,96 @@ function parseDates(dateString) {
 
   return { startTime, endTime };
 }
+function extractEducation(htmlContent) {
+  const $ = cheerio.load(htmlContent);
+  const educationData = [];
 
+  // Select the specific list items that contain education details
+  // The snippet shows IDs containing 'EDUCATION-VIEW-DETAILS'
+  $('li[id*="EDUCATION-VIEW-DETAILS"]').each((index, element) => {
+    
+    // Initialize default object structure
+    const entry = {
+      institution: null,
+      degree: null,
+      field_of_study: null,
+      start_date: null,
+      end_date: null,
+      grade: null,
+      description: null,
+    };
+
+    // Strategy: Extract all clean text from 'span[aria-hidden="true"]'
+    // The HTML provided uses aria-hidden spans for visual text and hidden spans for screen readers.
+    // We capture the visual text to avoid duplication.
+    const textNodes = [];
+    $(element).find('span[aria-hidden="true"]').each((i, el) => {
+      const text = $(el).text().trim();
+      if (text) textNodes.push(text);
+    });
+
+    // --- Apply Heuristics to map text nodes to fields ---
+
+    if (textNodes.length > 0) {
+      // 1. Institution is typically the first element
+      entry.institution = textNodes[0];
+    }
+
+    if (textNodes.length > 1) {
+      // 2. Degree and Field of Study are typically the second element
+      // Format usually: "Degree, Field" or "Degree - Field"
+      const degreeRaw = textNodes[1];
+      
+      // Simple logic to separate degree from field based on the first comma
+      if (degreeRaw.includes(',')) {
+        const parts = degreeRaw.split(',');
+        entry.degree = parts[0].trim();
+        entry.field_of_study = parts.slice(1).join(',').trim(); // Join rest in case of multiple commas
+      } else {
+        entry.degree = degreeRaw;
+      }
+    }
+
+    if (textNodes.length > 2) {
+      // 3. Dates are typically the third element
+      // Format usually: "Aug 2011 - Sep 2013"
+      const dateRaw = textNodes[2];
+      const dateParts = dateRaw.split(' - ');
+      
+      if (dateParts.length >= 1) entry.start_date = dateParts[0].trim();
+      if (dateParts.length >= 2) entry.end_date = dateParts[1].trim();
+    }
+
+    // 4. Loop through remaining nodes to find Grade, Activities, or Description
+    // We skip the first 3 indices as we already processed them
+    for (let i = 3; i < textNodes.length; i++) {
+      const text = textNodes[i];
+
+      if (text.startsWith('Grade:')) {
+        entry.grade = text.replace('Grade:', '').trim();
+      } 
+      else if (text.startsWith('Activities and societies:')) {
+        // If you wanted to capture activities, you could add a field here.
+        // For this schema, we append it to description or ignore it.
+        const activity = text.replace('Activities and societies:', '').trim();
+        entry.description = entry.description 
+          ? `${entry.description}\n\nActivities: ${activity}` 
+          : `Activities: ${activity}`;
+      } 
+      else {
+        // If it doesn't match known prefixes, it's likely the Description
+        // (The long text block at the end)
+        entry.description = entry.description 
+          ? `${entry.description}\n\n${text}` 
+          : text;
+      }
+    }
+
+    educationData.push(entry);
+  });
+
+  return educationData;
+}
 /**
  * Parses the education section from a LinkedIn profile HTML string.
  *
