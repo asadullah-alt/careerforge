@@ -174,6 +174,7 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
     let skillsArray = extractSkills(cleaned);
     if (skillsArray.length === 0)  {
       skillsArray = extractSkillsAltOne(cleaned);
+      console.log(skillsArray)
     }
     return skillsArray;
   }
