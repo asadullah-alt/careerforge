@@ -278,12 +278,9 @@ module.exports = function (app, passport) {
 
           let rawSkills = cleanHTML(payload.details_skills_main, "skills") || [];
           console.log(rawSkills)
-          if (!Array.isArray(rawSkills) && typeof rawSkills === 'string') {
-            rawSkills = rawSkills.split(',').map(s => s.trim()).filter(Boolean);
-          }
+       
 
-          const skills = Array.isArray(rawSkills) ? rawSkills.map(s => ({ skill_name: s })) : [];
-
+         
           const processedResumeData = {
             user_id: user._id.toString(),
             resume_name: payload.name || 'LinkedIn Import',
@@ -299,7 +296,7 @@ module.exports = function (app, passport) {
             experiences: cleanHTML(payload.details_experience_main, "experience") || [],
             projects: cleanHTML(payload.details_projects_main, "projects") || [],
             education: cleanHTML(payload.details_education_main, "education") || [],
-            skills: skills,
+            skills: rawSkills,
             extracted_keywords: [],
             processed_at: new Date()
           };
