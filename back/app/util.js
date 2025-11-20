@@ -34,38 +34,36 @@ function extractSkills(html) {
       skill_name: skill 
   }));
 }
+function removeDuplicatesByKey(array, key) {
+  const seen = new Set();
+  return array.filter(item => {
+    const value = item[key];
+    if (seen.has(value)) return false;
+    seen.add(value);
+    return true;
+  });
+}
 function extractSkillsAltOne(html) {
-  // Create a temporary DOM element to parse the HTML
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  
-  const skills = [];
-  
-  // Find all skill list items
-  const skillItems = doc.querySelectorAll('li[id*="SKILLS"]');
-  
-  skillItems.forEach(item => {
-    // Find the skill name span (the one without aria-hidden)
-    const skillNameSpan = item.querySelector('span:not([aria-hidden])');
-    
-    if (skillNameSpan) {
-      // Extract and clean the skill name
-      const skillName = skillNameSpan.textContent.trim();
-      
-      // For this HTML structure, we'll use "All" as the category since that's the active tab
-      // In a real scenario, you might want to determine the category based on which tab is active
-      const category = "All";
-      
-      if (skillName) {
-        skills.push({
-          category: category,
-          skill_name: skillName
-        });
-      }
+  const $ = cheerio.load(html);
+  const skills = new Set();
+
+  // LinkedIn skills are usually inside <li> tags that contain two <span> items.
+  $("li").each((_, li) => {
+    // Find the spans containing the visible and hidden versions of text
+    const spans = $(li).find("span");
+
+    if (spans.length > 0) {
+      // Take the last non-empty span text
+      spans.each((_, span) => {
+        const text = $(span).text().trim();
+        if (text && text.length > 1) {
+          skills.add({"skill_name":text,"category":null});
+        }
+      });
     }
   });
-  
-  return skills;
+
+  return removeDuplicatesByKey(Array.from(skills), "skill_name");
 }
 // Alternative approach using regex (works without DOM parser)
 function extractSkillsWithRegex(html) {
