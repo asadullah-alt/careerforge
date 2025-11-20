@@ -34,7 +34,39 @@ function extractSkills(html) {
       skill_name: skill 
   }));
 }
-
+function extractSkillsAltOne(html) {
+  // Create a temporary DOM element to parse the HTML
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  const skills = [];
+  
+  // Find all skill list items
+  const skillItems = doc.querySelectorAll('li[id*="SKILLS"]');
+  
+  skillItems.forEach(item => {
+    // Find the skill name span (the one without aria-hidden)
+    const skillNameSpan = item.querySelector('span:not([aria-hidden])');
+    
+    if (skillNameSpan) {
+      // Extract and clean the skill name
+      const skillName = skillNameSpan.textContent.trim();
+      
+      // For this HTML structure, we'll use "All" as the category since that's the active tab
+      // In a real scenario, you might want to determine the category based on which tab is active
+      const category = "All";
+      
+      if (skillName) {
+        skills.push({
+          category: category,
+          skill_name: skillName
+        });
+      }
+    }
+  });
+  
+  return skills;
+}
 // Alternative approach using regex (works without DOM parser)
 function extractSkillsWithRegex(html) {
   const skills = new Set();
@@ -141,7 +173,10 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   if (moduleTypeCV === 'skills') {
     console.log("Skills");
     console.log(cleaned);
-    const skillsArray = extractSkills(cleaned);
+    let skillsArray = extractSkills(cleaned);
+    if (skillsArray.length === 0)  {
+      skillsArray = extractSkillsAltOne(cleaned);
+    }
     return skillsArray;
   }
 
