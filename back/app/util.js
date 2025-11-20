@@ -139,12 +139,13 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   }
 
   if (moduleTypeCV === 'skills') {
-    console.log(cleaned);
+    
     const skillsArray = extractSkills(cleaned);
     return skillsArray;
   }
 
   if (moduleTypeCV === "projects") {
+    console.log(cleaned);
     const projectsArray = parseLinkedInProjects(cleaned);
     return projectsArray;
   }

@@ -64,8 +64,8 @@ const EducationSchema = new mongoose.Schema({
 const ProcessedResumeSchema = new mongoose.Schema({
   resume_id:{type:String,index:true},
   user_id: {type:String },
-  title: { type: String, default: 'Untitled Resume' },
-   personal_data: { type: PersonalDataSchema, required: true },
+  resume_name: { type: String, default: 'Untitled Resume' },
+  personal_data: { type: PersonalDataSchema, required: true },
   experiences: { type: [ExperienceSchema], default: [] },
   projects: { type: [ProjectSchema], default: [] },
   skills: { type: [SkillSchema], default: [] },
