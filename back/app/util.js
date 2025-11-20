@@ -139,22 +139,28 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   }
 
   if (moduleTypeCV === 'skills') {
-    
+    console.log("Skills");
+    console.log(cleaned);
     const skillsArray = extractSkills(cleaned);
     return skillsArray;
   }
 
   if (moduleTypeCV === "projects") {
+    console.log("Projects");
     console.log(cleaned);
     const projectsArray = parseLinkedInProjects(cleaned);
     return projectsArray;
   }
 
   if(moduleTypeCV === "experience") {
+    console.log("Experience");
+    console.log(cleaned);
     const experienceArray = parseLinkedInExperience(cleaned);
     return experienceArray;
   }
   if(moduleTypeCV === "education") {
+    console.log("Education");
+    console.log(cleaned);
     const educationArray = parseEducation(cleaned);
     return educationArray;
   }
