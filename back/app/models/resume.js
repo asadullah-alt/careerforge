@@ -80,5 +80,22 @@ const ProcessedResumeSchema = new mongoose.Schema({
   });
 
 ProcessedResumeSchema.index({ user_id: 1, updatedAt: -1 });
+const ResumeSchema = new mongoose.Schema({
+  user_id: { type: String, required: true },
+  resume_id: { type: String, required: true, index: true },
+  resume_name: { type: String, required: true },
+  content: { type: String, required: true },
+  content_type: { type: String, required: false },
+  created_at: { type: Date, default: Date.now },
+}, {
+  collection: 'Resume'
+});
 
-module.exports = mongoose.model('ProcessedResume', ProcessedResumeSchema);
+ResumeSchema.index({ user_id: 1, created_at: -1 });
+
+// ...existing code...
+
+module.exports = {
+  ProcessedResume: mongoose.model('ProcessedResume', ProcessedResumeSchema),
+  Resume: mongoose.model('Resume', ResumeSchema)
+};

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('./models/user');
-const LinkedInProcessedResume = require('./models/resume');
+
 const JobApplication = require('./models/jobApplication');
 const { raw } = require('body-parser');
 const { default: ollamaClient } = require('ollama');
@@ -8,7 +8,7 @@ const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({});
 const crypto = require('crypto');
 const { ProcessedJob } = require('./models/jobApplication');
-const ProcessedResume = require('./models/resume');
+const {ProcessedResume,Resume} = require('./models/resume');
 const {extractSkills, extractSkillsWithRegex, cleanHTML, parseLinkedInProjects} = require('./util');
 const { error } = require('console');
 async function runGeminiFlash(model, prompt) {
@@ -278,9 +278,32 @@ module.exports = function (app, passport) {
 
           let rawSkills = cleanHTML(payload.details_skills_main, "skills") || [];
           console.log(rawSkills)
-       
+         const resumeContent = {personal_data: {
+              first_name: (payload.name || '').split(' ')[0] || '',
+              last_name: (payload.name || '').split(' ').slice(1).join(' ') || null,
+              linkedin: payload.profileUrl || null,
+              location: { city: payload.location || null }
+            },
 
-         
+            experiences: cleanHTML(payload.details_experience_main, "experience") || [],
+            projects: cleanHTML(payload.details_projects_main, "projects") || [],
+            education: cleanHTML(payload.details_education_main, "education") || [],
+            skills: rawSkills}
+         const ResumeData = {
+            user_id: user._id.toString(),
+            resume_name: payload.name || 'LinkedIn Import',
+            resume_id: resumeId,
+            content: resumeContent.toString()
+
+         }
+         job = new Resume(ResumeData);
+          job.save((errr, savedResume) => {
+            if (errr) {
+              console.error('Error saving resume:', errr);
+              return res.status(500).json({ success: false, message: errr.message });
+            }
+            console.log("Resume saved for user:", user._id);
+          });
           const processedResumeData = {
             user_id: user._id.toString(),
             resume_name: payload.name || 'LinkedIn Import',
@@ -304,7 +327,7 @@ module.exports = function (app, passport) {
           console.log("user found for profile save:", user._id);
 
           // Upsert ProcessedResume record (based on user_id + resume_id)
-          LinkedInProcessedResume.findOneAndUpdate(
+          ProcessedResume.findOneAndUpdate(
             { user_id: user._id.toString(), resume_id: resumeId },
             processedResumeData,
             { upsert: true, new: true, setDefaultsOnInsert: true },
