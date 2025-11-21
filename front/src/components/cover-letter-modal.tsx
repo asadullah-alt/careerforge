@@ -5,13 +5,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button'
 import { useResumeStore } from '@/store/resume-store'
 import { getCfAuthCookie } from '@/utils/cookie'
-import dynamic from 'next/dynamic'
-import 'react-quill/dist/quill.snow.css'
+import { QuillEditor } from './quill-editor'
 import { FileDown, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-
-// Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
 
 interface CoverLetterModalProps {
     isOpen: boolean
@@ -134,20 +130,10 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
                         </div>
                     ) : (
                         <div className="flex-1 overflow-auto border rounded-md">
-                            <ReactQuill
-                                theme="snow"
+                            <QuillEditor
                                 value={content}
                                 onChange={setContent}
                                 className="h-full"
-                                modules={{
-                                    toolbar: [
-                                        [{ 'header': [1, 2, false] }],
-                                        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                                        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                                        ['link', 'image'],
-                                        ['clean']
-                                    ],
-                                }}
                             />
                         </div>
                     )}
