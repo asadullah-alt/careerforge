@@ -289,11 +289,13 @@ module.exports = function (app, passport) {
             projects: cleanHTML(payload.details_projects_main, "projects") || [],
             education: cleanHTML(payload.details_education_main, "education") || [],
             skills: rawSkills}
+            stringResume  = JSON.stringify(resumeContent)
+            console.log("Resume content stringified:", stringResume);
          const ResumeData = {
             user_id: user._id.toString(),
             resume_name: payload.name || 'LinkedIn Import',
             resume_id: resumeId,
-            content: resumeContent.toString()
+            content:stringResume
 
          }
          job = new Resume(ResumeData);
