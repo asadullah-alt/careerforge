@@ -66,19 +66,7 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
         }
     }
 
-    const handleDownloadDocx = async () => {
-        try {
-            const { asBlob } = await import('html-to-docx')
-            const { saveAs } = await import('file-saver')
 
-            const blob = await asBlob(content)
-            saveAs(blob, 'cover-letter.docx')
-            toast.success("Downloaded as DOCX")
-        } catch (error) {
-            console.error("Error downloading DOCX:", error)
-            toast.error("Failed to download DOCX")
-        }
-    }
 
     const handleDownloadPdf = async () => {
         try {
@@ -141,10 +129,6 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
 
                 <div className="flex justify-end gap-2 mt-4">
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button variant="outline" onClick={handleDownloadDocx} disabled={loading || !content}>
-                        <FileDown className="mr-2 h-4 w-4" />
-                        Download DOCX
-                    </Button>
                     <Button onClick={handleDownloadPdf} disabled={loading || !content}>
                         <FileDown className="mr-2 h-4 w-4" />
                         Download PDF
