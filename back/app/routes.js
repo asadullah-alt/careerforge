@@ -274,7 +274,7 @@ module.exports = function (app, passport) {
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found.' });
          
           // Build a ProcessedResume-compatible object from the incoming payload
-          const resumeId = payload.profileUrl || crypto.randomBytes(8).toString('hex');
+          const resumeId = crypto.randomBytes(8).toString('hex');
 
           let rawSkills = cleanHTML(payload.details_skills_main, "skills") || [];
           console.log(rawSkills)
