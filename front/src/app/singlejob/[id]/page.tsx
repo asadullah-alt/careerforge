@@ -9,11 +9,11 @@ import { Badge } from '@/components/ui/badgeTable'
 import { useJobStore } from '@/store/job-store'
 import { getCfAuthCookie } from '@/utils/cookie'
 import dynamic from "next/dynamic";
-import {Link, Share2} from "lucide-react";
+import { Link, Share2, FileText } from "lucide-react";
+import { CoverLetterModal } from '@/components/cover-letter-modal';
+import { ExtendedJob } from '@/store/job-store'
 
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
-
-import { ExtendedJob } from '@/store/job-store'
 
 export default function SingleJobPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -39,6 +39,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
   const setSelectedJob = useJobStore((s) => s.setSelectedJob)
   const [copied, setCopied] = React.useState(false)
   const [resumeId, setResumeId] = React.useState<string | null>(null)
+  const [isCoverLetterModalOpen, setIsCoverLetterModalOpen] = React.useState(false)
 
   const handleShareClick = async () => {
     if (!jobData) return
@@ -72,7 +73,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
           setCopied(true)
           window.setTimeout(() => setCopied(false), 2000)
         }
-      } catch {}
+      } catch { }
     }
   }
 
@@ -84,7 +85,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
 
     try {
       setAnalyzing(true)
-      
+
       // Send analysis request
       const payload: Record<string, unknown> = {
         job_id: params.id,
@@ -104,7 +105,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         },
         body: JSON.stringify(payload)
       })
-      
+
       const analysisData = await analysisResponse.json()
       console.log('Analysis Result:', analysisData.data)
       setAnalysisResult(analysisData.data)
@@ -114,8 +115,6 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
       setAnalyzing(false)
     }
   }
-
-
 
   // Manage tab title animations while analyzing
   React.useEffect(() => {
@@ -204,17 +203,17 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
 
   React.useEffect(() => {
     let mounted = true
-    
+
     const fetchResumesAndImprovements = async () => {
       try {
         const token = getCfAuthCookie()
-        
+
         // Fetch all user resumes first
         const resumesResponse = await fetch(
           `https://resume.bhaikaamdo.com/api/v1/resumes/getAllUserResumes?token=${token}`
         )
         const resumesData = await resumesResponse.json()
-        
+
         if (!resumesData.data || resumesData.data.length === 0) {
           console.error('No resumes found')
           return
@@ -263,7 +262,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         const data = await response.json()
 
         if (!mounted) return
-        
+
         // Ensure the fetched job has the required fields
         const processedJob = data.data.processed_job
         const fetched: ExtendedJob = {
@@ -273,13 +272,13 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
           // Keep original id if present, otherwise use params.id
           id: processedJob.id || Number(params.id)
         }
-        
+
         setJobData(fetched)
 
         // Only update the store if the fetched job is different to avoid triggering loops
         const fetchedId = getJobId(fetched)
         const selIdAfter = selectedJob ? getJobId(selectedJob) : undefined
-        
+
         if (!selIdAfter || selIdAfter !== String(fetchedId)) {
           setSelectedJob(fetched)
         }
@@ -296,7 +295,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
     return () => {
       mounted = false
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
 
   if (loading) {
@@ -371,7 +370,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
                 )
               })()}
             </div>
-           
+
             <div className="flex items-center gap-3 text-muted-foreground">
               <span className="font-medium text-lg">{jobData.companyProfile?.companyName}</span>
               <span>•</span>
@@ -386,33 +385,6 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
 
           <Separator />
 
-          {/* <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-medium mb-1">Status</h3>
-              <Badge variant="outline" className={
-                jobData.status === "Interviewing" ? "bg-green-100 text-green-800" :
-                jobData.status === "Applied" ? "bg-blue-100 text-blue-800" :
-                "bg-gray-100 text-gray-800"
-              }>
-                {jobData.status}
-              </Badge>
-            </div>
-            <div>
-              <h3 className="font-medium mb-1">Salary</h3>
-              <p className="text-muted-foreground">{jobData.maxSalary}</p>
-            </div>
-            <div>
-              <h3 className="font-medium mb-1">Date Applied</h3>
-              <p className="text-muted-foreground">{jobData.dateApplied || '—'}</p>
-            </div>
-            <div>
-              <h3 className="font-medium mb-1">Next Follow Up</h3>
-              <p className="text-muted-foreground">{jobData.followUp || '—'}</p>
-            </div>
-          </div>
-
-          <Separator /> */}
-
           <div>
             <button
               onClick={() => setIsCompanyExpanded(!isCompanyExpanded)}
@@ -420,15 +392,13 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
             >
               <span>Company Details</span>
               <IconChevronDown
-                className={`transform transition-transform duration-200 ${
-                  isCompanyExpanded ? 'rotate-180' : ''
-                }`}
+                className={`transform transition-transform duration-200 ${isCompanyExpanded ? 'rotate-180' : ''
+                  }`}
                 size={24}
               />
             </button>
-            <div className={`space-y-4 overflow-hidden transition-all duration-200 ${
-              isCompanyExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
-            }`}>
+            <div className={`space-y-4 overflow-hidden transition-all duration-200 ${isCompanyExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+              }`}>
               <div>
                 <h3 className="font-medium mb-1">Industry</h3>
                 <p className="text-muted-foreground">{jobData.companyProfile?.industry || '—'}</p>
@@ -551,7 +521,7 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
                           { limit: 100 }
                         ]
                       }}
-                      pointer={{type: "blob", animationDelay: 0}}
+                      pointer={{ type: "blob", animationDelay: 0 }}
                       value={Math.round(analysisResult.original_score * 100)}
                     />
                     <div className="text-center mt-4">
@@ -602,8 +572,8 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
                 </div>
               )}
             </div>
-            <Button 
-              className="w-full mt-6" 
+            <Button
+              className="w-full mt-6"
               size="lg"
               onClick={analyzeResume}
               disabled={analyzing}
@@ -620,42 +590,23 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
                 </>
               )}
             </Button>
-          </div>
 
-          {/* <div className="bg-card rounded-lg p-6 border shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">Key Dates & Status</h2>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm font-medium">Application Status</p>
-                <Badge variant="outline" className={
-                  jobData.status === "Interviewing" ? "bg-green-100 text-green-800" :
-                  jobData.status === "Applied" ? "bg-blue-100 text-blue-800" :
-                  "bg-gray-100 text-gray-800"
-                }>
-                  {jobData.status}
-                </Badge>
-              </div>
-              
-              <div>
-                <p className="text-sm font-medium">Date Saved</p>
-                <p className="text-muted-foreground">{jobData.dateSaved || '—'}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Date Applied</p>
-                <p className="text-muted-foreground">{jobData.dateApplied || '—'}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Application Deadline</p>
-                <p className={`font-medium ${jobData.deadline ? 'text-red-600' : 'text-muted-foreground'}`}>
-                  {jobData.deadline || '—'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Next Follow Up</p>
-                <p className="text-muted-foreground">{jobData.followUp || '—'}</p>
-              </div>
-            </div>
-          </div> */}
+            <Button
+              className="w-full mt-4"
+              variant="outline"
+              size="lg"
+              onClick={() => setIsCoverLetterModalOpen(true)}
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              Generate Cover Letter
+            </Button>
+
+            <CoverLetterModal
+              isOpen={isCoverLetterModalOpen}
+              onClose={() => setIsCoverLetterModalOpen(false)}
+              jobId={params.id}
+            />
+          </div>
         </div>
       </div>
     </div>

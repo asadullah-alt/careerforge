@@ -295,6 +295,7 @@ module.exports = function (app, passport) {
             user_id: user._id.toString(),
             resume_name: payload.name || 'LinkedIn Import',
             resume_id: resumeId,
+            content_type:"md"
             content:stringResume
 
          }

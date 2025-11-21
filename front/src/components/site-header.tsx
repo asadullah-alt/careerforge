@@ -7,7 +7,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import FileUpload from "@/components/file-upload"
 import { usePathname, useRouter } from "next/navigation"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet"
-import { UploadCloud, Linkedin, Mail, ChevronDown,BookOpenCheck  } from "lucide-react"
+import { UploadCloud, Linkedin, Mail, ChevronDown, BookOpenCheck } from "lucide-react"
 import { Sun, Moon } from 'lucide-react'
 import { useTheme } from '@/context/theme-context'
 import LinkedinModal from "@/components/linkedin-modal"
@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { getCfAuthCookie } from "@/utils/cookie"
+import { useResumeStore } from "@/store/resume-store"
 
 // Add button blink animation styles
 const buttonAnimationStyle = `
@@ -42,7 +43,7 @@ export function SiteHeader() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [linkedinOpen, setLinkedinOpen] = useState(false)
   const [resumes, setResumes] = useState<Array<{ id: string; resume_name?: string }>>([])
-  const [activeResume, setActiveResume] = useState<string | null>(null)
+  const { selectedResumeId, setSelectedResumeId } = useResumeStore()
   const [loadingResumes, setLoadingResumes] = useState(false)
   const [blinkingButton, setBlinkingButton] = useState<string | null>(null)
 
@@ -93,9 +94,9 @@ export function SiteHeader() {
         const data = await response.json()
         if (data.data && Array.isArray(data.data)) {
           setResumes(data.data)
-          // Set first resume as active by default
-          if (data.data.length > 0) {
-            setActiveResume(data.data[0].id)
+          // Set first resume as active by default if none selected
+          if (data.data.length > 0 && !selectedResumeId) {
+            setSelectedResumeId(data.data[0].id)
           }
         }
       } catch (error) {
@@ -106,7 +107,7 @@ export function SiteHeader() {
     }
 
     void fetchResumes()
-  }, [])
+  }, [selectedResumeId, setSelectedResumeId])
 
   const router = useRouter()
 
@@ -170,14 +171,14 @@ export function SiteHeader() {
           <Button
             variant="ghost"
             size="sm"
-           
+
             className={`border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'email' ? 'animate-double-blink' : ''}`}
             onClick={() => handleButtonClick('email')}
           >
             <Mail className="size-4 mr-2" />
             <span className="hidden md:inline">Connect with Email</span>
           </Button>
-           <Button
+          <Button
             variant="ghost"
             size="sm"
             onClick={() => {
@@ -190,20 +191,20 @@ export function SiteHeader() {
             <span className="hidden md:inline">Resume Builder</span>
           </Button>
         </div>
-  <LinkedinModal open={linkedinOpen} onOpenChange={setLinkedinOpen} />
+        <LinkedinModal open={linkedinOpen} onOpenChange={setLinkedinOpen} />
 
         <div className="ml-auto flex items-center gap-2">
           {/* Resume Selector Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="border border-gray-200 dark:border-gray-700 rounded-md px-2 hidden sm:flex items-center gap-1"
                 disabled={loadingResumes || resumes.length === 0}
               >
                 <span className="text-xs truncate max-w-[150px]">
-                  {loadingResumes ? 'Loading...' : activeResume ? getResumeDisplayName(resumes.find(r => r.id === activeResume) || { id: activeResume }) : 'Select Resume'}
+                  {loadingResumes ? 'Loading...' : selectedResumeId ? getResumeDisplayName(resumes.find(r => r.id === selectedResumeId) || { id: selectedResumeId }) : 'Select Resume'}
                 </span>
                 <ChevronDown className="size-4" />
               </Button>
@@ -215,11 +216,11 @@ export function SiteHeader() {
                 resumes.map((resume) => (
                   <DropdownMenuItem
                     key={resume.id}
-                    onClick={() => setActiveResume(resume.id)}
-                    className={activeResume === resume.id ? 'bg-accent' : ''}
+                    onClick={() => setSelectedResumeId(resume.id)}
+                    className={selectedResumeId === resume.id ? 'bg-accent' : ''}
                   >
                     <span className="text-sm">{getResumeDisplayName(resume)}</span>
-                    {activeResume === resume.id && <span className="ml-2">✓</span>}
+                    {selectedResumeId === resume.id && <span className="ml-2">✓</span>}
                   </DropdownMenuItem>
                 ))
               ) : (
@@ -232,7 +233,7 @@ export function SiteHeader() {
 
           <Button variant="ghost" size="sm" onClick={() => { console.log('[SiteHeader] toggle clicked'); handleButtonClick('theme'); toggle() }} className={`border border-gray-200 dark:border-gray-700 rounded-md px-2 transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'theme' ? 'animate-double-blink' : ''}`}>
             {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
-           
+
           </Button>
           <Button
             variant="ghost"
@@ -248,7 +249,7 @@ export function SiteHeader() {
         </div>
 
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-    <SheetContent side="right" className="data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right data-[state=open]:duration-500">
+          <SheetContent side="right" className="data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right data-[state=open]:duration-500">
             <SheetHeader>
               <SheetTitle>Upload Resume</SheetTitle>
               <SheetDescription>Upload your resume to start matching with jobs. Supports PDF and DOCX formats.</SheetDescription>
