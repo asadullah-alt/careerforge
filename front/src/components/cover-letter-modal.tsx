@@ -38,7 +38,7 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
             setGenerating(true)
             const token = getCfAuthCookie()
 
-            const response = await fetch('https://resume.bhaikaamdo.com/api/v1/getCoverletter', {
+            const response = await fetch('https://resume.bhaikaamdo.com/api/v1/cover-letters/getCoverletter', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
