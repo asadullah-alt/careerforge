@@ -359,7 +359,7 @@ function parseLinkedInExperience(html) {
     // Extract job title (usually the first span that doesn't contain · or dates)
     if (spanTexts.length > 0) {
       const titleText = spanTexts[0];
-      if (titleText && !titleText.includes('·') && !titleText.includes('-') && !titleText.match(/\d{4}/)) {
+      if (titleText && !titleText.includes('·') && !titleText.match(/\d{4}/)) {
         job.job_title = titleText;
       }
     }
