@@ -1,17 +1,17 @@
 const nodemailer = require('nodemailer');
 // please please please dont add this in the codebase again
 // this should be in environment variables
-// holy shit 
-// the above comments were auto completed by github copilot
 
 // Create reusable transporter object using SMTP transport
 const transporter = nodemailer.createTransport({
-  host: "smtpout.secureserver.net",
+  // finally in a bloody environment variable
+  // thank god
+  host: process.env.EMAIL_HOST,
   port: 465,
   secure: true, // true for 465, false for other ports
   auth: {
-    user: "support@datapsx.com",
-    pass: process.env.EMAIL_PASSWORD // Should be set in environment variables
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD
   }
 });
 
@@ -24,7 +24,8 @@ const generateVerificationCode = () => {
 const sendVerificationEmail = async (to, verificationCode) => {
   try {
     const mailOptions = {
-      from: '"Bhai Kaam Do" <support@datapsx.com>',
+      // use environment variable for the from address
+      from: `"Bhai Kaam Do" <${process.env.EMAIL_USER}>`,
       to: to,
       subject: "Email Verification - Bhai Kaam Do",
       html: `
