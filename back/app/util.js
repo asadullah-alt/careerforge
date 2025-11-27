@@ -1,14 +1,11 @@
 const cheerio = require('cheerio');
-const { OpenAI } = require('openai');
+const { Ollama } = require('ollama');
 /**
  * Extracts skills from LinkedIn profile HTML
  * @param {string} html - The HTML content from LinkedIn profile skills section
  * @returns {Array<string>} - Array of unique skills
  */
-const client = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: "https://api.groq.com/openai/v1",
-});
+const ollama = new Ollama();
 function extractSkills(html) {
   const skills = new Set(); // Use a Set to automatically handle duplicates
   const $ = cheerio.load(html);
@@ -189,11 +186,14 @@ async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
     const prompt =
       "You are an expert in data extraction for projects. Below is the html which has the details of projects extract them in json format {project_name: '', start_date: '', end_date: '', description: '', technologies_used: []}. Your response should be in JSON format " +
       cleaned;
-    const response = await client.chat.completions.create({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+
+    const response = await ollama.chat({
+      model: 'gemma3:4b',
       messages: [{ role: "user", content: prompt }],
+      // 'stream: false' returns a single response object
+      stream: false,
     });
-    const output = response.choices[0].message.content;
+    const output = response.message.content;
     const match = output.match(/\[.*\]/s);
     const projectsJson = match ? JSON.parse(match[0]) : [];
     return projectsJson;
@@ -205,9 +205,11 @@ async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
     const prompt =
       "You are an expert in data extraction for experience. Below is the html which has the details of work experience extract them in json format {company: '', job_title: '', start_date: '', end_date: '', location: '', description: ''}. Your response should be in JSON format " +
       cleaned;
-    const response = await client.chat.completions.create({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+    const response = await ollama.chat({
+      model: 'gemma3:4b',
       messages: [{ role: "user", content: prompt }],
+      // 'stream: false' returns a single response object
+      stream: false,
     });
     const output = response.choices[0].message.content;
     const match = output.match(/\[.*\]/s);
@@ -219,9 +221,11 @@ async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
     const prompt =
       "You are an expert in data extraction for education. Below is the html which has the details of education extract them in json format {institution: '', degree: '', field_of_study: '', start_date: '', end_date: '',grade: '', description: ''}. Your response should be in JSON format " +
       cleaned;
-    const response = await client.chat.completions.create({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+    const response = await ollama.chat({
+      model: 'gemma3:4b',
       messages: [{ role: "user", content: prompt }],
+      // 'stream: false' returns a single response object
+      stream: false,
     });
 
     const output = response.choices[0].message.content;
