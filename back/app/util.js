@@ -182,7 +182,11 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   if (moduleTypeCV === "projects") {
     console.log("Projects");
     console.log(cleaned);
-    const projectsArray = parseLinkedInProjects(cleaned);
+    let projectsArray = parseLinkedInProjects(cleaned);
+    if (projectsArray.length === 0) { 
+      projectsArray = extractProjectsAlt(cleaned);
+    }
+
     return projectsArray;
   }
 
@@ -208,7 +212,88 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
 
   return cleaned;
 }
+function extractProjectsAlt(html) {
+  const $ = cheerio.load(html);
+  const projects = [];
 
+  // Find all project sections (each hr separates projects)
+  const projectSections = [];
+  let currentSection = [];
+  
+  // Iterate through all direct children to group by hr separators
+  $('[data-view-name="profile-projects-details-view"]').find('> div > div > div').children().each((i, elem) => {
+    if ($(elem).is('hr')) {
+      if (currentSection.length > 0) {
+        projectSections.push(currentSection);
+        currentSection = [];
+      }
+    } else if ($(elem).is('div')) {
+      currentSection.push(elem);
+    }
+  });
+  
+  // Add the last section if exists
+  if (currentSection.length > 0) {
+    projectSections.push(currentSection);
+  }
+
+  // Process each project section
+  projectSections.forEach(section => {
+    const project = {
+      project_name: null,
+      description: null,
+      technologies_used: [],
+      link: null,
+      start_date: null,
+      end_date: null
+    };
+
+    section.forEach(elem => {
+      const $elem = $(elem);
+      
+      // Extract project name (first p tag in the section)
+      if (!project.project_name) {
+        const nameElem = $elem.find('p').first();
+        if (nameElem.length && !nameElem.parent().is('figure')) {
+          project.project_name = nameElem.text().trim();
+        }
+      }
+
+      // Extract dates (second p tag, contains date range)
+      const dateElem = $elem.find('p').eq(1);
+      if (dateElem.length && dateElem.text().includes('–')) {
+        const dateText = dateElem.text().trim();
+        const dates = dateText.split('–').map(d => d.trim());
+        project.start_date = dates[0] || null;
+        project.end_date = dates[1] || null;
+      }
+
+      // Extract description (text inside expandable-text-box)
+      const descElem = $elem.find('[data-testid="expandable-text-box"]');
+      if (descElem.length) {
+        project.description = descElem.text().trim();
+      }
+
+      // Extract link (if "Show project" link exists)
+      const linkElem = $elem.find('svg#link-external-small').parent();
+      if (linkElem.length) {
+        // In actual scraping, you'd extract the href from the parent anchor
+        // This structure shows the link exists but doesn't contain the actual URL
+        const parentAnchor = linkElem.closest('a');
+        if (parentAnchor.length) {
+          project.link = parentAnchor.attr('href') || null;
+        }
+      }
+    });
+
+    // Only add projects that have at least a name
+    if (project.project_name) {
+      projects.push(project);
+    }
+  });
+
+  return projects;
+}
 function parseLinkedInProjects(html) {
   const $ = cheerio.load(html);
 
@@ -290,7 +375,7 @@ function parseLinkedInProjects(html) {
         project.technologies_used = Array.from(new Set(techMatches.map(t => t.trim())));
       }
     }
-
+    if(project.project_name!==null)
     projects.push({
       project_name: project.project_name,
       description: project.description,
