@@ -483,72 +483,93 @@ function parseDates(dateString) {
   return { startTime, endTime };
 }
 
-function extractEducationAlt(htmlString) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlString, 'text/html');
-
-  // Find all main education detail containers.
-  // Based on the structure, each education block is within a div 
-  // that is a sibling to the <hr> separators.
-  const educationBlocks = doc.querySelectorAll(
-    'div[componentkey^="com.linkedin.sdui.profile.card.refACoAAA-pHJgB9uKkUSqcFB59buJtUUJjhSol5rAEducationDetailsSection"] > div > div > div:not(:has(button)) > div:not(:has(button))'
-  );
+function extractEducationAltCheerioRevised(htmlString) {
+  const cheerio = require('cheerio'); // Assuming Node.js environment
+  const $ = cheerio.load(htmlString);
 
   const educationData = [];
 
-  educationBlocks.forEach(block => {
-    // Look for the main content div, which contains the text data
-    const contentDiv = block.querySelector('div[role="button"]');
+  // --- Step 1: Find the Education Section Container ---
+  // We locate the <h2> or <h3> tag that contains the text "Education" (case-insensitive)
+  // and then find its closest ancestor that wraps all education entries.
 
-    if (!contentDiv) return; // Skip if main content is missing
+  let $educationSectionContainer;
 
-    // Find all <p> tags within the content, which hold the institution, degree, etc.
-    const pTags = contentDiv.querySelectorAll('p');
+  // Look for a heading containing the text "Education"
+  // Note: LinkedIn often uses a nested <div> structure for the title.
+  const $educationHeading = $('section div span:contains("Education")').closest('section');
+
+  if ($educationHeading.length) {
+    // If we find the section via the title, use it as the context
+    $educationSectionContainer = $educationHeading;
+  } else {
+    // Fallback: If the text-based search fails, try the original but general selector
+    // that targets common list/section wrappers, but without the volatile key.
+    // This is less reliable but better than nothing.
+    $educationSectionContainer = $('div[data-section="education"]'); // Hypothetical stable attribute
+  }
+
+  // If we still can't find a container, exit.
+  if ($educationSectionContainer.length === 0) {
+    console.warn("Could not find a stable container for the Education section.");
+    return educationData;
+  }
+
+  // --- Step 2: Select Individual Education Blocks from the Container ---
+  // Now, we select the individual item blocks relative to the found container.
+  // The original structure suggested blocks are deeply nested divs within the main container.
+  // We look for divs that look like item wrappers, which often contain a 'role="button"' 
+  // or similar interactive wrapper for the data.
+  const educationBlocks = $educationSectionContainer.find('div[role="button"]').closest('div:has(p)');
+
+
+  educationBlocks.each((index, block) => {
+    const $block = $(block);
+
+    // The content is usually wrapped by the element with role="button"
+    const $contentDiv = $block.find('div[role="button"]');
+
+    if ($contentDiv.length === 0) return;
+
+    const $pTags = $contentDiv.find('p');
 
     let institution = '';
     let degree = '';
     let fieldOfStudy = '';
     let dates = '';
     let grade = '';
-    let description = ''; // This is often the 'Activities and societies' or similar field
+    let description = '';
 
-    // --- Core Extraction Logic ---
-    if (pTags.length >= 2) {
-      // First <p> is Institution
-      institution = pTags[0].textContent.trim();
+    // --- Core Extraction Logic remains the same, but uses Cheerio methods ---
+    if ($pTags.length >= 2) {
+      institution = $pTags.eq(0).text().trim();
 
-      // Second <p> contains Degree and Field of Study, separated by a comma (often)
-      const degreeFieldText = pTags[1].textContent.trim();
+      const degreeFieldText = $pTags.eq(1).text().trim();
       const parts = degreeFieldText.split(',');
       if (parts.length > 1) {
         degree = parts[0].trim();
         fieldOfStudy = parts.slice(1).join(',').trim();
       } else {
-        // If no comma, assume it's just the Degree or a general category
         degree = degreeFieldText;
       }
     }
 
-    // Dates are usually in the last <p> before any "Grade" or "Activities"
-    // Let's iterate through the P tags to find the date range, grade, and description.
-    for (let i = 0; i < pTags.length; i++) {
-      const text = pTags[i].textContent.trim();
+    $pTags.each((i, p) => {
+      const text = $(p).text().trim();
 
-      // Dates pattern: "Month Year – Month Year" or "Year – Year"
+      // Dates pattern
       if (text.match(/(\w{3}\s\d{4}|\d{4})\s–\s(\w{3}\s\d{4}|\d{4})/)) {
         dates = text;
       }
-
-      // Grade pattern: "Grade: X" (or similar structure next to it)
+      // Grade pattern
       else if (text.startsWith('Grade:')) {
         grade = text.replace('Grade:', '').trim();
       }
-
-      // Description/Activities pattern: "Activities and societies: X"
+      // Description/Activities pattern
       else if (text.startsWith('Activities and societies:')) {
         description = text.replace('Activities and societies:', '').trim();
       }
-    }
+    });
 
     // --- Date Parsing ---
     let startDate = '';
