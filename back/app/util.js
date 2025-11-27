@@ -211,7 +211,7 @@ async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
       // 'stream: false' returns a single response object
       stream: false,
     });
-    const output = response.choices[0].message.content;
+    const output = response.message.content;
     const match = output.match(/\[.*\]/s);
     const experienceJson = match ? JSON.parse(match[0]) : [];
     return experienceJson;
@@ -228,7 +228,7 @@ async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
       stream: false,
     });
 
-    const output = response.choices[0].message.content;
+    const output = response.message.content;
 
     // Extract the JSON array from the model's raw output.
     const match = output.match(/\[.*\]/s);
