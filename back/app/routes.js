@@ -331,7 +331,7 @@ module.exports = function (app, passport) {
         };
 
         console.log("user found for profile save:", user._id);
-
+        console.log("FINALL", processedResumeData.education);
         // Upsert ProcessedResume record (based on user_id + resume_id)
         ProcessedResume.findOneAndUpdate(
           { user_id: user._id.toString(), resume_id: resumeId },
