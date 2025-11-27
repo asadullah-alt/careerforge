@@ -483,7 +483,7 @@ function parseDates(dateString) {
   return { startTime, endTime };
 }
 
-function extractEducationAltCheerioRevised(htmlString) {
+function extractEducationAlt(htmlString) {
   const cheerio = require('cheerio'); // Assuming Node.js environment
   const $ = cheerio.load(htmlString);
 
