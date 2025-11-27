@@ -197,6 +197,8 @@ async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
     console.log(cleaned);
     let educationArray = extractEducation(cleaned);
     if (educationArray.length === 0) {
+      console.log("DID THIS TRIGGER")
+      educationArray = []
       educationArray = extractEducationAlt(cleaned);
     }
     return educationArray;
