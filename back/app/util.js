@@ -484,54 +484,53 @@ function parseDates(dateString) {
 }
 
 function extractEducationAlt(htmlString) {
-  const cheerio = require('cheerio'); // Assuming Node.js environment
+
   const $ = cheerio.load(htmlString);
 
   const educationData = [];
 
-  // --- Step 1: Find the Education Section Container ---
-  // We locate the <h2> or <h3> tag that contains the text "Education" (case-insensitive)
-  // and then find its closest ancestor that wraps all education entries.
+  // --- Step 1: Find all repeating education blocks ---
+  // A robust selector is to target the repeating unit container that contains 
+  // both the image/figure and the main data wrapper div[role="button"].
+  // In your HTML, the pattern is a block div followed by <hr>, followed by a block div.
+  // We look for divs that are siblings to the <hr> tag and contain the main data block.
 
-  let $educationSectionContainer;
+  // The first item is nested inside a key-ed div (0575fc42-...), and subsequent items 
+  // are siblings to the <hr> separator.
+  const educationBlockContainers = $('[componentkey]').filter((i, el) => {
+    // Check if the element contains a logo/figure and the data button.
+    return $(el).find('figure[aria-label][data-view-name="image"]').length > 0 &&
+      $(el).find('div[role="button"]').length > 0;
+  });
 
-  // Look for a heading containing the text "Education"
-  // Note: LinkedIn often uses a nested <div> structure for the title.
-  const $educationHeading = $('section div span:contains("Education")').closest('section');
 
-  if ($educationHeading.length) {
-    // If we find the section via the title, use it as the context
-    $educationSectionContainer = $educationHeading;
-  } else {
-    // Fallback: If the text-based search fails, try the original but general selector
-    // that targets common list/section wrappers, but without the volatile key.
-    // This is less reliable but better than nothing.
-    $educationSectionContainer = $('div[data-section="education"]'); // Hypothetical stable attribute
+  if (educationBlockContainers.length === 0) {
+    // Revert to the original, slightly looser structure check if the filter is too strict
+    const looserBlocks = $('div[role="button"]').closest('div:has(figure[aria-label])').closest('div[componentkey]');
+    if (looserBlocks.length > 0) {
+      console.log("Using looser selector fallback.");
+      // Ensure we only get unique, top-level blocks
+      educationBlockContainers.push(...looserBlocks.toArray());
+    }
   }
 
-  // If we still can't find a container, exit.
-  if ($educationSectionContainer.length === 0) {
-    console.warn("Could not find a stable container for the Education section.");
+  if (educationBlockContainers.length === 0) {
+    console.error("Could not find a stable container for the Education section.");
     return educationData;
   }
 
-  // --- Step 2: Select Individual Education Blocks from the Container ---
-  // Now, we select the individual item blocks relative to the found container.
-  // The original structure suggested blocks are deeply nested divs within the main container.
-  // We look for divs that look like item wrappers, which often contain a 'role="button"' 
-  // or similar interactive wrapper for the data.
-  const educationBlocks = $educationSectionContainer.find('div[role="button"]').closest('div:has(p)');
-
-
-  educationBlocks.each((index, block) => {
+  // Use the blocks found by the refined selector
+  $(educationBlockContainers).each((index, block) => {
     const $block = $(block);
 
-    // The content is usually wrapped by the element with role="button"
-    const $contentDiv = $block.find('div[role="button"]');
+    // The main content div is always found inside the block and has role="button"
+    const $contentDiv = $block.find('div[role="button"]').first();
 
     if ($contentDiv.length === 0) return;
 
-    const $pTags = $contentDiv.find('p');
+    // Find the wrapper containing the P tags (it's often a div two levels above the P tags)
+    const $pTagsWrapper = $contentDiv.find('> div > div');
+    const $pTags = $pTagsWrapper.find('p');
 
     let institution = '';
     let degree = '';
@@ -540,7 +539,7 @@ function extractEducationAlt(htmlString) {
     let grade = '';
     let description = '';
 
-    // --- Core Extraction Logic remains the same, but uses Cheerio methods ---
+    // --- Core Extraction Logic ---
     if ($pTags.length >= 2) {
       institution = $pTags.eq(0).text().trim();
 
@@ -554,10 +553,11 @@ function extractEducationAlt(htmlString) {
       }
     }
 
+    // Iterate over all P tags to find dates, grade, and description
     $pTags.each((i, p) => {
       const text = $(p).text().trim();
 
-      // Dates pattern
+      // Dates pattern: must look for dates adjacent to the main degree/field block
       if (text.match(/(\w{3}\s\d{4}|\d{4})\s–\s(\w{3}\s\d{4}|\d{4})/)) {
         dates = text;
       }
@@ -580,7 +580,6 @@ function extractEducationAlt(htmlString) {
       endDate = dateParts[1] || '';
     }
 
-    // --- Final Object Creation ---
     educationData.push({
       institution: institution,
       degree: degree,
