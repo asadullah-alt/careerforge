@@ -483,117 +483,106 @@ function parseDates(dateString) {
   return { startTime, endTime };
 }
 
-function extractEducationAlt(htmlString) {
+function extractEducationAlt(html) {
+  const $ = cheerio.load(html);
+  const educationList = [];
 
-  const $ = cheerio.load(htmlString);
+  // Find all education entries by looking for edit buttons with aria-label containing "Edit education"
+  // Each education entry has its own edit button
+  $('button[aria-label*="Edit education"]').each((index, button) => {
+    // Navigate up to find the parent container of this education entry
+    const $entry = $(button).closest('div').parent();
 
-  const educationData = [];
-
-  // --- Step 1: Find all repeating education blocks ---
-  // A robust selector is to target the repeating unit container that contains 
-  // both the image/figure and the main data wrapper div[role="button"].
-  // In your HTML, the pattern is a block div followed by <hr>, followed by a block div.
-  // We look for divs that are siblings to the <hr> tag and contain the main data block.
-
-  // The first item is nested inside a key-ed div (0575fc42-...), and subsequent items 
-  // are siblings to the <hr> separator.
-  const educationBlockContainers = $('[componentkey]').filter((i, el) => {
-    // Check if the element contains a logo/figure and the data button.
-    return $(el).find('figure[aria-label][data-view-name="image"]').length > 0 &&
-      $(el).find('div[role="button"]').length > 0;
-  });
-
-
-  if (educationBlockContainers.length === 0) {
-    // Revert to the original, slightly looser structure check if the filter is too strict
-    const looserBlocks = $('div[role="button"]').closest('div:has(figure[aria-label])').closest('div[componentkey]');
-    if (looserBlocks.length > 0) {
-      console.log("Using looser selector fallback.");
-      // Ensure we only get unique, top-level blocks
-      educationBlockContainers.push(...looserBlocks.toArray());
+    // Skip if this doesn't have the expected structure
+    if (!$entry.find('figure').length) {
+      return; // continue to next iteration
     }
-  }
 
-  if (educationBlockContainers.length === 0) {
-    console.error("Could not find a stable container for the Education section.");
-    return educationData;
-  }
+    // Extract institution name (first p tag in the content area)
+    const institution = $entry.find('figure').next('div').find('p').first().text().trim();
 
-  // Use the blocks found by the refined selector
-  $(educationBlockContainers).each((index, block) => {
-    const $block = $(block);
-
-    // The main content div is always found inside the block and has role="button"
-    const $contentDiv = $block.find('div[role="button"]').first();
-
-    if ($contentDiv.length === 0) return;
-
-    // Find the wrapper containing the P tags (it's often a div two levels above the P tags)
-    const $pTagsWrapper = $contentDiv.find('> div > div');
-    const $pTags = $pTagsWrapper.find('p');
-
-    let institution = '';
+    // Extract degree and field of study (second p tag)
+    const degreeText = $entry.find('figure').next('div').find('p').eq(1).text().trim();
     let degree = '';
     let fieldOfStudy = '';
-    let dates = '';
+
+    if (degreeText) {
+      // Split by comma to separate degree from field of study
+      const commaIndex = degreeText.indexOf(',');
+      if (commaIndex !== -1) {
+        degree = degreeText.substring(0, commaIndex).trim();
+        fieldOfStudy = degreeText.substring(commaIndex + 1).trim();
+      } else {
+        // If no comma, check if it looks like a degree or field
+        if (degreeText.toLowerCase().includes('degree') ||
+          degreeText.toLowerCase().includes('school') ||
+          degreeText.toLowerCase().includes('high school')) {
+          degree = degreeText;
+        } else {
+          fieldOfStudy = degreeText;
+        }
+      }
+    }
+
+    // Extract date range (third p tag)
+    const dateText = $entry.find('figure').next('div').find('p').eq(2).text().trim();
+    let startDate = '';
+    let endDate = '';
+
+    if (dateText) {
+      // Parse dates like "Mar 2025 – Jun 2025" or "2010 – 2014"
+      const dateParts = dateText.split('–').map(d => d.trim());
+      if (dateParts.length === 2) {
+        startDate = dateParts[0];
+        endDate = dateParts[1];
+      } else if (dateParts.length === 1) {
+        startDate = dateParts[0];
+      }
+    }
+
+    // Extract grade and description from all p tags
     let grade = '';
     let description = '';
 
-    // --- Core Extraction Logic ---
-    if ($pTags.length >= 2) {
-      institution = $pTags.eq(0).text().trim();
-
-      const degreeFieldText = $pTags.eq(1).text().trim();
-      const parts = degreeFieldText.split(',');
-      if (parts.length > 1) {
-        degree = parts[0].trim();
-        fieldOfStudy = parts.slice(1).join(',').trim();
-      } else {
-        degree = degreeFieldText;
-      }
-    }
-
-    // Iterate over all P tags to find dates, grade, and description
-    $pTags.each((i, p) => {
+    $entry.find('p').each((i, p) => {
       const text = $(p).text().trim();
-
-      // Dates pattern: must look for dates adjacent to the main degree/field block
-      if (text.match(/(\w{3}\s\d{4}|\d{4})\s–\s(\w{3}\s\d{4}|\d{4})/)) {
-        dates = text;
-      }
-      // Grade pattern
-      else if (text.startsWith('Grade:')) {
+      if (text.startsWith('Grade:')) {
         grade = text.replace('Grade:', '').trim();
-      }
-      // Description/Activities pattern
-      else if (text.startsWith('Activities and societies:')) {
+      } else if (text.startsWith('Activities and societies:')) {
         description = text.replace('Activities and societies:', '').trim();
       }
     });
 
-    // --- Date Parsing ---
-    let startDate = '';
-    let endDate = '';
-    if (dates) {
-      const dateParts = dates.split('–').map(d => d.trim());
-      startDate = dateParts[0] || '';
-      endDate = dateParts[1] || '';
+    // Only add if we found an institution
+    if (institution) {
+      educationList.push({
+        institution: institution,
+        degree: degree,
+        field_of_study: fieldOfStudy,
+        start_date: startDate,
+        end_date: endDate,
+        grade: grade,
+        description: description
+      });
     }
-
-    educationData.push({
-      institution: institution,
-      degree: degree,
-      field_of_study: fieldOfStudy,
-      start_date: startDate,
-      end_date: endDate,
-      grade: grade,
-      description: description
-    });
   });
 
-  return educationData;
-}
+  // Remove duplicates based on institution and degree combined
+  const uniqueEducation = [];
+  const seen = new Set();
 
+  for (const edu of educationList) {
+    // Create a unique key from institution and degree
+    const key = `${edu.institution.toLowerCase()}|${edu.degree.toLowerCase()}`;
+
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueEducation.push(edu);
+    }
+  }
+
+  return uniqueEducation;
+}
 
 function extractEducation(htmlContent) {
   const $ = cheerio.load(htmlContent);
