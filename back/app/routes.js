@@ -277,7 +277,7 @@ module.exports = function (app, passport) {
         // Build a ProcessedResume-compatible object from the incoming payload
         const resumeId = crypto.randomUUID();
 
-        let rawSkills = await cleanHTML(payload.details_skills_main, "skills") || [];
+        let rawSkills = cleanHTML(payload.details_skills_main, "skills") || [];
         console.log(rawSkills)
         const resumeContent = {
           personal_data: {
@@ -287,9 +287,9 @@ module.exports = function (app, passport) {
             location: { city: payload.location || null }
           },
 
-          experiences: await cleanHTML(payload.details_experience_main, "experience") || [],
-          projects: await cleanHTML(payload.details_projects_main, "projects") || [],
-          education: await cleanHTML(payload.details_education_main, "education") || [],
+          experiences: cleanHTML(payload.details_experience_main, "experience") || [],
+          projects: cleanHTML(payload.details_projects_main, "projects") || [],
+          education:  cleanHTML(payload.details_education_main, "education") || [],
           skills: rawSkills
         }
         stringResume = JSON.stringify(resumeContent)

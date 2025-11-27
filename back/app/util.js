@@ -86,7 +86,7 @@ function extractSkillsWithRegex(html) {
   return Array.from(skills).map(s => ({ category: null, skill_name: s }));
 }
 
-async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
+function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   // Default options - remove everything by default
   if (htmlContent == null) {
     if (moduleTypeCV === 'skills' || moduleTypeCV === 'projects' || moduleTypeCV === 'experience' || moduleTypeCV === 'education') {
