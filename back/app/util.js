@@ -668,10 +668,10 @@ function extractEducation(htmlContent) {
           : text;
       }
     }
-    if (entry.institution)
+    if (entry.institution !== null && entry.degree !== null)
       educationData.push(entry);
   });
-
+  console.log("EDUCATION DATA", educationData);
   return educationData;
 }
 /**
