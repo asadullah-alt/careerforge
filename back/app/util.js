@@ -233,6 +233,7 @@ async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
     // Extract the JSON array from the model's raw output.
     const match = output.match(/\[.*\]/s);
     const educationJson = match ? JSON.parse(match[0]) : [];
+    console.log("EDUCATION JSON:", educationJson)
     //const educationArray = extractEducation(cleaned);
     return educationJson;
   }
