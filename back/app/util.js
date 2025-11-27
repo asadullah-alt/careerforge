@@ -582,7 +582,7 @@ function extractEducationAlt(html) {
       uniqueEducation.push(edu);
     }
   }
-
+console.log("UNIQUE", uniqueEducation)
   return uniqueEducation;
 }
 
