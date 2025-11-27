@@ -1,10 +1,14 @@
 const cheerio = require('cheerio');
-
+const { OpenAI } = require('openai');
 /**
  * Extracts skills from LinkedIn profile HTML
  * @param {string} html - The HTML content from LinkedIn profile skills section
  * @returns {Array<string>} - Array of unique skills
  */
+const client = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
+});
 function extractSkills(html) {
   const skills = new Set(); // Use a Set to automatically handle duplicates
   const $ = cheerio.load(html);
@@ -86,7 +90,7 @@ function extractSkillsWithRegex(html) {
   return Array.from(skills).map(s => ({ category: null, skill_name: s }));
 }
 
-async function cleanHTML(htmlContent, moduleTypeCV = 'default', client) {
+async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   // Default options - remove everything by default
   if (htmlContent == null) {
     if (moduleTypeCV === 'skills' || moduleTypeCV === 'projects' || moduleTypeCV === 'experience' || moduleTypeCV === 'education') {

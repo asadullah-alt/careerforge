@@ -11,10 +11,7 @@ const { ProcessedJob } = require('./models/jobApplication');
 const { ProcessedResume, Resume } = require('./models/resume');
 const { extractSkills, extractSkillsWithRegex, cleanHTML, parseLinkedInProjects } = require('./util');
 const { error } = require('console');
-const openClient = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: "https://api.groq.com/openai/v1",
-});
+
 async function runGeminiFlash(model, prompt) {
   try {
     // Note: model and prompt are now parameters, not constants inside the function.
@@ -280,7 +277,7 @@ module.exports = function (app, passport) {
         // Build a ProcessedResume-compatible object from the incoming payload
         const resumeId = crypto.randomUUID();
 
-        let rawSkills = await cleanHTML(payload.details_skills_main, "skills", openClient) || [];
+        let rawSkills = await cleanHTML(payload.details_skills_main, "skills") || [];
         console.log(rawSkills)
         const resumeContent = {
           personal_data: {
@@ -290,9 +287,9 @@ module.exports = function (app, passport) {
             location: { city: payload.location || null }
           },
 
-          experiences: await cleanHTML(payload.details_experience_main, "experience", openClient) || [],
-          projects: await cleanHTML(payload.details_projects_main, "projects", openClient) || [],
-          education: await cleanHTML(payload.details_education_main, "education", openClient) || [],
+          experiences: await cleanHTML(payload.details_experience_main, "experience") || [],
+          projects: await cleanHTML(payload.details_projects_main, "projects") || [],
+          education: await cleanHTML(payload.details_education_main, "education") || [],
           skills: rawSkills
         }
         stringResume = JSON.stringify(resumeContent)
