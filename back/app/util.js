@@ -668,8 +668,8 @@ function extractEducation(htmlContent) {
           : text;
       }
     }
-
-    educationData.push(entry);
+    if (entry.institution)
+      educationData.push(entry);
   });
 
   return educationData;
