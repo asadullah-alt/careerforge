@@ -211,6 +211,7 @@ async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
     return experienceJson;
   }
   if (moduleTypeCV === "education") {
+    console.log("EDUCATION AI")
     const prompt =
       "You are an expert in data extraction for education. Below is the html which has the details of education extract them in json format {institution: '', degree: '', field_of_study: '', start_date: '', end_date: '',grade: '', description: ''}. Your response should be in JSON format " +
       cleaned;
