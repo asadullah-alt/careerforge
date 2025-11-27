@@ -200,7 +200,9 @@ async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
       console.log("DID THIS TRIGGER")
       educationArray = []
       educationArray = extractEducationAlt(cleaned);
+     
     }
+     console.log("EDUCACTION ARRAY", educationArray);
     return educationArray;
   }
 
