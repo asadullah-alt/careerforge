@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('./models/user');
-
+const { OpenAI } = require('openai');
 const JobApplication = require('./models/jobApplication');
 const { raw } = require('body-parser');
 const { default: ollamaClient } = require('ollama');
@@ -8,14 +8,18 @@ const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({});
 const crypto = require('crypto');
 const { ProcessedJob } = require('./models/jobApplication');
-const {ProcessedResume,Resume} = require('./models/resume');
-const {extractSkills, extractSkillsWithRegex, cleanHTML, parseLinkedInProjects} = require('./util');
+const { ProcessedResume, Resume } = require('./models/resume');
+const { extractSkills, extractSkillsWithRegex, cleanHTML, parseLinkedInProjects } = require('./util');
 const { error } = require('console');
+const openClient = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
+});
 async function runGeminiFlash(model, prompt) {
   try {
     // Note: model and prompt are now parameters, not constants inside the function.
     console.log(`Sending prompt to ${model}: "${prompt}"\n`);
-    
+
     // Call the model to generate content
     const response = await ai.models.generateContent({
       model: model,
@@ -26,11 +30,11 @@ async function runGeminiFlash(model, prompt) {
 
   } catch (error) {
     console.error("An error occurred:", error);
-     return error;
+    return error;
   }
 }
 module.exports = function (app, passport) {
-  
+
   app.post('/login', (req, res, next) => {
 
     return passport.authenticate('local-login', { session: false }, (err, passportUser, info) => {
@@ -115,7 +119,7 @@ module.exports = function (app, passport) {
   }));
 
   app.get('/auth/google/callback',
-    passport.authenticate('google', ), (req, res) => {
+    passport.authenticate('google',), (req, res) => {
       console.log(req.user.google)
       if (!req.user.isVerified) {
         // Redirect to verification page if email not verified
@@ -127,13 +131,13 @@ module.exports = function (app, passport) {
       }
     });
 
-    app.get('/auth/linkedin', passport.authenticate('linkedin'));
-  
-    app.get('/auth/linkedin/callback',
-      passport.authenticate('linkedin', ), (req, res) => {
-        let token = req.user.linkedin.token;
-        res.redirect('https://bhaikaamdo.com/game?token=' + token)
-      });
+  app.get('/auth/linkedin', passport.authenticate('linkedin'));
+
+  app.get('/auth/linkedin/callback',
+    passport.authenticate('linkedin',), (req, res) => {
+      let token = req.user.linkedin.token;
+      res.redirect('https://bhaikaamdo.com/game?token=' + token)
+    });
 
   app.get('/jwt', passport.authenticate('jwt-auth', { session: false }), (req, res) => {
     res.json({ user: req.user })
@@ -170,7 +174,7 @@ module.exports = function (app, passport) {
       await user.save();
 
       // Generate JWT token
-      
+
       res.json({
         success: true,
         message: 'Email verified successfully',
@@ -247,102 +251,104 @@ module.exports = function (app, passport) {
       }
 
       if (passportUser) {
-        return res.status(200).json({ user: passportUser});
+        return res.status(200).json({ user: passportUser });
       }
 
       return res.status(400).json({
-        info : 'Please check if your token is valid and provide a good one'
+        info: 'Please check if your token is valid and provide a good one'
       });
     })(req, res, next);
 
   });
 
   // Save LinkedIn profile data endpoint
-  app.post('/api/saveProfile', (req, res) => {
+  app.post('/api/saveProfile', async (req, res) => {
     try {
       const payload = req.body || {};
       const token = payload.token || (req.headers && (req.headers.authorization || req.headers.Authorization) ? (req.headers.authorization || req.headers.Authorization).replace(/^Bearer\s+/i, '') : null);
-      
-     
+
+
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token in request body or Authorization header.' });
       }
 
       // Find the user by any stored social token
-      User.findOne({ $or: [{ 'Extensiontoken': token },{ 'local.token':token},{'google.token':token}, { 'linkedin.token': token }] }, (err, user) => {
+      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'google.token': token }, { 'linkedin.token': token }] }, async (err, user) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found.' });
-         
-          // Build a ProcessedResume-compatible object from the incoming payload
-          const resumeId = crypto.randomUUID();
 
-          let rawSkills = cleanHTML(payload.details_skills_main, "skills") || [];
-          console.log(rawSkills)
-         const resumeContent = {personal_data: {
-              first_name: (payload.name || '').split(' ')[0] || '',
-              last_name: (payload.name || '').split(' ').slice(1).join(' ') || null,
-              linkedin: payload.profileUrl || null,
-              location: { city: payload.location || null }
-            },
+        // Build a ProcessedResume-compatible object from the incoming payload
+        const resumeId = crypto.randomUUID();
 
-            experiences: cleanHTML(payload.details_experience_main, "experience") || [],
-            projects: cleanHTML(payload.details_projects_main, "projects") || [],
-            education: cleanHTML(payload.details_education_main, "education") || [],
-            skills: rawSkills}
-            stringResume  = JSON.stringify(resumeContent)
-            console.log("Resume content stringified:", stringResume);
-         const ResumeData = {
-            user_id: user._id.toString(),
-            resume_name: payload.name || 'LinkedIn Import',
-            resume_id: resumeId,
-            content_type:"md",
-            content:stringResume
+        let rawSkills = await cleanHTML(payload.details_skills_main, "skills", openClient) || [];
+        console.log(rawSkills)
+        const resumeContent = {
+          personal_data: {
+            first_name: (payload.name || '').split(' ')[0] || '',
+            last_name: (payload.name || '').split(' ').slice(1).join(' ') || null,
+            linkedin: payload.profileUrl || null,
+            location: { city: payload.location || null }
+          },
 
-         }
-         job = new Resume(ResumeData);
-          job.save((errr, savedResume) => {
-            if (errr) {
-              console.error('Error saving resume:', errr);
-              return res.status(500).json({ success: false, message: errr.message });
+          experiences: await cleanHTML(payload.details_experience_main, "experience", openClient) || [],
+          projects: await cleanHTML(payload.details_projects_main, "projects", openClient) || [],
+          education: await cleanHTML(payload.details_education_main, "education", openClient) || [],
+          skills: rawSkills
+        }
+        stringResume = JSON.stringify(resumeContent)
+        console.log("Resume content stringified:", stringResume);
+        const ResumeData = {
+          user_id: user._id.toString(),
+          resume_name: payload.name || 'LinkedIn Import',
+          resume_id: resumeId,
+          content_type: "md",
+          content: stringResume
+
+        }
+        job = new Resume(ResumeData);
+        job.save((errr, savedResume) => {
+          if (errr) {
+            console.error('Error saving resume:', errr);
+            return res.status(500).json({ success: false, message: errr.message });
+          }
+          console.log("Resume saved for user:", user._id);
+        });
+        const processedResumeData = {
+          user_id: user._id.toString(),
+          resume_name: payload.name || 'LinkedIn Import',
+          resume_id: resumeId,
+
+          personal_data: {
+            first_name: (payload.name || '').split(' ')[0] || '',
+            last_name: (payload.name || '').split(' ').slice(1).join(' ') || null,
+            linkedin: payload.profileUrl || null,
+            location: { city: payload.location || null }
+          },
+
+          experiences: cleanHTML(payload.details_experience_main, "experience") || [],
+          projects: cleanHTML(payload.details_projects_main, "projects") || [],
+          education: cleanHTML(payload.details_education_main, "education") || [],
+          skills: rawSkills,
+          extracted_keywords: [],
+          processed_at: new Date()
+        };
+
+        console.log("user found for profile save:", user._id);
+
+        // Upsert ProcessedResume record (based on user_id + resume_id)
+        ProcessedResume.findOneAndUpdate(
+          { user_id: user._id.toString(), resume_id: resumeId },
+          processedResumeData,
+          { upsert: true, new: true, setDefaultsOnInsert: true },
+          (err2, savedResume) => {
+            if (err2) {
+              console.error('Error saving processed resume:', err2);
+              return res.status(500).json({ success: false, message: err2.message });
             }
-            console.log("Resume saved for user:", user._id);
-          });
-          const processedResumeData = {
-            user_id: user._id.toString(),
-            resume_name: payload.name || 'LinkedIn Import',
-            resume_id: resumeId,
-
-            personal_data: {
-              first_name: (payload.name || '').split(' ')[0] || '',
-              last_name: (payload.name || '').split(' ').slice(1).join(' ') || null,
-              linkedin: payload.profileUrl || null,
-              location: { city: payload.location || null }
-            },
-
-            experiences: cleanHTML(payload.details_experience_main, "experience") || [],
-            projects: cleanHTML(payload.details_projects_main, "projects") || [],
-            education: cleanHTML(payload.details_education_main, "education") || [],
-            skills: rawSkills,
-            extracted_keywords: [],
-            processed_at: new Date()
-          };
-
-          console.log("user found for profile save:", user._id);
-
-          // Upsert ProcessedResume record (based on user_id + resume_id)
-          ProcessedResume.findOneAndUpdate(
-            { user_id: user._id.toString(), resume_id: resumeId },
-            processedResumeData,
-            { upsert: true, new: true, setDefaultsOnInsert: true },
-            (err2, savedResume) => {
-              if (err2) {
-                console.error('Error saving processed resume:', err2);
-                return res.status(500).json({ success: false, message: err2.message });
-              }
-              console.log("Processed resume saved for user:", user._id);
-              return res.json({ success: true, message: 'Processed resume saved successfully.', resume: savedResume });
-            }
-          );
+            console.log("Processed resume saved for user:", user._id);
+            return res.json({ success: true, message: 'Processed resume saved successfully.', resume: savedResume });
+          }
+        );
       });
     } catch (e) {
       console.log(e.message);
@@ -373,7 +379,7 @@ module.exports = function (app, passport) {
         const filter = userIdFilter ? { resume_id: resume_id, user_id: userIdFilter } : { resume_id: resume_id };
         const update = { personal_data, updatedAt: new Date(), processed_at: new Date() };
         // Upsert so we create a minimal record if none exists
-        ProcessedResume.findOneAndUpdate(filter, { $set: update, $setOnInsert: { resume_id: resume_id} }, { upsert: true, new: true, setDefaultsOnInsert: true }, (err, saved) => {
+        ProcessedResume.findOneAndUpdate(filter, { $set: update, $setOnInsert: { resume_id: resume_id } }, { upsert: true, new: true, setDefaultsOnInsert: true }, (err, saved) => {
           if (err) return res.status(500).json({ success: false, message: err.message });
           return res.json({ success: true, message: 'Personal data saved', resume: saved });
         });
@@ -381,7 +387,7 @@ module.exports = function (app, passport) {
 
       if (token) {
         // find user by token and restrict update to that user's resume
-        User.findOne({ $or: [{ 'Extensiontoken': token },{ 'local.token':token},{'google.token':token}, { 'linkedin.token': token }] }, (err, user) => {
+        User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'google.token': token }, { 'linkedin.token': token }] }, (err, user) => {
           if (err) return res.status(500).json({ success: false, message: err.message });
           if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found.' });
           proceedUpdate(user._id.toString());
@@ -404,23 +410,23 @@ module.exports = function (app, passport) {
 
       const url = payload.url || '';
       const html = payload.html || '';
-      const systemPromptData = {"system_prompt":"using the schema above convert the information into the JSON object","user_input":"{ \"jobId\": \"\", \"title\": \"\", \"companyName\": \"\", \"companyLogoUrl\": \"\", \"companyWebsite\": \"\", \"companyDescription\": \"\", \"description\": \"\", \"responsibilities\": [], \"requirements\": { \"mustHave\": [], \"niceToHave\": [] }, \"location\": { \"city\": \"\", \"state\": \"\", \"country\": \"\", \"postalCode\": \"\", \"address\": \"\", \"locationType\": \"\" }, \"employmentType\": \"\", \"schedule\": \"\", \"salary\": { \"min\": null, \"max\": null, \"currency\": \"\", \"payPeriod\": \"\", \"details\": \"\" }, \"benefits\": [], \"howToApply\": \"\", \"applyUrl\": \"\", \"contactEmail\": \"\", \"datePosted\": \"\", \"validThrough\": \"\", \"department\": \"\", \"experienceLevel\": \"\", \"industry\": \"\" }"};
+      const systemPromptData = { "system_prompt": "using the schema above convert the information into the JSON object", "user_input": "{ \"jobId\": \"\", \"title\": \"\", \"companyName\": \"\", \"companyLogoUrl\": \"\", \"companyWebsite\": \"\", \"companyDescription\": \"\", \"description\": \"\", \"responsibilities\": [], \"requirements\": { \"mustHave\": [], \"niceToHave\": [] }, \"location\": { \"city\": \"\", \"state\": \"\", \"country\": \"\", \"postalCode\": \"\", \"address\": \"\", \"locationType\": \"\" }, \"employmentType\": \"\", \"schedule\": \"\", \"salary\": { \"min\": null, \"max\": null, \"currency\": \"\", \"payPeriod\": \"\", \"details\": \"\" }, \"benefits\": [], \"howToApply\": \"\", \"applyUrl\": \"\", \"contactEmail\": \"\", \"datePosted\": \"\", \"validThrough\": \"\", \"department\": \"\", \"experienceLevel\": \"\", \"industry\": \"\" }" };
 
-let cleanedHTML = cleanHTML(html);
+      let cleanedHTML = cleanHTML(html);
       const response = await ollamaClient.generate({
-    model: 'gpt-oss:latest',
-    prompt: cleanedHTML+systemPromptData.user_input+systemPromptData.system_prompt,
-    stream: false
-  });
-responseGemini = response.response;
-  // responseGemini = await runGeminiFlash('gemini-2.5-flash', cleanedHTML+systemPromptData.user_input+systemPromptData.system_prompt);
-  console.log(responseGemini);
+        model: 'gpt-oss:latest',
+        prompt: cleanedHTML + systemPromptData.user_input + systemPromptData.system_prompt,
+        stream: false
+      });
+      responseGemini = response.response;
+      // responseGemini = await runGeminiFlash('gemini-2.5-flash', cleanedHTML+systemPromptData.user_input+systemPromptData.system_prompt);
+      console.log(responseGemini);
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token' });
       }
 
       // find user by token
-      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token':token},{ 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
+      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
 
         // attempt to extract JSON from responseGemini
@@ -465,7 +471,7 @@ responseGemini = response.response;
           user: user ? user._id : undefined,
           url,
           html,
-          parsed: parsed? JSON.stringify(parsed) : null,
+          parsed: parsed ? JSON.stringify(parsed) : null,
         });
 
         doc.save((saveErr, saved) => {
@@ -525,7 +531,7 @@ responseGemini = response.response;
         return res.status(400).json({ success: false, valid: false, message: 'Missing token' });
       }
 
-      User.findOne({ $or: [{ 'google.token': token },{ 'local.token':token}, { 'extensionToken': token }, { 'linkedin.token': token }] }, (err, user) => {
+      User.findOne({ $or: [{ 'google.token': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }] }, (err, user) => {
         if (err) return res.status(500).json({ success: false, valid: false, message: err.message });
         if (!user) return res.json({ success: true, valid: false });
 
@@ -561,13 +567,13 @@ responseGemini = response.response;
   app.post('/api/allJobs', (req, res) => {
     try {
       const token = req.body.token || (req.headers && (req.headers.authorization || req.headers.Authorization) ? (req.headers.authorization || req.headers.Authorization).replace(/^Bearer\s+/i, '') : null);
-      
+
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token' });
       }
 
       // Find user by token
-      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token':token},{ 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
+      User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
 
@@ -591,7 +597,7 @@ responseGemini = response.response;
   app.post('/api/resume/save', (req, res) => {
     try {
       const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
-      
+
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token' });
       }
@@ -629,7 +635,7 @@ responseGemini = response.response;
   app.post('/api/resume/list', (req, res) => {
     try {
       const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
-      
+
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token' });
       }
@@ -637,9 +643,9 @@ responseGemini = response.response;
       User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
-    
+
         // Get all resumes for the user   
-        ProcessedResume.find({ user_id: user._id}).sort({ updatedAt: -1 }).exec((err, resumes) => {
+        ProcessedResume.find({ user_id: user._id }).sort({ updatedAt: -1 }).exec((err, resumes) => {
           if (err) return res.status(500).json({ success: false, message: err.message });
           return res.json({ success: true, data: resumes });
         });
@@ -653,8 +659,8 @@ responseGemini = response.response;
   app.post('/api/resume/load', (req, res) => {
     try {
       const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
-      const  id  = req.body.id;
-      console.log(req.body);  
+      const id = req.body.id;
+      console.log(req.body);
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token' });
       }
@@ -666,7 +672,7 @@ responseGemini = response.response;
       User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] }, (err, user) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
-      console.log("ID for resume load:", id);
+        console.log("ID for resume load:", id);
         ProcessedResume.findOne({ _id: id, user_id: user._id }, (err, resume) => {
           if (err) return res.status(500).json({ success: false, message: err.message });
           if (!resume) return res.status(404).json({ success: false, message: 'Resume not found' });
@@ -683,7 +689,7 @@ responseGemini = response.response;
     try {
       const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
       const { id } = req.body;
-      
+
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token' });
       }
@@ -712,7 +718,7 @@ responseGemini = response.response;
     try {
       const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
       const { id, title } = req.body;
-      
+
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token' });
       }

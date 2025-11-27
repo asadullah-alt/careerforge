@@ -19,19 +19,19 @@ function extractSkills(html) {
     const text = pTag.text().trim();
 
     // 3. Validate the text
-    if (text && 
-        !text.includes('endorsement') && 
-        !text.includes('Show more') &&
-        text.length > 0) {
-      
+    if (text &&
+      !text.includes('endorsement') &&
+      !text.includes('Show more') &&
+      text.length > 0) {
+
       skills.add(text);
     }
   });
 
   // 4. Convert Set back to the array format you wanted
-  return Array.from(skills).map(skill => ({ 
-      category: null, 
-      skill_name: skill 
+  return Array.from(skills).map(skill => ({
+    category: null,
+    skill_name: skill
   }));
 }
 function removeDuplicatesByKey(array, key) {
@@ -57,7 +57,7 @@ function extractSkillsAltOne(html) {
       spans.each((_, span) => {
         const text = $(span).text().trim();
         if (text && text.length > 1) {
-          skills.add({"skill_name":text,"category":null});
+          skills.add({ "skill_name": text, "category": null });
         }
       });
     }
@@ -86,9 +86,9 @@ function extractSkillsWithRegex(html) {
   return Array.from(skills).map(s => ({ category: null, skill_name: s }));
 }
 
-function cleanHTML(htmlContent, moduleTypeCV = 'default') {
+async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   // Default options - remove everything by default
-    if (htmlContent == null) {
+  if (htmlContent == null) {
     if (moduleTypeCV === 'skills' || moduleTypeCV === 'projects' || moduleTypeCV === 'experience' || moduleTypeCV === 'education') {
       return [];
     }
@@ -172,7 +172,7 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
     console.log("Skills");
     console.log(cleaned);
     let skillsArray = extractSkills(cleaned);
-    if (skillsArray.length === 0)  {
+    if (skillsArray.length === 0) {
       skillsArray = extractSkillsAltOne(cleaned);
       console.log(skillsArray)
     }
@@ -182,21 +182,50 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   if (moduleTypeCV === "projects") {
     console.log("Projects");
     console.log(cleaned);
-    const projectsArray = parseLinkedInProjects(cleaned);
-    return projectsArray;
+    const prompt =
+      "You are an expert in data extraction for projects. Below is the html which has the details of projects extract them in json format {project_name: '', start_date: '', end_date: '', description: '', technologies_used: []}. Your response should be in JSON format " +
+      cleaned;
+    const response = await client.chat.completions.create({
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      messages: [{ role: "user", content: prompt }],
+    });
+    const output = response.choices[0].message.content;
+    const match = output.match(/\[.*\]/s);
+    const projectsJson = match ? JSON.parse(match[0]) : [];
+    return projectsJson;
   }
 
-  if(moduleTypeCV === "experience") {
+  if (moduleTypeCV === "experience") {
     console.log("Experience");
     console.log(cleaned);
-    const experienceArray = parseLinkedInExperience(cleaned);
-    return experienceArray;
+    const prompt =
+      "You are an expert in data extraction for experience. Below is the html which has the details of work experience extract them in json format {company: '', job_title: '', start_date: '', end_date: '', location: '', description: ''}. Your response should be in JSON format " +
+      cleaned;
+    const response = await client.chat.completions.create({
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      messages: [{ role: "user", content: prompt }],
+    });
+    const output = response.choices[0].message.content;
+    const match = output.match(/\[.*\]/s);
+    const experienceJson = match ? JSON.parse(match[0]) : [];
+    return experienceJson;
   }
-  if(moduleTypeCV === "education") {
-    console.log("Education");
-    console.log(cleaned);
-    const educationArray = extractEducation(cleaned);
-    return educationArray;
+  if (moduleTypeCV === "education") {
+    const prompt =
+      "You are an expert in data extraction for education. Below is the html which has the details of education extract them in json format {institution: '', degree: '', field_of_study: '', start_date: '', end_date: '',grade: '', description: ''}. Your response should be in JSON format " +
+      cleaned;
+    const response = await client.chat.completions.create({
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const output = response.choices[0].message.content;
+
+    // Extract the JSON array from the model's raw output.
+    const match = output.match(/\[.*\]/s);
+    const educationJson = match ? JSON.parse(match[0]) : [];
+    //const educationArray = extractEducation(cleaned);
+    return educationJson;
   }
 
   return cleaned;
@@ -204,12 +233,12 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
 
 function parseLinkedInProjects(html) {
   const $ = cheerio.load(html);
-  
+
   // Find all project list items
   const projectItems = $('li[id^="profilePagedListComponent"]');
-  
+
   const projects = [];
-  
+
   projectItems.each((i, item) => {
     const project = {
       project_name: null,
@@ -220,7 +249,7 @@ function parseLinkedInProjects(html) {
       technologies_used: [],
       link: null
     };
-    
+
     // Extract project name
     const nameElements = $(item).find('span[aria-hidden="true"]');
     let foundName = false;
@@ -228,16 +257,16 @@ function parseLinkedInProjects(html) {
       if (foundName) return;
       const text = $(elem).text().trim();
       // First substantial text is usually the project name
-      if (text && !text.includes('Associated with') && !text.includes('Aug ') && 
-          !text.includes('Sep ') && !text.includes('Jan ') && !text.includes('Feb ') &&
-          !text.includes('Mar ') && !text.includes('Apr ') && !text.includes('May ') &&
-          !text.includes('Jun ') && !text.includes('Jul ') && !text.includes('Oct ') &&
-          !text.includes('Nov ') && !text.includes('Dec ')) {
+      if (text && !text.includes('Associated with') && !text.includes('Aug ') &&
+        !text.includes('Sep ') && !text.includes('Jan ') && !text.includes('Feb ') &&
+        !text.includes('Mar ') && !text.includes('Apr ') && !text.includes('May ') &&
+        !text.includes('Jun ') && !text.includes('Jul ') && !text.includes('Oct ') &&
+        !text.includes('Nov ') && !text.includes('Dec ')) {
         project.project_name = text;
         foundName = true;
       }
     });
-    
+
     // Extract dates
     const dateElements = $(item).find('span > span[aria-hidden="true"]');
     let foundDate = false;
@@ -248,12 +277,12 @@ function parseLinkedInProjects(html) {
         const [start, end] = text.split(' - ').map(s => s.trim());
         const sd = parseDate(start);
         const ed = parseDate(end);
-        project.start_date = sd ? sd.toISOString().slice(0,10) : null;
-        project.end_date = ed ? ed.toISOString().slice(0,10) : null;
+        project.start_date = sd ? sd.toISOString().slice(0, 10) : null;
+        project.end_date = ed ? ed.toISOString().slice(0, 10) : null;
         foundDate = true;
       }
     });
-    
+
     // Extract associated organization
     const allSpans = $(item).find('span[aria-hidden="true"]');
     let foundAssoc = false;
@@ -265,7 +294,7 @@ function parseLinkedInProjects(html) {
         foundAssoc = true;
       }
     });
-    
+
     // Extract description (usually the longest text content)
     let longestText = '';
     allSpans.each((j, elem) => {
@@ -283,7 +312,7 @@ function parseLinkedInProjects(html) {
         project.technologies_used = Array.from(new Set(techMatches.map(t => t.trim())));
       }
     }
-    
+
     projects.push({
       project_name: project.project_name,
       description: project.description,
@@ -294,7 +323,7 @@ function parseLinkedInProjects(html) {
       associatedWith: project.associatedWith
     });
   });
-  
+
   return projects;
 }
 
@@ -307,12 +336,12 @@ function parseDate(dateStr) {
   if (!dateStr || dateStr.toLowerCase() === 'present') {
     return null;
   }
-  
+
   const monthMap = {
     'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
     'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
   };
-  
+
   const parts = dateStr.split(' ');
   if (parts.length === 2) {
     const month = monthMap[parts[0]];
@@ -321,21 +350,21 @@ function parseDate(dateStr) {
       return new Date(year, month, 1);
     }
   }
-  
+
   return null;
 }
 
 
 function parseLinkedInExperience(html) {
   const $ = cheerio.load(html);
-  
+
   // Find all experience list items
   const experienceItems = $('li[id*="profilePagedListComponent"]');
   const jobs = [];
-  
+
   experienceItems.each((index, item) => {
     const $item = $(item);
-    
+
     const job = {
       job_title: null,
       start_date: null,
@@ -346,7 +375,7 @@ function parseLinkedInExperience(html) {
       companyPicURL: null,
       technologies_used: []
     };
-    
+
     // Extract all span elements with aria-hidden="true"
     const spans = $item.find('span[aria-hidden="true"]');
     const spanTexts = [];
@@ -355,7 +384,7 @@ function parseLinkedInExperience(html) {
       const text = $(span).text().trim();
       if (text) spanTexts.push(text);
     });
-    
+
     // Extract job title (usually the first span that doesn't contain · or dates)
     if (spanTexts.length > 0) {
       const titleText = spanTexts[0];
@@ -363,14 +392,14 @@ function parseLinkedInExperience(html) {
         job.job_title = titleText;
       }
     }
-    
+
     // Extract company name (span that contains · and employment type)
     const companySpan = spanTexts.find(text => text.includes('·') && (text.includes('Full-time') || text.includes('Part-time') || text.includes('Contract') || text.includes('Internship')));
     if (companySpan) {
       const companyText = companySpan.split('·')[0].trim();
       if (companyText) job.company = companyText;
     }
-    
+
     // Extract date range (start and end time)
     const dateSpan = spanTexts.find(text => text.includes('Present') || (text.match(/\d{4}/) && (text.includes('-') || text.includes('to'))));
     if (dateSpan) {
@@ -379,20 +408,20 @@ function parseLinkedInExperience(html) {
         const startStr = dateMatch[1].trim();
         const endStr = dateMatch[2].trim();
         const sd = parseDateExp(startStr);
-        job.start_date = sd ? sd.toISOString().slice(0,10) : null;
+        job.start_date = sd ? sd.toISOString().slice(0, 10) : null;
         if (endStr.toLowerCase().includes('present')) {
           job.end_date = 'Present';
         } else {
           const ed = parseDateExp(endStr);
-          job.end_date = ed ? ed.toISOString().slice(0,10) : endStr;
+          job.end_date = ed ? ed.toISOString().slice(0, 10) : endStr;
         }
       }
     }
-    
+
     // Extract location/address
     const locationSpan = spanTexts.find(text => !text.includes('·') && !text.includes('-') && !text.match(/\d{4}/) && text.length > 2 && text.length < 100 && text !== job.job_title && text !== job.company && (text.includes('Pakistan') || text.includes('Islamabad') || text.includes('On-site') || text.includes('Hybrid') || text.includes('Remote') || text.includes('Comsats')));
     if (locationSpan) job.location = locationSpan;
-    
+
     // Extract description (look for bullet point content)
     const descriptionElements = $item.find('div ul li div span[aria-hidden="true"]');
     const descriptions = [];
@@ -401,18 +430,18 @@ function parseLinkedInExperience(html) {
       if (text && text.length > 20) descriptions.push(text);
     });
     if (descriptions.length > 0) job.description = descriptions;
-    
+
     // Extract company picture URL
     const img = $item.find('img').first();
     if (img.length && img.attr('src')) job.companyPicURL = img.attr('src');
-    
+
     // Try extracting simple technology mentions from spanTexts or descriptions
     const techMatches = spanTexts.join(' ').match(/\b(JavaScript|TypeScript|React|Node|Python|Django|Flask|MongoDB|Postgres|SQL|AWS|Docker|Kubernetes|C\+\+|Java|Go)\b/ig);
     if (techMatches) job.technologies_used = Array.from(new Set(techMatches.map(t => t.trim())));
 
     jobs.push(job);
   });
-  
+
   return jobs;
 }
 
@@ -423,22 +452,22 @@ function parseLinkedInExperience(html) {
  */
 function parseDateExp(dateStr) {
   if (!dateStr) return null;
-  
+
   const months = {
     'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
     'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11,
     'january': 0, 'february': 1, 'march': 2, 'april': 3, 'june': 5,
     'july': 6, 'august': 7, 'september': 8, 'october': 9, 'november': 10, 'december': 11
   };
-  
+
   const match = dateStr.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)\s+(\d{4})/i);
-  
+
   if (match) {
     const month = months[match[1].toLowerCase()];
     const year = parseInt(match[2]);
     return new Date(year, month, 1);
   }
-  
+
   return null;
 }
 function parseDates(dateString) {
@@ -486,7 +515,7 @@ function extractEducation(htmlContent) {
   // Select the specific list items that contain education details
   // The snippet shows IDs containing 'EDUCATION-VIEW-DETAILS'
   $('li[id*="EDUCATION-VIEW-DETAILS"]').each((index, element) => {
-    
+
     // Initialize default object structure
     const entry = {
       institution: null,
@@ -518,7 +547,7 @@ function extractEducation(htmlContent) {
       // 2. Degree and Field of Study are typically the second element
       // Format usually: "Degree, Field" or "Degree - Field"
       const degreeRaw = textNodes[1];
-      
+
       // Simple logic to separate degree from field based on the first comma
       if (degreeRaw.includes(',')) {
         const parts = degreeRaw.split(',');
@@ -534,7 +563,7 @@ function extractEducation(htmlContent) {
       // Format usually: "Aug 2011 - Sep 2013"
       const dateRaw = textNodes[2];
       const dateParts = dateRaw.split(' - ');
-      
+
       if (dateParts.length >= 1) entry.start_date = dateParts[0].trim();
       if (dateParts.length >= 2) entry.end_date = dateParts[1].trim();
     }
@@ -546,20 +575,20 @@ function extractEducation(htmlContent) {
 
       if (text.startsWith('Grade:')) {
         entry.grade = text.replace('Grade:', '').trim();
-      } 
+      }
       else if (text.startsWith('Activities and societies:')) {
         // If you wanted to capture activities, you could add a field here.
         // For this schema, we append it to description or ignore it.
         const activity = text.replace('Activities and societies:', '').trim();
-        entry.description = entry.description 
-          ? `${entry.description}\n\nActivities: ${activity}` 
+        entry.description = entry.description
+          ? `${entry.description}\n\nActivities: ${activity}`
           : `Activities: ${activity}`;
-      } 
+      }
       else {
         // If it doesn't match known prefixes, it's likely the Description
         // (The long text block at the end)
-        entry.description = entry.description 
-          ? `${entry.description}\n\n${text}` 
+        entry.description = entry.description
+          ? `${entry.description}\n\n${text}`
           : text;
       }
     }
@@ -586,26 +615,26 @@ function parseEducation(html) {
 
     // Find the main content block for this entry using a stable data-attribute
     const $contentBlock = $li.find('div[data-view-name="profile-component-entity"]')
-                            .children('div').eq(1) // Skips the icon div
-                            .children('div').first(); // Gets the container for text
+      .children('div').eq(1) // Skips the icon div
+      .children('div').first(); // Gets the container for text
 
     // 1. Get Educational Institute
     // This is the first div child of the content block
     const educationalInstitute = $contentBlock.children('div').first()
-                                            .find('span[aria-hidden="true"]').first()
-                                            .text().trim() || null;
+      .find('span[aria-hidden="true"]').first()
+      .text().trim() || null;
 
     // 2. Get Qualification Name
     // This is the first span child of the content block
     const qualificationName = $contentBlock.children('span').eq(0)
-                                          .find('span[aria-hidden="true"]').first()
-                                          .text().trim() || null;
+      .find('span[aria-hidden="true"]').first()
+      .text().trim() || null;
 
     // 3. Get Dates
     // This is the second span child of the content block
     const dateString = $contentBlock.children('span').eq(1)
-                                    .find('span[aria-hidden="true"]').first()
-                                    .text().trim() || null;
+      .find('span[aria-hidden="true"]').first()
+      .text().trim() || null;
 
     // Parse the date string into start and end dates
     const { startTime, endTime } = parseDates(dateString);
@@ -634,10 +663,10 @@ function parseEducation(html) {
   return educationList;
 }
 // Export for use in different environments
-module.exports = { 
-  extractSkills, 
-  extractSkillsWithRegex, 
-  parseLinkedInProjects, 
+module.exports = {
+  extractSkills,
+  extractSkillsWithRegex,
+  parseLinkedInProjects,
   cleanHTML,
   parseLinkedInExperience,
   parseDateExp
