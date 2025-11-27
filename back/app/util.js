@@ -1,11 +1,10 @@
 const cheerio = require('cheerio');
-const { Ollama } = require('ollama');
+
 /**
  * Extracts skills from LinkedIn profile HTML
  * @param {string} html - The HTML content from LinkedIn profile skills section
  * @returns {Array<string>} - Array of unique skills
  */
-const ollama = new Ollama();
 function extractSkills(html) {
   const skills = new Set(); // Use a Set to automatically handle duplicates
   const $ = cheerio.load(html);
@@ -183,59 +182,21 @@ async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   if (moduleTypeCV === "projects") {
     console.log("Projects");
     console.log(cleaned);
-    const prompt =
-      "You are an expert in data extraction for projects. Below is the html which has the details of projects extract them in json format {project_name: '', start_date: '', end_date: '', description: '', technologies_used: []}. Your response should be in JSON format " +
-      cleaned;
-
-    const response = await ollama.chat({
-      model: 'gemma3:4b',
-      messages: [{ role: "user", content: prompt }],
-      // 'stream: false' returns a single response object
-      stream: false,
-    });
-    const output = response.message.content;
-    const match = output.match(/\[.*\]/s);
-    const projectsJson = match ? JSON.parse(match[0]) : [];
-    return projectsJson;
+    const projectsArray = parseLinkedInProjects(cleaned);
+    return projectsArray;
   }
 
   if (moduleTypeCV === "experience") {
     console.log("Experience");
     console.log(cleaned);
-    const prompt =
-      "You are an expert in data extraction for experience. Below is the html which has the details of work experience extract them in json format {company: '', job_title: '', start_date: '', end_date: '', location: '', description: ''}. Your response should be in JSON format " +
-      cleaned;
-    const response = await ollama.chat({
-      model: 'gemma3:4b',
-      messages: [{ role: "user", content: prompt }],
-      // 'stream: false' returns a single response object
-      stream: false,
-    });
-    const output = response.message.content;
-    const match = output.match(/\[.*\]/s);
-    const experienceJson = match ? JSON.parse(match[0]) : [];
-    return experienceJson;
+    const experienceArray = parseLinkedInExperience(cleaned);
+    return experienceArray;
   }
   if (moduleTypeCV === "education") {
-    console.log("EDUCATION AI")
-    const prompt =
-      "You are an expert in data extraction for education. Below is the html which has the details of education extract them in json format {institution: '', degree: '', field_of_study: '', start_date: '', end_date: '',grade: '', description: ''}. Your response should be in JSON format " +
-      cleaned;
-    const response = await ollama.chat({
-      model: 'gemma3:4b',
-      messages: [{ role: "user", content: prompt }],
-      // 'stream: false' returns a single response object
-      stream: false,
-    });
-
-    const output = response.message.content;
-
-    // Extract the JSON array from the model's raw output.
-    const match = output.match(/\[.*\]/s);
-    const educationJson = match ? JSON.parse(match[0]) : [];
-    console.log("EDUCATION JSON:", educationJson)
-    //const educationArray = extractEducation(cleaned);
-    return educationJson;
+    console.log("Education");
+    console.log(cleaned);
+    const educationArray = extractEducation(cleaned);
+    return educationArray;
   }
 
   return cleaned;
