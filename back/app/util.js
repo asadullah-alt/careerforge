@@ -195,7 +195,10 @@ async function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   if (moduleTypeCV === "education") {
     console.log("Education");
     console.log(cleaned);
-    const educationArray = extractEducation(cleaned);
+    let educationArray = extractEducation(cleaned);
+    if (educationArray.length === 0) {
+      educationArray = extractEducationAlt(cleaned);
+    }
     return educationArray;
   }
 
@@ -479,6 +482,99 @@ function parseDates(dateString) {
 
   return { startTime, endTime };
 }
+
+function extractEducationAlt(htmlString) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+
+  // Find all main education detail containers.
+  // Based on the structure, each education block is within a div 
+  // that is a sibling to the <hr> separators.
+  const educationBlocks = doc.querySelectorAll(
+    'div[componentkey^="com.linkedin.sdui.profile.card.refACoAAA-pHJgB9uKkUSqcFB59buJtUUJjhSol5rAEducationDetailsSection"] > div > div > div:not(:has(button)) > div:not(:has(button))'
+  );
+
+  const educationData = [];
+
+  educationBlocks.forEach(block => {
+    // Look for the main content div, which contains the text data
+    const contentDiv = block.querySelector('div[role="button"]');
+
+    if (!contentDiv) return; // Skip if main content is missing
+
+    // Find all <p> tags within the content, which hold the institution, degree, etc.
+    const pTags = contentDiv.querySelectorAll('p');
+
+    let institution = '';
+    let degree = '';
+    let fieldOfStudy = '';
+    let dates = '';
+    let grade = '';
+    let description = ''; // This is often the 'Activities and societies' or similar field
+
+    // --- Core Extraction Logic ---
+    if (pTags.length >= 2) {
+      // First <p> is Institution
+      institution = pTags[0].textContent.trim();
+
+      // Second <p> contains Degree and Field of Study, separated by a comma (often)
+      const degreeFieldText = pTags[1].textContent.trim();
+      const parts = degreeFieldText.split(',');
+      if (parts.length > 1) {
+        degree = parts[0].trim();
+        fieldOfStudy = parts.slice(1).join(',').trim();
+      } else {
+        // If no comma, assume it's just the Degree or a general category
+        degree = degreeFieldText;
+      }
+    }
+
+    // Dates are usually in the last <p> before any "Grade" or "Activities"
+    // Let's iterate through the P tags to find the date range, grade, and description.
+    for (let i = 0; i < pTags.length; i++) {
+      const text = pTags[i].textContent.trim();
+
+      // Dates pattern: "Month Year – Month Year" or "Year – Year"
+      if (text.match(/(\w{3}\s\d{4}|\d{4})\s–\s(\w{3}\s\d{4}|\d{4})/)) {
+        dates = text;
+      }
+
+      // Grade pattern: "Grade: X" (or similar structure next to it)
+      else if (text.startsWith('Grade:')) {
+        grade = text.replace('Grade:', '').trim();
+      }
+
+      // Description/Activities pattern: "Activities and societies: X"
+      else if (text.startsWith('Activities and societies:')) {
+        description = text.replace('Activities and societies:', '').trim();
+      }
+    }
+
+    // --- Date Parsing ---
+    let startDate = '';
+    let endDate = '';
+    if (dates) {
+      const dateParts = dates.split('–').map(d => d.trim());
+      startDate = dateParts[0] || '';
+      endDate = dateParts[1] || '';
+    }
+
+    // --- Final Object Creation ---
+    educationData.push({
+      institution: institution,
+      degree: degree,
+      field_of_study: fieldOfStudy,
+      start_date: startDate,
+      end_date: endDate,
+      grade: grade,
+      description: description
+    });
+  });
+
+  return educationData;
+}
+
+
 function extractEducation(htmlContent) {
   const $ = cheerio.load(htmlContent);
   const educationData = [];
