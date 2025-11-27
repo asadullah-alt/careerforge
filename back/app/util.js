@@ -213,21 +213,17 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   return cleaned;
 }
 function extractProjectsAlt(html) {
-const $ = cheerio.load(html);
+  const $ = cheerio.load(html);
   const projects = [];
-
-  // Find all project containers - they are siblings separated by <hr> tags
-  $('[data-view-name="profile-projects-details-view"]').find('> div > div > div > div').each((i, container) => {
-    const $container = $(container);
+  
+  // Find all sections that look like projects by finding elements with edit buttons
+  $('button[aria-label^="Edit project"]').each((i, button) => {
+    const $button = $(button);
     
-    // Skip hr elements and button containers
-    if ($container.is('hr') || $container.find('button[type="button"]').length > 0 && !$container.find('p').first().length) {
-      return;
-    }
-
-    // Check if this div contains project info (has multiple child divs)
-    const mainDiv = $container.find('> div > div');
-    if (mainDiv.length === 0) {
+    // Go up to find the parent container that has the full project info
+    const projectContainer = $button.closest('div').prev();
+    
+    if (projectContainer.length === 0) {
       return;
     }
 
@@ -240,41 +236,51 @@ const $ = cheerio.load(html);
       end_date: null
     };
 
-    // Extract project name (first p tag)
-    const nameElem = mainDiv.find('> div > p').first();
-    if (nameElem.length) {
-      project.project_name = nameElem.text().trim();
-    }
-
-    // Extract dates (second p tag with date range)
-    const dateElem = mainDiv.find('> div').eq(0).find('> p').eq(1);
-    if (dateElem.length && dateElem.text().includes('–')) {
-      const dateText = dateElem.text().trim();
-      const dates = dateText.split('–').map(d => d.trim());
-      project.start_date = dates[0] || null;
-      project.end_date = dates[1] || null;
-    }
-
-    // Extract description (text inside expandable-text-box)
-    const descElem = mainDiv.find('[data-testid="expandable-text-box"]');
-    if (descElem.length) {
-      project.description = descElem.text().trim();
-    }
-
-    // Extract link (check for "Show project" link with external icon)
-    const linkSpan = mainDiv.find('span').filter((i, el) => {
-      return $(el).text().trim() === 'Show project';
-    });
-    if (linkSpan.length) {
-      const parentAnchor = linkSpan.closest('a');
-      if (parentAnchor.length) {
-        project.link = parentAnchor.attr('href') || 'link-present';
-      } else {
-        project.link = 'link-present';
+    // Extract project name from button aria-label
+    const ariaLabel = $button.attr('aria-label');
+    if (ariaLabel) {
+      const match = ariaLabel.match(/Edit project (.+)/);
+      if (match) {
+        project.project_name = match[1];
       }
     }
 
-    // Only add projects that have at least a name
+    // Alternative: extract from the first <p> tag
+    if (!project.project_name) {
+      const firstP = projectContainer.find('p').first();
+      if (firstP.length) {
+        project.project_name = firstP.text().trim();
+      }
+    }
+
+    // Extract dates
+    projectContainer.find('p').each((pIdx, pElem) => {
+      const pText = $(pElem).text().trim();
+      if ((pText.includes('–') || pText.includes('-')) && 
+          (pText.match(/\d{4}/) || pText.match(/Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec/))) {
+        const dates = pText.split(/–|-/).map(d => d.trim());
+        if (dates.length >= 2) {
+          project.start_date = dates[0];
+          project.end_date = dates[1];
+        }
+      }
+    });
+
+    // Extract description
+    const descBox = projectContainer.find('[data-testid="expandable-text-box"]');
+    if (descBox.length) {
+      project.description = descBox.text().trim();
+    }
+
+    // Check for link
+    const showProjectSpan = projectContainer.find('span').filter(function() {
+      return $(this).text().trim() === 'Show project';
+    });
+    
+    if (showProjectSpan.length) {
+      project.link = 'link-present';
+    }
+
     if (project.project_name) {
       projects.push(project);
     }
