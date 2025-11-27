@@ -213,32 +213,24 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   return cleaned;
 }
 function extractProjectsAlt(html) {
-  const $ = cheerio.load(html);
+const $ = cheerio.load(html);
   const projects = [];
 
-  // Find all project sections (each hr separates projects)
-  const projectSections = [];
-  let currentSection = [];
-  
-  // Iterate through all direct children to group by hr separators
-  $('[data-view-name="profile-projects-details-view"]').find('> div > div > div').children().each((i, elem) => {
-    if ($(elem).is('hr')) {
-      if (currentSection.length > 0) {
-        projectSections.push(currentSection);
-        currentSection = [];
-      }
-    } else if ($(elem).is('div')) {
-      currentSection.push(elem);
+  // Find all project containers - they are siblings separated by <hr> tags
+  $('[data-view-name="profile-projects-details-view"]').find('> div > div > div > div').each((i, container) => {
+    const $container = $(container);
+    
+    // Skip hr elements and button containers
+    if ($container.is('hr') || $container.find('button[type="button"]').length > 0 && !$container.find('p').first().length) {
+      return;
     }
-  });
-  
-  // Add the last section if exists
-  if (currentSection.length > 0) {
-    projectSections.push(currentSection);
-  }
 
-  // Process each project section
-  projectSections.forEach(section => {
+    // Check if this div contains project info (has multiple child divs)
+    const mainDiv = $container.find('> div > div');
+    if (mainDiv.length === 0) {
+      return;
+    }
+
     const project = {
       project_name: null,
       description: null,
@@ -248,43 +240,39 @@ function extractProjectsAlt(html) {
       end_date: null
     };
 
-    section.forEach(elem => {
-      const $elem = $(elem);
-      
-      // Extract project name (first p tag in the section)
-      if (!project.project_name) {
-        const nameElem = $elem.find('p').first();
-        if (nameElem.length && !nameElem.parent().is('figure')) {
-          project.project_name = nameElem.text().trim();
-        }
-      }
+    // Extract project name (first p tag)
+    const nameElem = mainDiv.find('> div > p').first();
+    if (nameElem.length) {
+      project.project_name = nameElem.text().trim();
+    }
 
-      // Extract dates (second p tag, contains date range)
-      const dateElem = $elem.find('p').eq(1);
-      if (dateElem.length && dateElem.text().includes('–')) {
-        const dateText = dateElem.text().trim();
-        const dates = dateText.split('–').map(d => d.trim());
-        project.start_date = dates[0] || null;
-        project.end_date = dates[1] || null;
-      }
+    // Extract dates (second p tag with date range)
+    const dateElem = mainDiv.find('> div').eq(0).find('> p').eq(1);
+    if (dateElem.length && dateElem.text().includes('–')) {
+      const dateText = dateElem.text().trim();
+      const dates = dateText.split('–').map(d => d.trim());
+      project.start_date = dates[0] || null;
+      project.end_date = dates[1] || null;
+    }
 
-      // Extract description (text inside expandable-text-box)
-      const descElem = $elem.find('[data-testid="expandable-text-box"]');
-      if (descElem.length) {
-        project.description = descElem.text().trim();
-      }
+    // Extract description (text inside expandable-text-box)
+    const descElem = mainDiv.find('[data-testid="expandable-text-box"]');
+    if (descElem.length) {
+      project.description = descElem.text().trim();
+    }
 
-      // Extract link (if "Show project" link exists)
-      const linkElem = $elem.find('svg#link-external-small').parent();
-      if (linkElem.length) {
-        // In actual scraping, you'd extract the href from the parent anchor
-        // This structure shows the link exists but doesn't contain the actual URL
-        const parentAnchor = linkElem.closest('a');
-        if (parentAnchor.length) {
-          project.link = parentAnchor.attr('href') || null;
-        }
-      }
+    // Extract link (check for "Show project" link with external icon)
+    const linkSpan = mainDiv.find('span').filter((i, el) => {
+      return $(el).text().trim() === 'Show project';
     });
+    if (linkSpan.length) {
+      const parentAnchor = linkSpan.closest('a');
+      if (parentAnchor.length) {
+        project.link = parentAnchor.attr('href') || 'link-present';
+      } else {
+        project.link = 'link-present';
+      }
+    }
 
     // Only add projects that have at least a name
     if (project.project_name) {
