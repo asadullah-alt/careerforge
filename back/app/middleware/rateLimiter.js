@@ -1,6 +1,7 @@
 const User = require('../models/user');
 
 // Constants for rate limiting
+//
 const MAX_ATTEMPTS = 5;
 const BLOCK_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 const ATTEMPT_RESET_TIME = 15 * 60 * 1000; // 15 minutes in milliseconds
