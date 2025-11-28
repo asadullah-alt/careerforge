@@ -17,13 +17,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Trash2, GripVertical } from "lucide-react"
+import { Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 
 export function ExperiencesForm() {
   const resume = useResumeStore((state) => state.resume)
   const addExperience = useResumeStore((state) => state.addExperience)
   const updateExperience = useResumeStore((state) => state.updateExperience)
   const removeExperience = useResumeStore((state) => state.removeExperience)
+  const [currentIndex, setCurrentIndex] = React.useState(0)
 
   const form = useForm({
     resolver: zodResolver(
@@ -63,6 +64,41 @@ export function ExperiencesForm() {
     })
   }
 
+  const handleNext = () => {
+    if (currentIndex < fields.length - 1) {
+      setCurrentIndex(currentIndex + 1)
+    }
+  }
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1)
+    }
+  }
+
+  const handleAdd = () => {
+    append({
+      job_title: "",
+      company: "",
+      location: "",
+      start_date: "",
+      end_date: "",
+      description: [],
+      technologies_used: [],
+    })
+    setCurrentIndex(fields.length)
+  }
+
+  const handleRemove = () => {
+    remove(currentIndex)
+    removeExperience(currentIndex)
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1)
+    }
+  }
+
+  const currentField = fields[currentIndex]
+
   return (
     <Card>
       <CardHeader>
@@ -72,30 +108,47 @@ export function ExperiencesForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {fields.map((field, index) => (
-              <div key={field.id} className="border border-input rounded-lg p-4 space-y-4">
+            {fields.length > 0 && currentField ? (
+              <div key={currentField.id} className="border border-input rounded-lg p-4 space-y-4">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <GripVertical className="h-4 w-4" />
-                    <span className="text-sm font-medium">Experience {index + 1}</span>
+                  <span className="text-sm font-medium">
+                    Experience {currentIndex + 1} of {fields.length}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handlePrevious}
+                      disabled={currentIndex === 0}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleNext}
+                      disabled={currentIndex === fields.length - 1}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRemove}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      remove(index)
-                      removeExperience(index)
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name={`experiences.${index}.job_title`}
+                    name={`experiences.${currentIndex}.job_title`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Job Title *</FormLabel>
@@ -108,7 +161,7 @@ export function ExperiencesForm() {
                   />
                   <FormField
                     control={form.control}
-                    name={`experiences.${index}.company`}
+                    name={`experiences.${currentIndex}.company`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Company</FormLabel>
@@ -124,7 +177,7 @@ export function ExperiencesForm() {
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name={`experiences.${index}.start_date`}
+                    name={`experiences.${currentIndex}.start_date`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Start Date *</FormLabel>
@@ -141,7 +194,7 @@ export function ExperiencesForm() {
                   />
                   <FormField
                     control={form.control}
-                    name={`experiences.${index}.end_date`}
+                    name={`experiences.${currentIndex}.end_date`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>End Date *</FormLabel>
@@ -160,7 +213,7 @@ export function ExperiencesForm() {
 
                 <FormField
                   control={form.control}
-                  name={`experiences.${index}.location`}
+                  name={`experiences.${currentIndex}.location`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Location</FormLabel>
@@ -174,7 +227,7 @@ export function ExperiencesForm() {
 
                 <FormField
                   control={form.control}
-                  name={`experiences.${index}.technologies_used`}
+                  name={`experiences.${currentIndex}.technologies_used`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Technologies (comma-separated)</FormLabel>
@@ -197,22 +250,17 @@ export function ExperiencesForm() {
                   )}
                 />
               </div>
-            ))}
+            ) : (
+              <div className="text-center py-8 text-muted-foreground border border-dashed rounded-lg">
+                No experience entries yet. Add one to get started.
+              </div>
+            )}
 
             <Button
               type="button"
               variant="outline"
-              onClick={() =>
-                append({
-                  job_title: "",
-                  company: "",
-                  location: "",
-                  start_date: "",
-                  end_date: "",
-                  description: [],
-                  technologies_used: [],
-                })
-              }
+              onClick={handleAdd}
+              className="w-full"
             >
               + Add Experience
             </Button>

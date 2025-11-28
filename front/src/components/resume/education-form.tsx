@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Trash2 } from "lucide-react"
+import { Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 import TextareaAutosize from "react-textarea-autosize"
 
 export function EducationForm() {
@@ -24,6 +24,7 @@ export function EducationForm() {
   const addEducation = useResumeStore((state) => state.addEducation)
   const updateEducation = useResumeStore((state) => state.updateEducation)
   const removeEducation = useResumeStore((state) => state.removeEducation)
+  const [currentIndex, setCurrentIndex] = React.useState(0)
 
   const form = useForm({
     resolver: zodResolver(StructuredResumeSchema.pick({ education: true })),
@@ -56,6 +57,41 @@ export function EducationForm() {
     })
   }
 
+  const handleNext = () => {
+    if (currentIndex < fields.length - 1) {
+      setCurrentIndex(currentIndex + 1)
+    }
+  }
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1)
+    }
+  }
+
+  const handleAdd = () => {
+    append({
+      institution: "",
+      degree: "",
+      field_of_study: "",
+      start_date: "",
+      end_date: "",
+      grade: "",
+      description: "",
+    })
+    setCurrentIndex(fields.length)
+  }
+
+  const handleRemove = () => {
+    remove(currentIndex)
+    removeEducation(currentIndex)
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1)
+    }
+  }
+
+  const currentField = fields[currentIndex]
+
   return (
     <Card>
       <CardHeader>
@@ -65,26 +101,46 @@ export function EducationForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {fields.map((field, index) => (
-              <div key={field.id} className="border border-input rounded-lg p-4 space-y-4">
+            {fields.length > 0 && currentField ? (
+              <div key={currentField.id} className="border border-input rounded-lg p-4 space-y-4">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-medium">Education {index + 1}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      remove(index)
-                      removeEducation(index)
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <span className="text-sm font-medium">
+                    Education {currentIndex + 1} of {fields.length}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handlePrevious}
+                      disabled={currentIndex === 0}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleNext}
+                      disabled={currentIndex === fields.length - 1}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRemove}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 <FormField
                   control={form.control}
-                  name={`education.${index}.institution`}
+                  name={`education.${currentIndex}.institution`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Institution</FormLabel>
@@ -103,7 +159,7 @@ export function EducationForm() {
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name={`education.${index}.degree`}
+                    name={`education.${currentIndex}.degree`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Degree</FormLabel>
@@ -120,7 +176,7 @@ export function EducationForm() {
                   />
                   <FormField
                     control={form.control}
-                    name={`education.${index}.field_of_study`}
+                    name={`education.${currentIndex}.field_of_study`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Field of Study</FormLabel>
@@ -140,7 +196,7 @@ export function EducationForm() {
                 <div className="grid grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
-                    name={`education.${index}.start_date`}
+                    name={`education.${currentIndex}.start_date`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Start Date</FormLabel>
@@ -153,7 +209,7 @@ export function EducationForm() {
                   />
                   <FormField
                     control={form.control}
-                    name={`education.${index}.end_date`}
+                    name={`education.${currentIndex}.end_date`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>End Date</FormLabel>
@@ -166,7 +222,7 @@ export function EducationForm() {
                   />
                   <FormField
                     control={form.control}
-                    name={`education.${index}.grade`}
+                    name={`education.${currentIndex}.grade`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>GPA/Grade</FormLabel>
@@ -181,7 +237,7 @@ export function EducationForm() {
 
                 <FormField
                   control={form.control}
-                  name={`education.${index}.description`}
+                  name={`education.${currentIndex}.description`}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Description</FormLabel>
@@ -198,22 +254,17 @@ export function EducationForm() {
                   )}
                 />
               </div>
-            ))}
+            ) : (
+              <div className="text-center py-8 text-muted-foreground border border-dashed rounded-lg">
+                No education entries yet. Add one to get started.
+              </div>
+            )}
 
             <Button
               type="button"
               variant="outline"
-              onClick={() =>
-                append({
-                  institution: "",
-                  degree: "",
-                  field_of_study: "",
-                  start_date: "",
-                  end_date: "",
-                  grade: "",
-                  description: "",
-                })
-              }
+              onClick={handleAdd}
+              className="w-full"
             >
               + Add Education
             </Button>

@@ -49,9 +49,9 @@ export function ResumePreview({ data, pdfStyles, template = 'classic' }: ResumeP
     const schedule = () => {
       // Use globalThis so TypeScript picks up the correct global timer types
       if (typeof globalThis !== 'undefined' && typeof globalThis.requestIdleCallback === 'function') {
-        idleHandle = globalThis.requestIdleCallback(() => { build().catch(() => {}) }, { timeout: 2000 })
+        idleHandle = globalThis.requestIdleCallback(() => { build().catch(() => { }) }, { timeout: 2000 })
       } else {
-        timeoutHandle = globalThis.setTimeout(() => { build().catch(() => {}) }, 200)
+        timeoutHandle = globalThis.setTimeout(() => { build().catch(() => { }) }, 200)
       }
     }
 
@@ -82,7 +82,7 @@ export function ResumePreview({ data, pdfStyles, template = 'classic' }: ResumeP
   const { personal_data, experiences, projects, skills, education, achievements, extracted_keywords } = data
 
   return (
-    <div className="bg-white dark:bg-slate-950 text-black dark:text-white p-8 h-full overflow-y-auto print:p-0 space-y-4">
+    <div className="bg-white dark:bg-slate-950 text-black dark:text-white p-8 min-h-screen overflow-y-auto print:p-0 space-y-4">
       <div className="mb-4 flex gap-2">
         {/* PDF preview is shown automatically; no toggle button */}
       </div>

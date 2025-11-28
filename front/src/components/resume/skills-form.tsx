@@ -16,13 +16,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Trash2 } from "lucide-react"
+import { Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 
 export function SkillsForm() {
   const resume = useResumeStore((state) => state.resume)
   const addSkill = useResumeStore((state) => state.addSkill)
   const updateSkill = useResumeStore((state) => state.updateSkill)
   const removeSkill = useResumeStore((state) => state.removeSkill)
+  const [currentIndex, setCurrentIndex] = React.useState(0)
 
   const form = useForm({
     resolver: zodResolver(StructuredResumeSchema.pick({ skills: true })),
@@ -55,6 +56,36 @@ export function SkillsForm() {
     })
   }
 
+  const handleNext = () => {
+    if (currentIndex < fields.length - 1) {
+      setCurrentIndex(currentIndex + 1)
+    }
+  }
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1)
+    }
+  }
+
+  const handleAdd = () => {
+    append({
+      category: "",
+      skill_name: "",
+    })
+    setCurrentIndex(fields.length)
+  }
+
+  const handleRemove = () => {
+    remove(currentIndex)
+    removeSkill(currentIndex)
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1)
+    }
+  }
+
+  const currentField = fields[currentIndex]
+
   return (
     <Card>
       <CardHeader>
@@ -64,27 +95,47 @@ export function SkillsForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {fields.map((field, index) => (
-              <div key={field.id} className="border border-input rounded-lg p-4 space-y-4">
+            {fields.length > 0 && currentField ? (
+              <div key={currentField.id} className="border border-input rounded-lg p-4 space-y-4">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-medium">Skill {index + 1}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      remove(index)
-                      removeSkill(index)
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <span className="text-sm font-medium">
+                    Skill {currentIndex + 1} of {fields.length}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handlePrevious}
+                      disabled={currentIndex === 0}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleNext}
+                      disabled={currentIndex === fields.length - 1}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRemove}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name={`skills.${index}.category`}
+                    name={`skills.${currentIndex}.category`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Category</FormLabel>
@@ -97,7 +148,7 @@ export function SkillsForm() {
                   />
                   <FormField
                     control={form.control}
-                    name={`skills.${index}.skill_name`}
+                    name={`skills.${currentIndex}.skill_name`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Skill Name *</FormLabel>
@@ -110,17 +161,17 @@ export function SkillsForm() {
                   />
                 </div>
               </div>
-            ))}
+            ) : (
+              <div className="text-center py-8 text-muted-foreground border border-dashed rounded-lg">
+                No skills added yet. Add one to get started.
+              </div>
+            )}
 
             <Button
               type="button"
               variant="outline"
-              onClick={() =>
-                append({
-                  category: "",
-                  skill_name: "",
-                })
-              }
+              onClick={handleAdd}
+              className="w-full"
             >
               + Add Skill
             </Button>
