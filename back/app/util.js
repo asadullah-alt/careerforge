@@ -187,7 +187,7 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
 
     return projectsArray;
   }
-  if(modduleTypeCV==="certifications"){
+  if(moduleTypeCV==="certifications"){
     console.log("Certifications");
     console.log(cleaned);
    //let certificationsArray = parseLinkedInCertifications(cleaned);
