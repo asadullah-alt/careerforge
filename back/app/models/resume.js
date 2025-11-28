@@ -39,7 +39,14 @@ const SkillSchema = new mongoose.Schema({
   category: { type: String, default: null },
   skill_name: { type: String, required: true },
 });
-
+const CertificationSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  issuing_organization: { type: String, default: null },  
+  issue_date: { type: String, default: null },
+  expiration_date: { type: String, default: null },
+  credential_id: { type: String, default: null },
+  credential_url: { type: String, default: null },
+});
 const ResearchWorkSchema = new mongoose.Schema({
   title: { type: String, default: null },
   publication: { type: String, default: null },
@@ -68,6 +75,7 @@ const ProcessedResumeSchema = new mongoose.Schema({
   personal_data: { type: PersonalDataSchema, required: true },
   experiences: { type: [ExperienceSchema], default: [] },
   projects: { type: [ProjectSchema], default: [] },
+  certifications: { type: [CertificationSchema], default: [] },
   skills: { type: [SkillSchema], default: [] },
   research_work: { type: [ResearchWorkSchema], default: [] },
   achievements: { type: [String], default: [] },

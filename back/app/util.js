@@ -173,7 +173,7 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
     let skillsArray = extractSkills(cleaned);
     if (skillsArray.length === 0) {
       skillsArray = extractSkillsAltOne(cleaned);
-      console.log(skillsArray)
+      
     }
     return skillsArray;
   }
@@ -188,28 +188,30 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
     return projectsArray;
   }
   if(moduleTypeCV==="certifications"){
-    console.log("Certifications");
-    console.log(cleaned);
+   
+    let certificationsArray = extractCertifications(cleaned);
    //let certificationsArray = parseLinkedInCertifications(cleaned);
-    //return certificationsArray;
+    return certificationsArray;
   }
   if (moduleTypeCV === "experience") {
-    console.log("Experience");
-    console.log(cleaned);
-    const experienceArray = parseLinkedInExperience(cleaned);
+   
+    let experienceArray = parseLinkedInExperience(cleaned);
+    if(experienceArray.length===0){ 
+
+      experienceArray = extractExperiencesAlt(cleaned);
+    }
     return experienceArray;
   }
   if (moduleTypeCV === "education") {
-    console.log("Education");
-    console.log(cleaned);
+   
     let educationArray = extractEducation(cleaned);
     if (educationArray.length === 0) {
-      console.log("DID THIS TRIGGER")
+     
       educationArray = []
       educationArray = extractEducationAlt(cleaned);
      
     }
-     console.log("EDUCACTION ARRAY", educationArray);
+    
     return educationArray;
   }
 
@@ -290,6 +292,84 @@ function extractProjectsAlt(html) {
   });
 
   return projects;
+}
+
+function extractCertifications(html) {
+  const $ = cheerio.load(html);
+  const certifications = [];
+
+  // Find all certification cards - they have edit buttons with specific aria-labels
+  $('button[aria-label*="Edit license or certification"]').each((index, element) => {
+    const $button = $(element);
+    const ariaLabel = $button.attr('aria-label');
+    
+    // Extract certification name from aria-label
+    const nameMatch = ariaLabel.match(/Edit license or certification (.+)/);
+    const name = nameMatch ? nameMatch[1].trim() : null;
+
+    if (!name) return; // Skip if no name found
+
+    // Navigate to the parent container that holds all certification details
+    const $container = $button.closest('div[role="listitem"], div').parent();
+    
+    // Extract issuing organization (second <p> in the structure)
+    const $paragraphs = $container.find('p');
+    let issuing_organization = null;
+    let issue_date = null;
+    let expiration_date = null;
+    let credential_id = null;
+
+    // The organization is typically in the second paragraph
+    if ($paragraphs.length > 1) {
+      issuing_organization = $paragraphs.eq(1).text().trim() || null;
+    }
+
+    // Extract dates and credential ID - typically in format "Issued MMM YYYY" or "Issued MMM YYYY · Expires MMM YYYY"
+    $paragraphs.each((i, p) => {
+      const text = $(p).text().trim();
+      
+      // Check for issue date
+      const issuedMatch = text.match(/Issued\s+([A-Za-z]+\s+\d{4})/);
+      if (issuedMatch) {
+        issue_date = issuedMatch[1];
+      }
+
+      // Check for expiration date
+      const expiresMatch = text.match(/Expires\s+([A-Za-z]+\s+\d{4})/);
+      if (expiresMatch) {
+        expiration_date = expiresMatch[1];
+      }
+
+      // Check for credential ID
+      const credentialMatch = text.match(/Credential ID\s+(.+)/);
+      if (credentialMatch) {
+        credential_id = credentialMatch[1].trim();
+      }
+    });
+
+    // Extract credential URL from "Show credential" link
+    let credential_url = null;
+    const $credentialLink = $container.find('span:contains("Show credential")').closest('span, a, div');
+    if ($credentialLink.length > 0) {
+      // The actual URL might be in a parent or sibling element
+      const $urlContainer = $credentialLink.closest('div').find('a[href]');
+      if ($urlContainer.length > 0) {
+        credential_url = $urlContainer.attr('href') || null;
+      }
+    }
+
+    // Add certification to array
+    certifications.push({
+      name,
+      issuing_organization,
+      issue_date,
+      expiration_date,
+      credential_id,
+      credential_url
+    });
+  });
+
+  return certifications;
 }
 function parseLinkedInProjects(html) {
   const $ = cheerio.load(html);
@@ -413,7 +493,106 @@ function parseDate(dateStr) {
 
   return null;
 }
+function extractExperiencesAlt(html) {
+  const $ = cheerio.load(html);
+  const experiences = [];
 
+  // Find all experience items by looking for edit buttons with specific aria-labels
+  $('button[aria-label*="Edit"]').each((index, element) => {
+    const ariaLabel = $(element).attr('aria-label');
+    
+    // Check if this is an experience edit button (excludes profile language, etc.)
+    if (ariaLabel && 
+        ariaLabel.includes('Edit') && 
+        !ariaLabel.includes('profile') && 
+        !ariaLabel.includes('language') &&
+        ariaLabel.includes('at')) {
+      
+      // Navigate up to find the parent container with experience details
+      const container = $(element).closest('div[componentkey^="entity-collection-item"]');
+      
+      if (container.length) {
+        try {
+          // Find all paragraph tags within the container
+          const paragraphs = container.find('p');
+          
+          let job_title = null;
+          let company = null;
+          let dateRange = null;
+          let location = null;
+          let description = [];
+
+          paragraphs.each((i, p) => {
+            const text = $(p).text().trim();
+            
+            if (!text) return;
+
+            // First paragraph is usually the job title
+            if (i === 0 && !text.includes('·')) {
+              job_title = text;
+            }
+            // Second paragraph contains company and employment type
+            else if (i === 1 && text.includes('·')) {
+              const parts = text.split('·');
+              company = parts[0].trim();
+            }
+            // Third paragraph is usually the date range
+            else if (i === 2 && (text.includes('-') || text.includes('Present'))) {
+              dateRange = text;
+            }
+            // Fourth paragraph might be location
+            else if (i === 3 && !text.includes('-') && !text.includes('·')) {
+              location = text;
+            }
+            // Description is in expandable text
+            else if ($(p).find('[data-testid="expandable-text-box"]').length) {
+              const descText = $(p).find('[data-testid="expandable-text-box"]').text().trim();
+              if (descText) {
+                // Split by common delimiters for bullet points
+                description = descText
+                  .split(/[-•]\s*/)
+                  .map(item => item.trim())
+                  .filter(item => item.length > 0);
+              }
+            }
+          });
+
+          // Parse date range
+          let start_date = '';
+          let end_date = '';
+          
+          if (dateRange) {
+            // Remove duration information (e.g., "· 3 yrs")
+            const cleanDateRange = dateRange.split('·')[0].trim();
+            
+            // Split by dash or hyphen
+            const parts = cleanDateRange.split(/\s*[-–]\s*/);
+            
+            start_date = parts[0]?.trim() || '';
+            end_date = parts[1]?.trim() || 'Present';
+          }
+
+          // Only add if we have required fields
+          if (job_title && start_date) {
+            experiences.push({
+              job_title: job_title,
+              company: company || null,
+              location: location || null,
+              start_date: start_date,
+              end_date: end_date,
+              description: description,
+              technologies_used: []
+            });
+          }
+        } catch (error) {
+          console.error('Error parsing experience container:', error);
+        }
+      }
+    }
+  });
+
+  return experiences;
+}
 
 function parseLinkedInExperience(html) {
   const $ = cheerio.load(html);
@@ -666,7 +845,7 @@ function extractEducationAlt(html) {
       uniqueEducation.push(edu);
     }
   }
-console.log("UNIQUE", uniqueEducation)
+
   return uniqueEducation;
 }
 
@@ -757,7 +936,7 @@ function extractEducation(htmlContent) {
     if (entry.institution !== null && entry.degree !== null)
       educationData.push(entry);
   });
-  console.log("EDUCATION DATA", educationData);
+  
   return educationData;
 }
 /**
