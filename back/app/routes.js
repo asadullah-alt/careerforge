@@ -276,7 +276,7 @@ module.exports = function (app, passport) {
 
         // Build a ProcessedResume-compatible object from the incoming payload
         const resumeId = crypto.randomUUID();
-
+        let certificates = cleanHTML(payload.details_certifications_main, "certifications") || [];
         let rawSkills = cleanHTML(payload.details_skills_main, "skills") || [];
         console.log(rawSkills)
         const resumeContent = {

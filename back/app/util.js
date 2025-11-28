@@ -169,8 +169,7 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   }
 
   if (moduleTypeCV === 'skills') {
-    console.log("Skills");
-    console.log(cleaned);
+    
     let skillsArray = extractSkills(cleaned);
     if (skillsArray.length === 0) {
       skillsArray = extractSkillsAltOne(cleaned);
@@ -180,8 +179,7 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
   }
 
   if (moduleTypeCV === "projects") {
-    console.log("Projects");
-    console.log(cleaned);
+   
     let projectsArray = parseLinkedInProjects(cleaned);
     if (projectsArray.length === 0) { 
       projectsArray = extractProjectsAlt(cleaned);
@@ -189,7 +187,12 @@ function cleanHTML(htmlContent, moduleTypeCV = 'default') {
 
     return projectsArray;
   }
-
+  if(modduleTypeCV==="certifications"){
+    console.log("Certifications");
+    console.log(cleaned);
+   //let certificationsArray = parseLinkedInCertifications(cleaned);
+    //return certificationsArray;
+  }
   if (moduleTypeCV === "experience") {
     console.log("Experience");
     console.log(cleaned);
