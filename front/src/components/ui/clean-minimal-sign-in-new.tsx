@@ -80,7 +80,7 @@ const SignIn2 = () => {
           Sign up with email
         </h2>
         <p className="text-gray-500 text-sm mb-6 text-center">
-          Create a new account to start using CareerForge
+          Create a new account to start using Bhai Kaam Do
         </p>
         <div className="w-full flex flex-col gap-3 mb-2">
           <div className="relative">

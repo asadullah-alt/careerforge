@@ -4,6 +4,7 @@
 node_modules
 /front/node_modules
 /back/node_modules
+/front/build_output.log
 /back/.env
 /.pnp
 .pnp.js
