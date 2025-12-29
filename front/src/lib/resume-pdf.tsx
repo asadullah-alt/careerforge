@@ -263,7 +263,7 @@ function ModernTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                 <Text style={{ fontSize: 12, fontWeight: 'bold', borderBottomWidth: 1, borderBottomColor: accentColor, paddingBottom: 4, marginBottom: 8 }}>
                   PROJECTS
                 </Text>
-                {resume.projects.slice(0, 2).map((p: Project, i: number) => (
+                {resume.projects.slice(0, 4).map((p: Project, i: number) => (
                   <View key={i} style={{ marginBottom: 6 }}>
                     <Text style={{ fontWeight: 'bold', fontSize: 10 }}>{p.project_name}</Text>
                     {p.description && <Text style={{ fontSize: 9 }}>{p.description.substring(0, 100)}...</Text>}
@@ -598,7 +598,7 @@ function ExecutiveTemplate({ resume, styles }: { resume: StructuredResume; style
                 <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 6, color: '#2563eb', textTransform: 'uppercase' }}>
                   Experience
                 </Text>
-                {resume.experiences.slice(0, 3).map((exp: Experience, i: number) => (
+                {resume.experiences.slice(0, 4).map((exp: Experience, i: number) => (
                   <View key={i} style={{ marginBottom: 8 }}>
                     <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                       <Text style={{ fontSize: 10, fontWeight: 'bold' }}>{exp.job_title}</Text>
@@ -624,7 +624,7 @@ function ExecutiveTemplate({ resume, styles }: { resume: StructuredResume; style
                 <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 6, color: '#2563eb', textTransform: 'uppercase' }}>
                   Projects
                 </Text>
-                {resume.projects.slice(0, 2).map((proj: Project, i: number) => (
+                {resume.projects.slice(0, 5).map((proj: Project, i: number) => (
                   <View key={i} style={{ marginBottom: 6 }}>
                     <Text style={{ fontSize: 9, fontWeight: 'bold', marginBottom: 1 }}>
                       {proj.project_name}

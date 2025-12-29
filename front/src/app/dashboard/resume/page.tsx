@@ -15,7 +15,13 @@ import { toast } from "sonner"
 import AuthGuard from "@/components/auth-guard"
 import { ExportResumeDialog } from "@/components/resume/export-resume-dialog"
 import { getCfAuthCookie } from "@/utils/cookie"
-import PdfViewer from "@/components/resume/pdf-viewer"
+import dynamic from "next/dynamic"
+
+const PdfViewer = dynamic(() => import("@/components/resume/pdf-viewer"), {
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-full text-muted-foreground">Loading PDF Viewer...</div>,
+})
+
 import type { PdfStyles } from "@/lib/resume-pdf"
 
 export default function ResumePage() {
@@ -280,8 +286,8 @@ export default function ResumePage() {
           {/* Right Panel - PDF Viewer */}
           <div className="lg:col-span-1 border border-input rounded-lg overflow-hidden bg-card">
             <div className="h-full flex flex-col relative">
-              <PdfViewer 
-                blobUrl={pdfUrl} 
+              <PdfViewer
+                blobUrl={pdfUrl}
                 data={resume}
                 currentTemplate={template}
                 currentStyles={pdfStyles}

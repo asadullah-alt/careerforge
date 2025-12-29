@@ -14,10 +14,13 @@ module.exports = (passport) => {
         done(null, user.id);
     });
 
-    passport.deserializeUser((id, done) => {
-        User.findById(id, (err, user) => {
-            done(err, user);
-        });
+    passport.deserializeUser(async (id, done) => {
+        try {
+            const user = await User.findById(id);
+            done(null, user);
+        } catch (err) {
+            done(err, null);
+        }
     });
 
     passport.use('local-signup', new LocalStrategy({
@@ -25,27 +28,23 @@ module.exports = (passport) => {
         passwordField: 'password',
         passReqToCallback: true
     },
-        (req, email, password, done) => {
-            process.nextTick(() => {
-                User.findOne({ 'local.email': email }, (err, user) => {
-                    if (err)
-                        return done(err);
+        async (req, email, password, done) => {
+            try {
+                const user = await User.findOne({ 'local.email': email });
 
-                    if (user) {
-                        return done(null, false, { message: 'That email is already taken.' });
-                    } else {
-                        let newUser = new User();
+                if (user) {
+                    return done(null, false, { message: 'That email is already taken.' });
+                } else {
+                    let newUser = new User();
 
-                        newUser.local.email = email;
-                        newUser.local.password = newUser.generateHash(password);
-                        newUser.save((err) => {
-                            if (err)
-                                throw err;
-                            return done(null, newUser);
-                        });
-                    }
-                });
-            });
+                    newUser.local.email = email;
+                    newUser.local.password = newUser.generateHash(password);
+                    await newUser.save();
+                    return done(null, newUser);
+                }
+            } catch (err) {
+                return done(err);
+            }
         }));
 
     passport.use('local-login', new LocalStrategy({
@@ -53,11 +52,9 @@ module.exports = (passport) => {
         passwordField: 'password',
         passReqToCallback: true
     },
-        (req, email, password, done) => {
-            User.findOne({ 'local.email': email }, (err, user) => {
-
-                if (err)
-                    return done(err);
+        async (req, email, password, done) => {
+            try {
+                const user = await User.findOne({ 'local.email': email });
 
                 if (!user)
                     return done(null, false, { message: 'Incorrect username.' });
@@ -66,8 +63,9 @@ module.exports = (passport) => {
                     return done(null, false, { message: 'Incorrect password.' });
 
                 return done(null, user);
-            });
-
+            } catch (err) {
+                return done(err);
+            }
         }));
 
     // Passport JWT Strategy
@@ -76,17 +74,18 @@ module.exports = (passport) => {
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
         secretOrKey: jwt_secret.secret,
     },
-        (jwt_payload, done) => {
-            User.findOne({ 'local.email': jwt_payload.email }, (err, user) => {
-                if (err)
-                    return done(err);
+        async (jwt_payload, done) => {
+            try {
+                const user = await User.findOne({ 'local.email': jwt_payload.email });
 
                 if (user) {
                     return done(null, user, { message: 'A user was found thanks to the jwt token' });
                 } else {
                     return done(null, false, { message: 'No user was found thanks to the jwt token' });
                 }
-            });
+            } catch (err) {
+                return done(err);
+            }
         }));
 
     // Passport Facebook Strategy
@@ -99,7 +98,7 @@ module.exports = (passport) => {
 
     // },
     //     (token, refreshToken, profile, done) => {
-           
+
     //         process.nextTick(() => {
     //             User.findOne({ 'facebook.id': profile.id }, (err, user) => {
     //                 if (err)
@@ -134,68 +133,60 @@ module.exports = (passport) => {
         callbackURL: process.env.GOOGLE_CALLBACK_URL,
 
     },
-        (token, refreshToken, profile, done) => {
-            process.nextTick(() => {
-                User.findOne({ 'google.id': profile.id }, (err, user) => {
-                    if (err)
-                        return done(err);
+        async (token, refreshToken, profile, done) => {
+            try {
+                const user = await User.findOne({ 'google.id': profile.id });
 
-                    if (user) {
-                        return done(null, user);
-                    } else {
-                        let newUser = new User();
+                if (user) {
+                    return done(null, user);
+                } else {
+                    let newUser = new User();
 
-                        newUser.google.id = profile.id;
-                        newUser.google.token = token;
-                        newUser.google.name = profile.displayName;
-                        newUser.google.email = profile.emails[0].value;
-                        // Mark OAuth-created users as verified (no email/password verification required)
-                        newUser.isVerified = true;
+                    newUser.google.id = profile.id;
+                    newUser.google.token = token;
+                    newUser.google.name = profile.displayName;
+                    newUser.google.email = profile.emails[0].value;
+                    // Mark OAuth-created users as verified (no email/password verification required)
+                    newUser.isVerified = true;
 
-                        newUser.save((err) => {
-                            if (err)
-                                throw err;
-                            return done(null, newUser);
-                        });
-                    }
-                });
-            });
+                    await newUser.save();
+                    return done(null, newUser);
+                }
+            } catch (err) {
+                return done(err);
+            }
         }));
     //Gmail Google Strategy - register only when credentials are present to avoid startup crash
-     // Passport Google Strategy
-    passport.use('gmail-creds',new GoogleStrategy({
+    // Passport Google Strategy
+    passport.use('gmail-creds', new GoogleStrategy({
 
         clientID: process.env.GMAIL_CLIENT_ID,
         clientSecret: process.env.GMAIL_CLIENT_SECRET,
         callbackURL: process.env.GMAIL_CALLBACK_URL,
 
     },
-        (token, refreshToken, profile, done) => {
-            process.nextTick(() => {
-                User.findOne({ 'google.id': profile.id }, (err, user) => {
-                    if (err)
-                        return done(err);
+        async (token, refreshToken, profile, done) => {
+            try {
+                const user = await User.findOne({ 'google.id': profile.id });
 
-                    if (user) {
-                        return done(null, user);
-                    } else {
-                        let newUser = new User();
+                if (user) {
+                    return done(null, user);
+                } else {
+                    let newUser = new User();
 
-                        newUser.google.id = profile.id;
-                        newUser.google.token = token;
-                        newUser.google.name = profile.displayName;
-                        newUser.google.email = profile.emails[0].value;
-                        // Mark OAuth-created users as verified (no email/password verification required)
-                        newUser.isVerified = true;
+                    newUser.google.id = profile.id;
+                    newUser.google.token = token;
+                    newUser.google.name = profile.displayName;
+                    newUser.google.email = profile.emails[0].value;
+                    // Mark OAuth-created users as verified (no email/password verification required)
+                    newUser.isVerified = true;
 
-                        newUser.save((err) => {
-                            if (err)
-                                throw err;
-                            return done(null, newUser);
-                        });
-                    }
-                });
-            });
+                    await newUser.save();
+                    return done(null, newUser);
+                }
+            } catch (err) {
+                return done(err);
+            }
         }));
     // Linkedin Strategy - register only when credentials are present to avoid startup crash
     if (process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET && process.env.LINKEDIN_CALLBACK_URL) {
@@ -207,33 +198,29 @@ module.exports = (passport) => {
             scope: ['r_emailaddress', 'r_liteprofile']
 
         },
-            (token, refreshToken, profile, done) => {
-                process.nextTick(() => {
-                    User.findOne({ 'linkedin.id': profile.id }, (err, user) => {
-                        if (err)
-                            return done(err);
+            async (token, refreshToken, profile, done) => {
+                try {
+                    const user = await User.findOne({ 'linkedin.id': profile.id });
 
-                        if (user) {
-                            return done(null, user);
-                        } else {
-                            let newUser = new User();
+                    if (user) {
+                        return done(null, user);
+                    } else {
+                        let newUser = new User();
 
-                            newUser.linkedin.id = profile.id;
-                            newUser.linkedin.token = token;
-                            newUser.linkedin.name = profile.displayName;
-                            newUser.linkedin.email = profile.emails[0].value;
+                        newUser.linkedin.id = profile.id;
+                        newUser.linkedin.token = token;
+                        newUser.linkedin.name = profile.displayName;
+                        newUser.linkedin.email = profile.emails[0].value;
 
-                                // Mark OAuth-created users as verified (no email/password verification required)
-                                newUser.isVerified = true;
+                        // Mark OAuth-created users as verified (no email/password verification required)
+                        newUser.isVerified = true;
 
-                            newUser.save((err) => {
-                                if (err)
-                                    throw err;
-                                return done(null, newUser);
-                            });
-                        }
-                    });
-                });
+                        await newUser.save();
+                        return done(null, newUser);
+                    }
+                } catch (err) {
+                    return done(err);
+                }
             }));
     } else {
         console.warn('LinkedIn OAuth not configured: set LINKEDIN_CLIENT_ID, LINKEDIN_CLIENT_SECRET and LINKEDIN_CALLBACK_URL to enable it.');

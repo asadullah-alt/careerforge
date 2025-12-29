@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { use } from 'react'
 import { useRouter } from 'next/navigation'
 import { IconArrowLeft, IconChartBar, IconChevronDown } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
@@ -15,7 +15,8 @@ import { ExtendedJob } from '@/store/job-store'
 
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
 
-export default function SingleJobPage({ params }: { params: { id: string } }) {
+export default function SingleJobPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = use(paramsPromise)
   const router = useRouter()
   const [jobData, setJobData] = React.useState<ExtendedJob | null>(null)
   const [loading, setLoading] = React.useState(true)
@@ -41,6 +42,13 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
   const [resumeId, setResumeId] = React.useState<string | null>(null)
   const [isCoverLetterModalOpen, setIsCoverLetterModalOpen] = React.useState(false)
 
+  React.useEffect(() => {
+    if (copied) {
+      const timer = setTimeout(() => setCopied(false), 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [copied])
+
   const handleShareClick = async () => {
     if (!jobData) return
     const url = (jobData.job_url ?? jobData.jobUrl ?? jobData.src ?? jobData.applicationInfo?.applyLink) as string | undefined
@@ -58,7 +66,6 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(url)
         setCopied(true)
-        window.setTimeout(() => setCopied(false), 2000)
         return
       }
 
@@ -71,7 +78,6 @@ export default function SingleJobPage({ params }: { params: { id: string } }) {
         if (navigator.clipboard) {
           await navigator.clipboard.writeText(url)
           setCopied(true)
-          window.setTimeout(() => setCopied(false), 2000)
         }
       } catch { }
     }

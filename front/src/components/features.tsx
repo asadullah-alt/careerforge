@@ -13,14 +13,14 @@ interface FeaturesProps {
     description: string;
     image: string;
   }[];
-  
+
   progressGradientLight?: string;
   progressGradientDark?: string;
 }
 
 export function Features({
   features,
-  
+
   progressGradientLight,
   progressGradientDark,
 }: FeaturesProps) {
@@ -39,10 +39,11 @@ export function Features({
 
   useEffect(() => {
     if (progress >= 100) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setCurrentFeature((prev) => (prev + 1) % features.length);
         setProgress(0);
       }, 200);
+      return () => clearTimeout(timer);
     }
   }, [progress, features.length]);
 
@@ -106,22 +107,20 @@ export function Features({
                   <div
                     className={`
                     flex lg:flex-row flex-col items-start space-x-4 p-3 max-w-sm md:max-w-sm lg:max-w-2xl transition-all duration-300
-                    ${
-                      isActive
+                    ${isActive
                         ? " bg-white dark:bg-black/80 md:shadow-xl dark:drop-shadow-lg  rounded-xl md:border dark:border-none border-gray-200 "
                         : " "
-                    }
+                      }
                   `}
                   >
                     {/* Icon */}
                     <div
                       className={`
                       p-3  hidden md:block rounded-full transition-all duration-300
-                      ${
-                        isActive
+                      ${isActive
                           ? `bg-sky-500 text-white`
                           : `bg-sky-500/10 dark:bg-black/80 text-sky-500`
-                      }
+                        }
                     `}
                     >
                       <Icon size={24} />
@@ -132,11 +131,10 @@ export function Features({
                       <h3
                         className={`
                         text-lg md:mt-4 lg:mt-0 font-semibold mb-2 transition-colors duration-300
-                        ${
-                          isActive
+                        ${isActive
                             ? "text-gray-900 dark:text-white"
                             : "text-gray-700 dark:text-white/80"
-                        }
+                          }
                       `}
                       >
                         {feature.title}
@@ -144,11 +142,10 @@ export function Features({
                       <p
                         className={`
                         transition-colors duration-300 text-sm
-                        ${
-                          isActive
+                        ${isActive
                             ? "text-gray-600 dark:text-white/60"
                             : "text-gray-500 dark:text-white/40"
-                        }
+                          }
                       `}
                       >
                         {feature.description}
