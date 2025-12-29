@@ -140,7 +140,7 @@ export function HeroSection() {
                     <div className="mx-auto max-w-7xl px-6">
                         <div className="text-center mb-16">
                             <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
-                                How CareerForge Works
+                                How Bhai Kaam Do Works
                             </h2>
                             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
                                 A simple three-step process to transform your job search
@@ -301,22 +301,22 @@ const stats = [
 
 const testimonials = [
     {
-        quote: 'I would not have been able to handle the sheer amount of applications without CareerForge. It&apos;s been a game-changer.',
-        name: 'Sarah Johnson',
-        role: 'Software Engineer',
-        initials: 'SJ'
+        quote: 'Sample Testimonial',
+        name: 'John Doe',
+        role: 'Example Job',
+        initials: 'JD'
     },
     {
-        quote: 'The AI resume builder helped me land 3x more interviews. The keyword matching is incredibly accurate.',
-        name: 'Michael Chen',
-        role: 'Product Manager',
-        initials: 'MC'
+        quote: 'Sample Testimonial',
+        name: 'John Doe',
+        role: 'Example Job',
+        initials: 'JD'
     },
     {
-        quote: 'Finally, a tool that keeps everything organized. The job tracker alone is worth it—no more lost applications.',
-        name: 'Emily Rodriguez',
-        role: 'Marketing Specialist',
-        initials: 'ER'
+        quote: 'Sample Testimonial',
+        name: 'John Doe',
+        role: 'Example Job',
+        initials: 'JD'
     }
 ]
 
@@ -437,7 +437,7 @@ const Logo = ({ className }: { className?: string }) => {
     return (
         <Image 
           src="/output_image.png" 
-          alt="CareerForge Logo"
+          alt="Bhai Kaam Do Logo"
           width={50} 
           height={50} 
           className={className} 

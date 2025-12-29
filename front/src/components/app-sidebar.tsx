@@ -162,7 +162,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">CareerForge Inc.</span>
+                <span className="text-base font-semibold">The Bhai Kaam Do Team.</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
