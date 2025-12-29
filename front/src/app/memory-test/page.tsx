@@ -26,7 +26,7 @@ export default function MemoryTest() {
                         <li>Take a snapshot now (Snapshot 1)</li>
                         <li>Wait for the counter to increase by ~20-30</li>
                         <li>Take another snapshot (Snapshot 2)</li>
-                        <li>Select "Comparison" view in Snapshot 2 and compare with Snapshot 1</li>
+                        <li>Select &quot;Comparison&quot; view in Snapshot 2 and compare with Snapshot 1</li>
                     </ol>
                     <p className="mt-4 p-2 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-900 rounded">
                         ⚠️ Look for increasing counts of <code>CSSStyleDeclaration</code> or detached DOM nodes.
