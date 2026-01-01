@@ -528,6 +528,8 @@ module.exports = function (app, passport) {
   // Accepts token in body { token }, query ?token=..., or Authorization header
   app.post('/api/checkExtensionToken', async (req, res) => {
     try {
+      console.log("POST CHECK EXTENSION TOKEN")
+      console.log("TOken:", req.body.token)
       const payload = req.body || {};
       const token = payload.token || req.query.token || (req.headers && (req.headers.authorization || req.headers.Authorization) ? (req.headers.authorization || req.headers.Authorization).replace(/^Bearer\s+/i, '') : null);
       if (!token) {
@@ -557,7 +559,7 @@ module.exports = function (app, passport) {
       }
 
       try {
-        const user = await User.findOne({ $or: [{ 'Extensiontoken': token }, { 'extensionToken': token }, { 'linkedin.token': token }] });
+        const user = await User.findOne({ $or: [{ 'Extensiontoken': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'local.token': token }] });
         if (!user) return res.json({ success: true, valid: false });
 
         const username = (user.local && user.local.email) || (user.linkedin && user.linkedin.name) || (user.google && user.google.name) || (user.facebook && user.facebook.name) || (user._id && user._id.toString()) || null;

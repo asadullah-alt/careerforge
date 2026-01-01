@@ -9,10 +9,10 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '/'
-  const hidePaths = ['/', '/signup', '/features', '/about', '/pricing','/verify', '/forgot-password']
-  
+  const hidePaths = ['/', '/signup', '/features', '/about', '/pricing', '/verify', '/forgot-password', '/privacy-policy', '/signin']
+
   const [shouldHideShell, setShouldHideShell] = useState<boolean | null>(null)
-  
+
   useEffect(() => {
     const isMainHost = window.location.hostname === 'bhaikaamdo.com'
     const isHidePath = hidePaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
@@ -20,9 +20,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, [pathname, hidePaths])
 
   // While checking, show nothing (or a blank screen)
- if (shouldHideShell === null) {
-  return <div className="min-h-screen bg-background" />
-}
+  if (shouldHideShell === null) {
+    return <div className="min-h-screen bg-background" />
+  }
 
   if (shouldHideShell) {
     return <div className="min-h-screen">{children}</div>
