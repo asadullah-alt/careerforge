@@ -1,7 +1,7 @@
 'use client'
-import React,{useState,useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Menu, X, Target, FileText, Sparkles, TrendingUp, BarChart3, CheckCircle2, Clock, Zap,Moon, Sun } from 'lucide-react'
+import { ArrowRight, Menu, X, Target, FileText, Sparkles, TrendingUp, BarChart3, CheckCircle2, Clock, Zap, Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/buttonHome'
 import { AnimatedGroup } from '@/components/ui/animated-group'
 import Image from 'next/image'
@@ -46,7 +46,7 @@ export function HeroSection() {
                 </div>
                 <section>
                     <div className="relative pt-24 md:pt-36">
-                       
+
                         <div aria-hidden className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--background)_75%)]" />
                         <div className="mx-auto max-w-7xl px-6">
                             <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
@@ -68,12 +68,12 @@ export function HeroSection() {
                                             </div>
                                         </div>
                                     </Link>
-                        
-                                   
-                                 
+
+
+
                                 </AnimatedGroup>
 
-                              
+
 
                                 {/* Trust badges */}
                                 <AnimatedGroup
@@ -391,11 +391,11 @@ export const HeroHeader = () => {
                                 </ul>
                             </div>
                             <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-                                <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={toggle} 
-                                className={cn("border border-gray-200 dark:border-gray-700 rounded-md px-2 flex items-center", isScrolled && 'lg:hidden')}>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={toggle}
+                                    className={cn("border border-gray-200 dark:border-gray-700 rounded-md px-2 flex items-center", isScrolled && 'lg:hidden')}>
                                     {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
                                     <span className="ml-2">Theme</span>
                                 </Button>
@@ -404,7 +404,7 @@ export const HeroHeader = () => {
                                     variant="outline"
                                     size="sm"
                                     className={cn(isScrolled && 'lg:hidden')}>
-                                    <Link href="/signup">
+                                    <Link href="/signin">
                                         <span>Login</span>
                                     </Link>
                                 </Button>
@@ -435,12 +435,12 @@ export const HeroHeader = () => {
 
 const Logo = ({ className }: { className?: string }) => {
     return (
-        <Image 
-          src="/output_image.png" 
-          alt="Bhai Kaam Do Logo"
-          width={50} 
-          height={50} 
-          className={className} 
+        <Image
+            src="/output_image.png"
+            alt="Bhai Kaam Do Logo"
+            width={50}
+            height={50}
+            className={className}
         />
     )
 
