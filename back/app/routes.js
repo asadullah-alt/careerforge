@@ -40,7 +40,7 @@ module.exports = function (app, passport) {
       }
 
       if (passportUser) {
-        return res.status(200).json({ user: passportUser, token: passportUser.generateJWT(passportUser.local.email) });
+        return res.status(200).json({ user: passportUser, token: passportUser.local.token });
       }
 
       return res.status(400).json({

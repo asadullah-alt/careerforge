@@ -53,6 +53,8 @@ const SignInForm = () => {
                 if (data.token) {
                     // Store token in cookie with proper expiration based on remember me
                     const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days : 24 hours
+                    // Remove existing cookie if present
+                    document.cookie = 'cf_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
                     document.cookie = `cf_auth=${data.token}; path=/; max-age=${maxAge}`;
                     router.push('/dashboard');
                 } else {
