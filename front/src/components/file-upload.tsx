@@ -18,7 +18,7 @@ const acceptedFileTypes = [
 ];
 
 const acceptString = acceptedFileTypes.join(',');
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://resume.bhaikaamdo.com';
 const API_RESUME_UPLOAD_URL = `${API_BASE_URL}/api/v1/resumes/upload`; // API endpoint
 
 export default function FileUpload() {
