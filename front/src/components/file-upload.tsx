@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AlertCircle,
   CheckCircle2,
@@ -28,7 +28,8 @@ export default function FileUpload() {
     type: 'success' | 'error';
     message: string;
   } | null>(null);
-  const [resumeName, setResumeName] = useState('')
+  const [resumeName, setResumeName] = useState('');
+  const [uploadStatusMessage, setUploadStatusMessage] = useState('Uploading Resume...')
 
   const [
     { files, isDragging, errors: validationOrUploadErrors, isUploadingGlobal },
@@ -102,6 +103,34 @@ export default function FileUpload() {
     },
   });
 
+  // Progressive status messages during upload
+  useEffect(() => {
+    if (!isUploadingGlobal) {
+      // Reset to initial message when not uploading
+      setUploadStatusMessage('Uploading Resume...');
+      return;
+    }
+
+    // Set initial message
+    setUploadStatusMessage('Uploading Resume...');
+
+    // After 10 seconds, change to "Extracting Information..."
+    const timer1 = setTimeout(() => {
+      setUploadStatusMessage('Extracting Information...');
+    }, 10000);
+
+    // After 20 seconds total, change to "Processing Resume with AI..."
+    const timer2 = setTimeout(() => {
+      setUploadStatusMessage('Processing Resume with AI...');
+    }, 20000);
+
+    // Cleanup timers on unmount or when upload completes
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [isUploadingGlobal]);
+
   const currentFile = files[0];
 
   const handleRemoveFile = (id: string) => {
@@ -157,7 +186,7 @@ export default function FileUpload() {
           {isUploadingGlobal ? (
             <>
               <Loader2 className="mb-4 size-10 animate-spin text-primary" />
-              <p className="text-lg font-semibold text-white">Uploading...</p>
+              <p className="text-lg font-semibold text-white">{uploadStatusMessage}</p>
               <p className="text-sm text-muted-foreground">
                 Your file is being processed.
               </p>
