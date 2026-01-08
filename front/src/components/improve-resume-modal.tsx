@@ -63,9 +63,9 @@ export function ImproveResumeModal({ isOpen, onClose, resumeMarkdown }: ImproveR
         }
 
         let currentSection = ''
-        let currentExperience: any = null
-        let currentEducation: any = null
-        let currentProject: any = null
+        let currentExperience: Partial<typeof resume.experiences[0]> | null = null
+        let currentEducation: Partial<typeof resume.education[0]> | null = null
+        let currentProject: Partial<typeof resume.projects[0]> | null = null
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim()
