@@ -11,6 +11,7 @@ import { getCfAuthCookie } from '@/utils/cookie'
 import dynamic from "next/dynamic";
 import { Link, Share2, FileText } from "lucide-react";
 import { CoverLetterModal } from '@/components/cover-letter-modal';
+import { ImproveResumeModal } from '@/components/improve-resume-modal';
 import { ExtendedJob } from '@/store/job-store'
 
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
@@ -626,60 +627,11 @@ export default function SingleJobPage({ params: paramsPromise }: { params: Promi
               jobId={params.id}
             />
 
-            {/* Improve Resume Modal */}
-            {isImproveResumeModalOpen && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                <div className="bg-background rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col m-4">
-                  <div className="flex items-center justify-between p-6 border-b">
-                    <h2 className="text-2xl font-bold">Improved Resume</h2>
-                    <button
-                      onClick={() => setIsImproveResumeModalOpen(false)}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="Close modal"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="flex-1 overflow-y-auto p-6">
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <pre className="whitespace-pre-wrap font-mono text-sm bg-muted p-4 rounded-lg">
-                        {analysisResult?.updated_resume_markdown || 'No improved resume available'}
-                      </pre>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-end gap-3 p-6 border-t">
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsImproveResumeModalOpen(false)}
-                    >
-                      Close
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        if (analysisResult?.updated_resume_markdown) {
-                          navigator.clipboard.writeText(analysisResult.updated_resume_markdown)
-                        }
-                      }}
-                    >
-                      Copy to Clipboard
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
+            <ImproveResumeModal
+              isOpen={isImproveResumeModalOpen}
+              onClose={() => setIsImproveResumeModalOpen(false)}
+              resumeMarkdown={analysisResult?.updated_resume_markdown}
+            />
           </div>
         </div>
       </div>
