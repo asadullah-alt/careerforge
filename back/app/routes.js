@@ -42,7 +42,7 @@ module.exports = function (app, passport) {
       if (passportUser) {
         return res.status(200).json({ user: passportUser, token: passportUser.local.token });
       }
-
+      console.log("Info", info)
       return res.status(400).json({
         info
       });
