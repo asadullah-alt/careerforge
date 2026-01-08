@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button'
 import { Copy, FileDown, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Document, Page, Text, View, pdf } from '@react-pdf/renderer'
+import { StructuredResume } from '@/lib/schemas/resume'
 
 interface ImproveResumeModalProps {
     isOpen: boolean
@@ -38,6 +38,158 @@ export function ImproveResumeModal({ isOpen, onClose, resumeMarkdown }: ImproveR
         html = html.replace(/(<li.*?<\/li>)/gim, '<ul class="list-disc ml-6 mb-4">$1</ul>')
 
         return html
+    }
+
+    // Parse markdown into StructuredResume format
+    const parseMarkdownToResume = (markdown: string): StructuredResume => {
+        const lines = markdown.split('\n')
+        const resume: StructuredResume = {
+            personal_data: {
+                first_name: '',
+                last_name: '',
+                email: '',
+                phone: '',
+                linkedin: '',
+                portfolio: '',
+                location: { city: '', country: '' }
+            },
+            experiences: [],
+            projects: [],
+            skills: [],
+            research_work: [],
+            achievements: [],
+            education: [],
+            extracted_keywords: []
+        }
+
+        let currentSection = ''
+        let currentExperience: any = null
+        let currentEducation: any = null
+        let currentProject: any = null
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim()
+
+            // Detect sections
+            if (line.startsWith('# ')) {
+                const name = line.replace('# ', '').trim()
+                const nameParts = name.split(' ')
+                resume.personal_data.first_name = nameParts[0] || ''
+                resume.personal_data.last_name = nameParts.slice(1).join(' ') || ''
+                continue
+            }
+
+            if (line.startsWith('## ')) {
+                currentSection = line.replace('## ', '').toLowerCase()
+                continue
+            }
+
+            // Parse contact info
+            if (line.includes('@') && line.includes('.')) {
+                const emailMatch = line.match(/[\w.-]+@[\w.-]+\.\w+/)
+                if (emailMatch) resume.personal_data.email = emailMatch[0]
+            }
+            if (line.match(/\+?\d[\d\s-()]+/)) {
+                const phoneMatch = line.match(/\+?\d[\d\s-()]+/)
+                if (phoneMatch) resume.personal_data.phone = phoneMatch[0].trim()
+            }
+            if (line.includes('linkedin.com')) {
+                resume.personal_data.linkedin = line.match(/https?:\/\/[^\s]+/)?.[0] || ''
+            }
+
+            // Parse sections
+            if (currentSection.includes('experience') || currentSection.includes('work')) {
+                if (line.startsWith('### ') || line.startsWith('**')) {
+                    if (currentExperience) {
+                        resume.experiences.push(currentExperience)
+                    }
+                    currentExperience = {
+                        job_title: line.replace(/^###\s*|\*\*/g, '').trim(),
+                        company: '',
+                        location: '',
+                        start_date: '',
+                        end_date: '',
+                        description: [],
+                        technologies_used: []
+                    }
+                } else if (currentExperience) {
+                    if (line.includes('|') || line.match(/\d{4}/)) {
+                        const parts = line.split('|').map(p => p.trim())
+                        if (parts.length >= 2) {
+                            currentExperience.company = parts[0].replace(/\*\*/g, '')
+                            const datePart = parts[parts.length - 1]
+                            const dates = datePart.split('-').map(d => d.trim())
+                            currentExperience.start_date = dates[0] || ''
+                            currentExperience.end_date = dates[1] || dates[0] || ''
+                        }
+                    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+                        currentExperience.description.push(line.replace(/^[-*]\s*/, ''))
+                    }
+                }
+            }
+
+            if (currentSection.includes('education')) {
+                if (line.startsWith('### ') || line.startsWith('**')) {
+                    if (currentEducation) {
+                        resume.education.push(currentEducation)
+                    }
+                    currentEducation = {
+                        degree: line.replace(/^###\s*|\*\*/g, '').trim(),
+                        institution: '',
+                        field_of_study: '',
+                        start_date: '',
+                        end_date: '',
+                        grade: '',
+                        description: ''
+                    }
+                } else if (currentEducation) {
+                    if (line.includes('|')) {
+                        const parts = line.split('|').map(p => p.trim())
+                        currentEducation.institution = parts[0].replace(/\*\*/g, '')
+                        if (parts.length > 1) {
+                            const datePart = parts[parts.length - 1]
+                            currentEducation.end_date = datePart
+                        }
+                    }
+                }
+            }
+
+            if (currentSection.includes('skill')) {
+                if (line.startsWith('- ') || line.startsWith('* ')) {
+                    const skillName = line.replace(/^[-*]\s*/, '').replace(/\*\*/g, '').trim()
+                    if (skillName) {
+                        resume.skills.push({ skill_name: skillName, category: 'Technical' })
+                    }
+                }
+            }
+
+            if (currentSection.includes('project')) {
+                if (line.startsWith('### ') || line.startsWith('**')) {
+                    if (currentProject) {
+                        resume.projects.push(currentProject)
+                    }
+                    currentProject = {
+                        project_name: line.replace(/^###\s*|\*\*/g, '').trim(),
+                        description: '',
+                        technologies_used: [],
+                        link: '',
+                        start_date: '',
+                        end_date: ''
+                    }
+                } else if (currentProject && line && !line.startsWith('#')) {
+                    if (!currentProject.description) {
+                        currentProject.description = line
+                    }
+                }
+            }
+        }
+
+        // Push last items
+        if (currentExperience) resume.experiences.push(currentExperience)
+        if (currentEducation) resume.education.push(currentEducation)
+        if (currentProject) resume.projects.push(currentProject)
+
+        return resume
     }
 
     const handleCopyToClipboard = async () => {
@@ -78,71 +230,12 @@ export function ImproveResumeModal({ isOpen, onClose, resumeMarkdown }: ImproveR
         try {
             setIsGeneratingPdf(true)
 
-            // Parse markdown into simple sections
-            const lines = resumeMarkdown.split('\n')
-            const sections: { type: string; content: string }[] = []
+            // Parse markdown to structured resume
+            const resumeData = parseMarkdownToResume(resumeMarkdown)
 
-            for (const line of lines) {
-                if (line.startsWith('# ')) {
-                    sections.push({ type: 'h1', content: line.replace(/^# /, '') })
-                } else if (line.startsWith('## ')) {
-                    sections.push({ type: 'h2', content: line.replace(/^## /, '') })
-                } else if (line.startsWith('### ')) {
-                    sections.push({ type: 'h3', content: line.replace(/^### /, '') })
-                } else if (line.startsWith('- ') || line.startsWith('* ')) {
-                    sections.push({ type: 'li', content: line.replace(/^[*-] /, '• ') })
-                } else if (line.trim()) {
-                    // Remove markdown formatting for plain text
-                    const cleanContent = line
-                        .replace(/\*\*(.*?)\*\*/g, '$1')
-                        .replace(/\*(.*?)\*/g, '$1')
-                    sections.push({ type: 'text', content: cleanContent })
-                }
-            }
-
-            // Create PDF document
-            const MyDocument = () => (
-                <Document>
-                    <Page size="A4" style={{ padding: 40, fontSize: 11, fontFamily: 'Helvetica' }}>
-                        {sections.map((section, index) => {
-                            if (section.type === 'h1') {
-                                return (
-                                    <Text key={index} style={{ fontSize: 20, fontWeight: 'bold', marginTop: 16, marginBottom: 8 }}>
-                                        {section.content}
-                                    </Text>
-                                )
-                            } else if (section.type === 'h2') {
-                                return (
-                                    <Text key={index} style={{ fontSize: 16, fontWeight: 'bold', marginTop: 12, marginBottom: 6 }}>
-                                        {section.content}
-                                    </Text>
-                                )
-                            } else if (section.type === 'h3') {
-                                return (
-                                    <Text key={index} style={{ fontSize: 13, fontWeight: 'bold', marginTop: 8, marginBottom: 4 }}>
-                                        {section.content}
-                                    </Text>
-                                )
-                            } else if (section.type === 'li') {
-                                return (
-                                    <Text key={index} style={{ fontSize: 10, marginBottom: 3, marginLeft: 12 }}>
-                                        {section.content}
-                                    </Text>
-                                )
-                            } else {
-                                return (
-                                    <Text key={index} style={{ fontSize: 10, marginBottom: 4 }}>
-                                        {section.content}
-                                    </Text>
-                                )
-                            }
-                        })}
-                    </Page>
-                </Document>
-            )
-
-            const asPdf = pdf(<MyDocument />)
-            const blob = await asPdf.toBlob()
+            // Use the existing PDF generator with Modern template
+            const { generateResumePDF } = await import('@/lib/resume-pdf')
+            const blob = await generateResumePDF(resumeData, {}, 'modern')
 
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
