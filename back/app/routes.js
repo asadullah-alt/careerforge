@@ -38,7 +38,8 @@ module.exports = function (app, passport) {
       if (err) {
         return res.json({ 'errors': err });
       }
-
+      console.log(passportUser);
+      console.log(info);
       if (passportUser) {
         return res.status(200).json({ user: passportUser, token: passportUser.local.token });
       }
