@@ -11,7 +11,7 @@ import { getCfAuthCookie } from '@/utils/cookie'
 import dynamic from "next/dynamic";
 import { Link, Share2, FileText } from "lucide-react";
 import { CoverLetterModal } from '@/components/cover-letter-modal';
-import { ImproveResumeModal } from '@/components/improve-resume-modal';
+
 import { ExtendedJob } from '@/store/job-store'
 
 const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false });
@@ -627,11 +627,7 @@ export default function SingleJobPage({ params: paramsPromise }: { params: Promi
               jobId={params.id}
             />
 
-            <ImproveResumeModal
-              isOpen={isImproveResumeModalOpen}
-              onClose={() => setIsImproveResumeModalOpen(false)}
-              resumeMarkdown={analysisResult?.updated_resume_markdown}
-            />
+
           </div>
         </div>
       </div>
