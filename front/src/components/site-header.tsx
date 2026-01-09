@@ -93,11 +93,24 @@ export function SiteHeader() {
           `https://resume.bhaikaamdo.com/api/v1/resumes/getAllUserResumes?token=${token}`
         )
         const data = await response.json()
-        if (data.data && Array.isArray(data.data)) {
-          setResumes(data.data)
-          // Set first resume as active by default if none selected
-          if (data.data.length > 0 && !selectedResumeId) {
-            setSelectedResumeId(data.data[0].id)
+        if (data.data && data.data.resumes && Array.isArray(data.data.resumes)) {
+          setResumes(data.data.resumes)
+
+          // Logic to set default resume
+          const defaultResumeId = data.data.default_resume
+
+          if (defaultResumeId && !selectedResumeId) {
+            // Verify the default resume exists in the list
+            const defaultResumeExists = data.data.resumes.find((r: { id: string }) => r.id === defaultResumeId)
+            if (defaultResumeExists) {
+              setSelectedResumeId(defaultResumeId)
+            } else if (data.data.resumes.length > 0) {
+              // Fallback if default not found in list (shouldn't happen but good for safety)
+              setSelectedResumeId(data.data.resumes[0].id)
+            }
+          } else if (data.data.resumes.length > 0 && !selectedResumeId) {
+            // Fallback if no default_resume returned
+            setSelectedResumeId(data.data.resumes[0].id)
           }
         }
       } catch (error) {
