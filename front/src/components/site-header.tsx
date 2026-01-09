@@ -11,6 +11,7 @@ import { UploadCloud, Linkedin, Mail, ChevronDown, BookOpenCheck } from "lucide-
 import { Sun, Moon } from 'lucide-react'
 import { useTheme } from '@/context/theme-context'
 import LinkedinModal from "@/components/linkedin-modal"
+import { toast } from "sonner"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -121,6 +122,44 @@ export function SiteHeader() {
     return resume.resume_name || resume.id || 'Resume'
   }
 
+  const handleSetDefaultResume = async (resumeId: string) => {
+    try {
+      const token = getCfAuthCookie()
+      if (!token) {
+        toast.error("Authentication token missing")
+        return
+      }
+
+      const response = await fetch("https://resume.bhaikaamdo.com/api/v1/resumes/setDefaultResume", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          resume_id: resumeId,
+          token: token
+        })
+      })
+
+      const data = await response.json()
+
+      if (
+        data.request_id &&
+        typeof data.request_id === 'string' &&
+        data.request_id.startsWith("resumes:") &&
+        data.message === "Default resume updated successfully"
+      ) {
+        setSelectedResumeId(resumeId)
+        toast.success("Default resume updated successfully")
+      } else {
+        toast.error("Failed to Make Resume Active")
+      }
+    } catch (error) {
+      console.error("Error setting default resume:", error)
+      toast.error("Failed to Make Resume Active")
+    }
+  }
+
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -216,7 +255,7 @@ export function SiteHeader() {
                 resumes.map((resume) => (
                   <DropdownMenuItem
                     key={resume.id}
-                    onClick={() => setSelectedResumeId(resume.id)}
+                    onClick={() => handleSetDefaultResume(resume.id)}
                     className={selectedResumeId === resume.id ? 'bg-accent' : ''}
                   >
                     <span className="text-sm">{getResumeDisplayName(resume)}</span>
