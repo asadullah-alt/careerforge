@@ -223,15 +223,31 @@ export default function SingleJobPage({ params: paramsPromise }: { params: Promi
         )
         const resumesData = await resumesResponse.json()
 
-        if (!resumesData.data || resumesData.data.length === 0) {
+        if (
+          !resumesData.data ||
+          !resumesData.data.resumes ||
+          !Array.isArray(resumesData.data.resumes) ||
+          resumesData.data.resumes.length === 0
+        ) {
           console.error('No resumes found')
           return
         }
 
-        // Use the first resume ID
-        const firstResumeId = resumesData.data[0].id
+        // Logic to determine which resume to use
+        const defaultResumeId = resumesData.data.default_resume
+        const userResumes = resumesData.data.resumes
+
+        let targetResumeId = userResumes[0].id
+
+        if (defaultResumeId) {
+          const defaultResumeExists = userResumes.find((r: { id: string }) => r.id === defaultResumeId)
+          if (defaultResumeExists) {
+            targetResumeId = defaultResumeId
+          }
+        }
+
         if (!mounted) return
-        setResumeId(firstResumeId)
+        setResumeId(targetResumeId)
 
         // Fetch cached improvements using the resume ID and job ID
         const improvementsResponse = await fetch(
