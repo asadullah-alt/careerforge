@@ -38,7 +38,7 @@ type ResumeListItem = {
   resume_name: string
   createdAt: string
   updatedAt?: string
-} &  StructuredResume
+} & StructuredResume
 
 export default function ResumesListPage() {
   const router = useRouter()
@@ -87,12 +87,12 @@ export default function ResumesListPage() {
       const res = await fetch('https://careerback.bhaikaamdo.com/api/resume/list', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ "token":token }),
+        body: JSON.stringify({ "token": token }),
       })
       const json = await res.json()
       if (json?.success) setResumes(json.data || [])
       else setResumes([])
-      console.log(resumes[0])
+      console.log(json.data)
     } catch (e) {
       console.error('Failed to load resumes from server:', e)
       setResumes([])
@@ -106,11 +106,11 @@ export default function ResumesListPage() {
     resetResume()
     // Navigate to the resume builder
     router.push("/dashboard/resume")
-  }``
+  } ``
 
   async function handleEdit(item: ResumeListItem) {
     try {
-        console.log("Editing resume with ID:", item);
+      console.log("Editing resume with ID:", item);
       const res = await fetch('https://careerback.bhaikaamdo.com/api/resume/load', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -213,9 +213,9 @@ export default function ResumesListPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {resumes.map((r) => {
-                
+
               const name = r?.personal_data ? `${r.personal_data.first_name || ''} ${r.personal_data.last_name || ''}`.trim() : r.title
-              const initials = (name || r.title || 'U').split(' ').map((s:string) => s.charAt(0)).slice(0,2).join('').toUpperCase()
+              const initials = (name || r.title || 'U').split(' ').map((s: string) => s.charAt(0)).slice(0, 2).join('').toUpperCase()
               const experiences = Array.isArray(r?.experiences) ? r.experiences.length : 0
               const skills = Array.isArray(r?.skills) ? r.skills.length : 0
               const updated = r.updatedAt || r.createdAt || ''
