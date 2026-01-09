@@ -20,7 +20,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { getCfAuthCookie } from "@/utils/cookie"
+import { getCfAuthCookie, setCookie } from "@/utils/cookie"
 import { useResumeStore } from "@/store/resume-store"
 
 // Add button blink animation styles
@@ -104,13 +104,16 @@ export function SiteHeader() {
             const defaultResumeExists = data.data.resumes.find((r: { id: string }) => r.id === defaultResumeId)
             if (defaultResumeExists) {
               setSelectedResumeId(defaultResumeId)
+              setCookie('bhaikaamdo_defaultresume', defaultResumeId)
             } else if (data.data.resumes.length > 0) {
               // Fallback if default not found in list (shouldn't happen but good for safety)
               setSelectedResumeId(data.data.resumes[0].id)
+              setCookie('bhaikaamdo_defaultresume', data.data.resumes[0].id)
             }
           } else if (data.data.resumes.length > 0 && !selectedResumeId) {
             // Fallback if no default_resume returned
             setSelectedResumeId(data.data.resumes[0].id)
+            setCookie('bhaikaamdo_defaultresume', data.data.resumes[0].id)
           }
         }
       } catch (error) {
@@ -163,6 +166,7 @@ export function SiteHeader() {
         data.message === "Default resume updated successfully"
       ) {
         setSelectedResumeId(resumeId)
+        setCookie('bhaikaamdo_defaultresume', resumeId)
         toast.success("Default resume updated successfully")
       } else {
         toast.error("Failed to Make Resume Active")
