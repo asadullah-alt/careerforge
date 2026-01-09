@@ -251,7 +251,7 @@ export default function SingleJobPage({ params: paramsPromise }: { params: Promi
 
         // Fetch cached improvements using the resume ID and job ID
         const improvementsResponse = await fetch(
-          `https://resume.bhaikaamdo.com/api/v1/resumes/getImprovements?resume_id=${firstResumeId}&job_id=${params.id}&token=${token}`
+          `https://resume.bhaikaamdo.com/api/v1/resumes/getImprovements?resume_id=${targetResumeId}&job_id=${params.id}&token=${token}`
         )
         const improvementsData = await improvementsResponse.json()
         if (improvementsData.data && mounted) {
