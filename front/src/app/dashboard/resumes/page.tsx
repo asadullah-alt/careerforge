@@ -90,7 +90,7 @@ export default function ResumesListPage() {
         body: JSON.stringify({ "token": token }),
       })
       const json = await res.json()
-      if (json?.success) setResumes(json.data || [])
+      if (json?.data) setResumes(json.data || [])
       else setResumes([])
       console.log(json.data)
     } catch (e) {
