@@ -37,7 +37,7 @@ const platforms = [
     { name: 'Indeed', icon: '/indeed.svg' },
     { name: 'Glassdoor', icon: '/glassdoor.svg' },
     { name: 'Monster', icon: '/monster.svg' },
-    { name: 'ZipRecruiter', icon: '/ziprecruiter.svg' },
+    { name: 'ZipRecruiter', icon: '' },
     { name: 'AngelList', icon: '/wellfound.svg' },
     { name: 'Company Sites', icon: null },
     { name: 'Any Board', icon: null }
