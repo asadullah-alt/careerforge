@@ -153,6 +153,7 @@ export default function Page() {
             deadline: null,
             dateApplied: null,
             followUp: null,
+            job_url: job.job_url,
             // Add the missing properties
             applicationInfo: job.applicationInfo,
             extractedKeywords: job.extractedKeywords || []
