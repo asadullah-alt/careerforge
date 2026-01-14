@@ -194,7 +194,7 @@ export function EmptyJobsState() {
                                 ease: "easeInOut"
                             }}
                         >
-                            <Sparkles className="w-4 h-4 text-yellow-500" />
+
                         </motion.div>
                         <span>Start building your perfect job application strategy today</span>
                     </div>

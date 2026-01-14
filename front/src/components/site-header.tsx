@@ -20,6 +20,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { getCfAuthCookie, setCookie } from "@/utils/cookie"
 import { useResumeStore } from "@/store/resume-store"
 
@@ -43,6 +50,7 @@ export function SiteHeader() {
 
   const [sheetOpen, setSheetOpen] = useState(false)
   const [linkedinOpen, setLinkedinOpen] = useState(false)
+  const [emailModalOpen, setEmailModalOpen] = useState(false)
   const [resumes, setResumes] = useState<Array<{ id: string; resume_name?: string }>>([])
   const { selectedResumeId, setSelectedResumeId } = useResumeStore()
   const [loadingResumes, setLoadingResumes] = useState(false)
@@ -227,9 +235,11 @@ export function SiteHeader() {
           <Button
             variant="ghost"
             size="sm"
-
             className={`border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'email' ? 'animate-double-blink' : ''}`}
-            onClick={() => handleButtonClick('email')}
+            onClick={() => {
+              handleButtonClick('email')
+              setEmailModalOpen(true)
+            }}
           >
             <Mail className="size-4 mr-2" />
             <span className="hidden md:inline">Connect with Email</span>
@@ -260,6 +270,18 @@ export function SiteHeader() {
           </Button>
         </div>
         <LinkedinModal open={linkedinOpen} onOpenChange={setLinkedinOpen} />
+
+        {/* Email Modal */}
+        <Dialog open={emailModalOpen} onOpenChange={setEmailModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Connect with Email</DialogTitle>
+              <DialogDescription>
+                Coming soon, but thanks for clicking!
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
 
         <div className="ml-auto flex items-center gap-2">
           {/* Resume Selector Dropdown */}
@@ -338,5 +360,3 @@ export function SiteHeader() {
     </header>
   )
 }
-
-
