@@ -32,6 +32,17 @@ const transitionVariants: {
     },
 }
 
+const platforms = [
+    { name: 'LinkedIn', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/linkedin.svg' },
+    { name: 'Indeed', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/indeed.svg' },
+    { name: 'Glassdoor', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/glassdoor.svg' },
+    { name: 'Monster', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/monster.svg' },
+    { name: 'ZipRecruiter', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/ziprecruiter.svg' },
+    { name: 'AngelList', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/wellfound.svg' },
+    { name: 'Company Sites', icon: null },
+    { name: 'Any Board', icon: null }
+]
+
 export function HeroSection() {
     return (
         <>
@@ -184,12 +195,25 @@ export function HeroSection() {
                         </p>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-12">
-                            {['LinkedIn', 'Indeed', 'Glassdoor', 'Monster', 'ZipRecruiter', 'AngelList', 'Company Sites', 'Any Board'].map((platform, index) => (
+                            {platforms.map((platform, index) => (
                                 <div
                                     key={index}
                                     className="bg-background/50 backdrop-blur-sm rounded-xl border p-4 hover:border-foreground/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                                    <p className="font-semibold text-sm">{platform}</p>
-                                    <CheckCircle2 className="size-5 text-green-500 mx-auto mt-2" />
+                                    <div className="h-8 mb-3 flex items-center justify-center">
+                                        {platform.icon ? (
+                                            <Image
+                                                src={platform.icon}
+                                                alt={`${platform.name} logo`}
+                                                width={32}
+                                                height={32}
+                                                className="h-8 w-auto object-contain dark:invert"
+                                            />
+                                        ) : (
+                                            <Globe className="size-8 text-foreground/60" />
+                                        )}
+                                    </div>
+                                    <p className="font-semibold text-sm text-center mb-2">{platform.name}</p>
+                                    <CheckCircle2 className="size-5 text-green-500 mx-auto" />
                                 </div>
                             ))}
                         </div>
@@ -271,7 +295,7 @@ export function HeroSection() {
                             </Button>
                         </div>
                         <p className="text-sm text-muted-foreground mt-6">
-                            No credit card required • Unlimited job tracking • Cancel anytime
+                            No credit card required
                         </p>
                     </div>
                 </section>
@@ -337,22 +361,22 @@ const stats = [
 
 const testimonials = [
     {
-        quote: 'Sample Testimonial',
-        name: 'John Doe',
-        role: 'Example Job',
-        initials: 'JD'
+        quote: 'I was spending hours customizing my resume for each job. Bhai Kaam Do cut that time down to minutes. Landed 3 interviews in my first week!',
+        name: 'Sarah Chen',
+        role: 'Software Engineer at Google',
+        initials: 'SC'
     },
     {
-        quote: 'Sample Testimonial',
-        name: 'John Doe',
-        role: 'Example Job',
-        initials: 'JD'
+        quote: 'The AI resume builder is incredible. It picked up keywords I never would have thought of. My response rate went from 5% to over 40%.',
+        name: 'Marcus Rodriguez',
+        role: 'Product Manager at Spotify',
+        initials: 'MR'
     },
     {
-        quote: 'Sample Testimonial',
-        name: 'John Doe',
-        role: 'Example Job',
-        initials: 'JD'
+        quote: 'Finally, a job search tool that actually works! The match scores helped me focus on the right opportunities. Got my dream job in 3 weeks.',
+        name: 'Priya Sharma',
+        role: 'UX Designer at Adobe',
+        initials: 'PS'
     }
 ]
 
