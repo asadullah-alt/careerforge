@@ -43,7 +43,7 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
   const { theme } = useTheme()
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches)
   const btnClass = isDark ? 'px-2 py-1 rounded border bg-black text-white text-sm' : 'px-2 py-1 rounded border bg-white/80 text-sm'
-  
+
   const [numPages, setNumPages] = useState<number>(0)
   const [page, setPage] = useState<number>(1)
   const [scale, setScale] = useState<number>(1.0)
@@ -267,9 +267,9 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
             <Document file={fileData} onLoadSuccess={onDocumentLoadSuccess} onLoadError={(err) => console.error('Document load error', err)} loading={<div className="text-center py-10">Loading PDF…</div>}>
               <div className="flex justify-center">
                 <Page renderTextLayer={false}
-                 renderAnnotationLayer={false}
-        
-         pageNumber={page} scale={1.0} />
+                  renderAnnotationLayer={false}
+
+                  pageNumber={page} scale={1.0} />
               </div>
             </Document>
           ) : (

@@ -68,7 +68,7 @@ interface TransformedJob {
     description: string | null;
   };
   maxSalary: string;
-  location:Location;
+  location: Location;
   qualifications: Qualifications;
   applicationInfo: ApplicationInfo;
   extractedKeywords: string[];
@@ -107,7 +107,7 @@ export default function Page() {
         }
 
         const data = await response.json() as ApiResponse
-        
+
         // Transform the API response to match the DataTable schema
         const transformedJobs = data.jobs.map((job: ProcessedJob) => {
           // Parse companyProfile if it's a string
@@ -125,11 +125,11 @@ export default function Page() {
 
           const companyName = companyProfile?.companyName || 'Unknown Company'
           // Format location as string
-         
+
 
           return {
             job_id: job.job_id,
-            jobSummary:job.jobSummary || '',
+            jobSummary: job.jobSummary || '',
             id: parseInt(job.job_id) || Math.floor(Math.random() * 1000000),
             jobTitle: job.jobTitle || 'Untitled Position',
             employmentType: job.employmentType || 'Not specified',
@@ -173,8 +173,8 @@ export default function Page() {
     <AuthGuard>
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <SectionCards />
-          
+          {/* <SectionCards /> */}
+
           {isLoading ? (
             <div className="flex items-center justify-center min-h-[200px]">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
