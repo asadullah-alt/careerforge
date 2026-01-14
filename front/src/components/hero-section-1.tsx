@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Menu, X, Target, FileText, Sparkles, TrendingUp, BarChart3, CheckCircle2, Clock, Zap, Moon, Sun } from 'lucide-react'
+import { ArrowRight, Menu, X, Target, FileText, Sparkles, TrendingUp, BarChart3, CheckCircle2, Clock, Zap, Moon, Sun, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/buttonHome'
 import { AnimatedGroup } from '@/components/ui/animated-group'
 import Image from 'next/image'
@@ -164,6 +164,42 @@ export function HeroSection() {
                     </div>
                 </section>
 
+                {/* Universal Compatibility Section */}
+                <section className="bg-gradient-to-br from-foreground/5 via-background to-foreground/5 py-16 md:py-24 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(74,222,128,0.1),transparent_50%)]" />
+
+                    <div className="mx-auto max-w-4xl px-6 text-center relative z-10">
+                        <div className="inline-flex items-center gap-2 bg-foreground/10 rounded-full px-4 py-2 mb-6">
+                            <Globe className="size-4 text-foreground" />
+                            <span className="text-sm font-semibold">Industry First Technology</span>
+                        </div>
+
+                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-foreground via-foreground/80 to-foreground bg-clip-text text-transparent">
+                            Works With Every Job Board. Everywhere.
+                        </h2>
+
+                        <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+                            We&apos;re the <span className="font-semibold text-foreground">only platform on the planet</span> that seamlessly integrates with job postings from <span className="font-semibold text-foreground">any website, anywhere in the world</span>. LinkedIn, Indeed, Glassdoor, company career pages—even that niche industry board nobody&apos;s heard of. If it&apos;s online, we&apos;ve got you covered.
+                        </p>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-12">
+                            {['LinkedIn', 'Indeed', 'Glassdoor', 'Monster', 'ZipRecruiter', 'AngelList', 'Company Sites', 'Any Board'].map((platform, index) => (
+                                <div
+                                    key={index}
+                                    className="bg-background/50 backdrop-blur-sm rounded-xl border p-4 hover:border-foreground/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                    <p className="font-semibold text-sm">{platform}</p>
+                                    <CheckCircle2 className="size-5 text-green-500 mx-auto mt-2" />
+                                </div>
+                            ))}
+                        </div>
+
+                        <p className="text-sm text-muted-foreground mt-8 italic">
+                            No extensions to install. No manual copying. Just pure magic. ✨
+                        </p>
+                    </div>
+                </section>
+
                 {/* Social Proof / Stats Section */}
                 <section className="bg-background py-16 md:py-32">
                     <div className="mx-auto max-w-7xl px-6">
@@ -250,15 +286,15 @@ const features = [
         title: 'AI Resume Builder',
         description: 'Create tailored resumes that match job descriptions perfectly. Our AI analyzes keywords and optimizes your content for ATS systems.'
     },
-    {
-        icon: FileText,
-        title: 'Job Application Tracker',
-        description: 'Track every application in one place. Save jobs from 40+ job boards, monitor status, and never lose track of opportunities.'
-    },
+    // {
+    //     icon: FileText,
+    //     title: 'Job Application Tracker',
+    //     description: 'Track every application in one place. Save jobs from 40+ job boards, monitor status, and never lose track of opportunities.'
+    // },
     {
         icon: Sparkles,
         title: 'AI Cover Letter Generator',
-        description: 'Generate compelling, personalized cover letters in seconds. AI-powered content that highlights your unique value.'
+        description: 'Generate compelling, personalized cover letters in seconds. Using your Resume and Job Description create a tailored cover letter.'
     },
     {
         icon: TrendingUp,
@@ -270,21 +306,21 @@ const features = [
         title: 'Keyword Analyzer',
         description: 'Extract essential keywords from job descriptions and optimize your resume to get noticed by recruiters.'
     },
-    {
-        icon: Zap,
-        title: 'Autofill Applications',
-        description: 'Automate your application process with AI-powered autofill for job application questions and forms.'
-    }
+    // {
+    //     icon: Zap,
+    //     title: 'Autofill Applications',
+    //     description: 'Automate your application process with AI-powered autofill for job application questions and forms.'
+    // }
 ]
 
 const steps = [
     {
         title: 'Upload Your Profile',
-        description: 'Add your resume, LinkedIn profile, and work history. Our AI learns about your experience and skills.'
+        description: 'Add your resume or LinkedIn profile. Our AI learns about your experience and skills.'
     },
     {
         title: 'Find & Save Jobs',
-        description: 'Paste job URLs or use our extension to save opportunities from any job board. Track everything in one place.'
+        description: 'Use our extension to save opportunities from any job board. Track everything in one place.'
     },
     {
         title: 'Apply with AI',

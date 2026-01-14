@@ -87,7 +87,7 @@ import { useJobStore } from '@/store/job-store'
 export const schema = z.object({
   job_id: z.string(),
   id: z.number(),
-  jobSummary:z.string(),
+  jobSummary: z.string(),
   employmentType: z.string(),
   keyResponsibilities: z.array(z.string()),
   jobTitle: z.string(),
@@ -108,8 +108,8 @@ export const schema = z.object({
     description: z.string().nullable()
   }).optional(),
   maxSalary: z.string(),
-  location:  z.object({
-    city: z.string().nullable(),  
+  location: z.object({
+    city: z.string().nullable(),
     state: z.string().nullable(),
     country: z.string().nullable(),
     remoteStatus: z.string().nullable()
@@ -213,11 +213,10 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
-      <Badge variant="outline" className={`text-muted-foreground px-1.5 ${
-        row.original.status === "Interviewing" ? "bg-green-100 text-green-800" :
+      <Badge variant="outline" className={`text-muted-foreground px-1.5 ${row.original.status === "Interviewing" ? "bg-green-100 text-green-800" :
         row.original.status === "Applied" ? "bg-blue-100 text-blue-800" :
-        "bg-gray-100 text-gray-800"
-      }`}>
+          "bg-gray-100 text-gray-800"
+        }`}>
         {row.original.status}
       </Badge>
     ),
@@ -361,7 +360,7 @@ export function DataTable({
       dateApplied: false,
       followUp: false,
       status: false
-    
+
     })
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -428,8 +427,8 @@ export function DataTable({
         <Label htmlFor="view-selector" className="sr-only">
           View
         </Label>
-       
-      
+
+
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -464,7 +463,7 @@ export function DataTable({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-         
+
         </div>
       </div>
       <TabsContent
@@ -489,9 +488,9 @@ export function DataTable({
                           {header.isPlaceholder
                             ? null
                             : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                         </TableHead>
                       )
                     })}
@@ -600,7 +599,7 @@ export function DataTable({
           </div>
         </div>
       </TabsContent>
-    
+
     </Tabs>
   )
 }

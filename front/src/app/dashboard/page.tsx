@@ -47,6 +47,7 @@ interface ProcessedJob {
   extractedKeywords: string[];
   processed_at: string;
   updated_at: string;
+  job_url: string;
 }
 
 interface ApiResponse {
@@ -72,6 +73,7 @@ interface TransformedJob {
   qualifications: Qualifications;
   applicationInfo: ApplicationInfo;
   extractedKeywords: string[];
+  job_url: string;
   status: string;
   dateSaved: string;
   deadline: string | null;

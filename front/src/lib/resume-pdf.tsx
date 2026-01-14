@@ -21,7 +21,7 @@ export type PdfStyles = {
 }
 
 export const defaultPdfStyles: Required<PdfStyles> = {
-  page: { padding: 20, fontSize: 11, fontFamily: 'Helvetica' },
+  page: { padding: 24, fontSize: 11, fontFamily: 'Helvetica' },
   header: { marginBottom: 8 },
   name: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
   sectionTitle: { fontSize: 12, fontWeight: 'bold', marginTop: 8, marginBottom: 4 },
@@ -92,13 +92,23 @@ function ClassicTemplate({ resume, styles }: { resume: StructuredResume; styles?
           <Text style={pdfStyles.name}>
             {resume.personal_data.first_name} {resume.personal_data.last_name}
           </Text>
-            {resume.personal_data.email && (
+          {resume.personal_data.email && (
             <Text style={pdfStyles.text}>
               {resume.personal_data.email}
               {resume.personal_data.phone ? ` | ${resume.personal_data.phone}` : ''}
             </Text>
           )}
         </View>
+
+        {/* Professional Summary */}
+        {resume.achievements && resume.achievements.length > 0 && (
+          <View style={{ marginBottom: 10 }}>
+            <Text style={pdfStyles.sectionTitle}>SUMMARY</Text>
+            <Text style={pdfStyles.text}>
+              {resume.achievements[0]}
+            </Text>
+          </View>
+        )}
 
         {/* Professional Experience */}
         {resume.experiences && resume.experiences.length > 0 && (
@@ -114,7 +124,10 @@ function ClassicTemplate({ resume, styles }: { resume: StructuredResume; styles?
                 {exp.description && exp.description.length > 0 && (
                   <View style={{ marginTop: 3 }}>
                     {exp.description.map((d: string, idx: number) => (
-                      <Text key={idx} style={pdfStyles.text}>• {d}</Text>
+                      <View key={idx} style={{ flexDirection: 'row', marginBottom: 2 }}>
+                        <Text style={{ width: 10, fontSize: 10 }}>•</Text>
+                        <Text style={{ flex: 1, fontSize: 10 }}>{d}</Text>
+                      </View>
                     ))}
                   </View>
                 )}
