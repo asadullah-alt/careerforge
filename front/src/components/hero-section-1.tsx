@@ -219,7 +219,7 @@ export function HeroSection() {
                         </div>
 
                         <p className="text-sm text-muted-foreground mt-8 italic">
-                            No extensions to install. No manual copying. Just pure magic. ✨
+                            Install one extension. No manual copying. Just pure magic. ✨
                         </p>
                     </div>
                 </section>
@@ -339,7 +339,7 @@ const features = [
 
 const steps = [
     {
-        title: 'Upload Your Profile',
+        title: 'Upload Your Resume',
         description: 'Add your resume or LinkedIn profile. Our AI learns about your experience and skills.'
     },
     {
