@@ -33,12 +33,12 @@ const transitionVariants: {
 }
 
 const platforms = [
-    { name: 'LinkedIn', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/linkedin.svg' },
-    { name: 'Indeed', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/indeed.svg' },
-    { name: 'Glassdoor', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/glassdoor.svg' },
-    { name: 'Monster', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/monster.svg' },
-    { name: 'ZipRecruiter', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/ziprecruiter.svg' },
-    { name: 'AngelList', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/wellfound.svg' },
+    { name: 'LinkedIn', icon: '/linkedin.svg' },
+    { name: 'Indeed', icon: '/indeed.svg' },
+    { name: 'Glassdoor', icon: '/glassdoor.svg' },
+    { name: 'Monster', icon: '/monster.svg' },
+    { name: 'ZipRecruiter', icon: '/ziprecruiter.svg' },
+    { name: 'AngelList', icon: '/wellfound.svg' },
     { name: 'Company Sites', icon: null },
     { name: 'Any Board', icon: null }
 ]
@@ -219,7 +219,7 @@ export function HeroSection() {
                         </div>
 
                         <p className="text-sm text-muted-foreground mt-8 italic">
-                            Install one extension. No manual copying. Just pure magic. ✨
+                            Install one extension. No manual copying. Just pure magic.
                         </p>
                     </div>
                 </section>
