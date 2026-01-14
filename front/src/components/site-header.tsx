@@ -7,7 +7,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import FileUpload from "@/components/file-upload"
 import { usePathname, useRouter } from "next/navigation"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet"
-import { UploadCloud, Linkedin, Mail, ChevronDown, BookOpenCheck } from "lucide-react"
+import { UploadCloud, Linkedin, Mail, ChevronDown, BookOpenCheck, Download } from "lucide-react"
 import { Sun, Moon } from 'lucide-react'
 import { useTheme } from '@/context/theme-context'
 import LinkedinModal from "@/components/linkedin-modal"
@@ -245,6 +245,18 @@ export function SiteHeader() {
           >
             <BookOpenCheck className="size-4 mr-2" />
             <span className="hidden md:inline">Resume Builder</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              handleButtonClick('extension')
+              window.open('https://chromewebstore.google.com/detail/bhaikaamdo-streamline-you/cfhjopkjaegoadmcfmepdbnmkikkpjjk', '_blank')
+            }}
+            className={`border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'extension' ? 'animate-double-blink' : ''}`}
+          >
+            <Download className="size-4 mr-2" />
+            <span className="hidden md:inline">Download extension</span>
           </Button>
         </div>
         <LinkedinModal open={linkedinOpen} onOpenChange={setLinkedinOpen} />
