@@ -4,6 +4,7 @@ import React from "react"
 import AuthGuard from '@/components/auth-guard'
 import { DataTable } from "@/components/data-table"
 import { SectionCards } from "@/components/section-cards"
+import { EmptyJobsState } from "@/components/empty-state"
 import { getCfAuthCookie } from "@/utils/cookie"
 
 interface CompanyProfile {
@@ -126,8 +127,6 @@ export default function Page() {
           }
 
           const companyName = companyProfile?.companyName || 'Unknown Company'
-          // Format location as string
-
 
           return {
             job_id: job.job_id,
@@ -147,14 +146,13 @@ export default function Page() {
               preferred: job.qualifications?.preferred || []
             },
             maxSalary: job.compensationAndBenefits || 'Not specified',
-            location: job.location, // Pass the full location object instead of string
+            location: job.location,
             status: job.applicationInfo.howToApply || 'Bookmarked',
             dateSaved: new Date(job.processed_at).toISOString().split('T')[0],
             deadline: null,
             dateApplied: null,
             followUp: null,
             job_url: job.job_url,
-            // Add the missing properties
             applicationInfo: job.applicationInfo,
             extractedKeywords: job.extractedKeywords || []
           } satisfies TransformedJob
@@ -187,9 +185,7 @@ export default function Page() {
               {error}
             </div>
           ) : jobs.length === 0 ? (
-            <div className="flex items-center justify-center min-h-[200px] text-muted-foreground">
-              No Jobs saved yet.
-            </div>
+            <EmptyJobsState />
           ) : (
             <DataTable data={jobs} />
           )}
