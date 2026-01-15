@@ -84,10 +84,7 @@ export function SiteHeader() {
   }
 
   const { theme, toggle } = useTheme()
-  // Log theme changes only (avoids logging on every render)
-  useEffect(() => {
-    console.log('[SiteHeader] theme:', theme)
-  }, [theme])
+
 
   // Fetch resumes on mount
   useEffect(() => {
