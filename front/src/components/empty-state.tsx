@@ -3,7 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Download, FileUp, Sparkles, ArrowRight, Chrome } from 'lucide-react'
-import { useTheme } from 'next-themes'
+import { useTheme } from '@/context/theme-context'
 
 export function EmptyJobsState() {
     const { theme } = useTheme()
