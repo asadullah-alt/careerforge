@@ -49,6 +49,16 @@ export function SiteHeader() {
   const title = isLifecycle ? "Lifecycle" : "Dashboard"
 
   const [sheetOpen, setSheetOpen] = useState(false)
+  const handleUploadSuccess = (resume_id: string) => {
+    // 1. Show the toast immediately
+    handleSetDefaultResume(resume_id);
+    toast.success("Resume uploaded successfully!", {
+      description: "Your file has been processed successfully.",
+    });
+
+    // 2. Close the sheet
+    setSheetOpen(false);
+  };
   const [linkedinOpen, setLinkedinOpen] = useState(false)
   const [emailModalOpen, setEmailModalOpen] = useState(false)
   const [resumes, setResumes] = useState<Array<{ id: string; resume_name?: string }>>([])
@@ -343,7 +353,7 @@ export function SiteHeader() {
             </SheetHeader>
 
             <div className="p-4">
-              <FileUpload />
+              <FileUpload onUploadComplete={handleUploadSuccess} />
             </div>
 
             <SheetFooter>

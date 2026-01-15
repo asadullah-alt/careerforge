@@ -20,8 +20,11 @@ const acceptedFileTypes = [
 const acceptString = acceptedFileTypes.join(',');
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://resume.bhaikaamdo.com';
 const API_RESUME_UPLOAD_URL = `${API_BASE_URL}/api/v1/resumes/upload`; // API endpoint
+interface FileUploadProps {
+  onUploadComplete?: (resume_id: string) => void;
+}
+export default function FileUpload({ onUploadComplete }: FileUploadProps) {
 
-export default function FileUpload() {
   const maxSize = 2 * 1024 * 1024; // 2MB
 
   const [uploadFeedback, setUploadFeedback] = useState<{
@@ -57,7 +60,7 @@ export default function FileUpload() {
       formData.append('name', nameToSend)
     },
     onUploadSuccess: (uploadedFile, response) => {
-      console.log('Upload successful:', uploadedFile, response);
+
       const data = response as Record<string, unknown> & { resume_id?: string };
       const resumeId =
         typeof data.resume_id === 'string' ? data.resume_id : undefined;
@@ -68,7 +71,11 @@ export default function FileUpload() {
           type: 'error',
           message: 'Upload succeeded but no resume ID received.',
         });
+
         return;
+      }
+      if (onUploadComplete) {
+        onUploadComplete(resumeId);
       }
 
       const storedName = resumeName && resumeName.trim().length > 0
