@@ -2,9 +2,13 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Download, FileUp, Sparkles, Briefcase, ArrowRight, Chrome } from 'lucide-react'
+import { Download, FileUp, Sparkles, ArrowRight, Chrome } from 'lucide-react'
+import { useTheme } from 'next-themes'
 
 export function EmptyJobsState() {
+    const { theme } = useTheme()
+    const isDark = theme === 'dark'
+
     return (
         <div className="flex items-center justify-center min-h-[600px] px-4 py-12">
             <div className="max-w-4xl w-full">
@@ -24,13 +28,13 @@ export function EmptyJobsState() {
                         }}
                         className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 mb-6 shadow-lg"
                     >
-                        <Briefcase className="w-10 h-10 text-white" />
+                        <Sparkles className="w-10 h-10 text-white" />
                     </motion.div>
 
-                    <h2 className="text-3xl font-bold mb-3 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                    <h2 className={`text-3xl font-bold mb-3 bg-gradient-to-r ${isDark ? 'from-gray-100 to-gray-400' : 'from-gray-900 to-gray-600'} bg-clip-text text-transparent`}>
                         No Jobs Saved Yet
                     </h2>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                    <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'} max-w-2xl mx-auto`}>
                         Get started in 3 easy steps to streamline your job application process
                     </p>
                 </motion.div>
@@ -45,7 +49,7 @@ export function EmptyJobsState() {
                         className="group relative"
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl blur-xl transition-all group-hover:blur-2xl" />
-                        <div className="relative bg-white border-2 border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all hover:border-blue-200">
+                        <div className={`relative ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} border-2 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all hover:border-blue-200`}>
                             <div className="flex items-start gap-6">
                                 <div className="flex-shrink-0">
                                     <motion.div
@@ -57,11 +61,11 @@ export function EmptyJobsState() {
                                     </motion.div>
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                                    <h3 className={`text-xl font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
                                         <Chrome className="w-5 h-5 text-blue-600" />
                                         Download the Chrome Extension
                                     </h3>
-                                    <p className="text-gray-600 mb-4">
+                                    <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
                                         Install our powerful browser extension to start tracking and analyzing job postings
                                     </p>
                                     <a
@@ -87,7 +91,7 @@ export function EmptyJobsState() {
                         className="group relative"
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl blur-xl transition-all group-hover:blur-2xl" />
-                        <div className="relative bg-white border-2 border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all hover:border-purple-200">
+                        <div className={`relative ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} border-2 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all hover:border-purple-200`}>
                             <div className="flex items-start gap-6">
                                 <div className="flex-shrink-0">
                                     <motion.div
@@ -99,11 +103,11 @@ export function EmptyJobsState() {
                                     </motion.div>
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                                    <h3 className={`text-xl font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
                                         <FileUp className="w-5 h-5 text-purple-600" />
                                         Upload or Create Your Resume
                                     </h3>
-                                    <p className="text-gray-600 mb-4">
+                                    <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
                                         Upload your existing resume, create a new one, or import your LinkedIn profile using the extension
                                     </p>
                                     <div className="flex flex-wrap gap-3">
@@ -133,7 +137,7 @@ export function EmptyJobsState() {
                         className="group relative"
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 to-orange-500/10 rounded-2xl blur-xl transition-all group-hover:blur-2xl" />
-                        <div className="relative bg-white border-2 border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all hover:border-pink-200">
+                        <div className={`relative ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} border-2 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all hover:border-pink-200`}>
                             <div className="flex items-start gap-6">
                                 <div className="flex-shrink-0">
                                     <motion.div
@@ -145,27 +149,27 @@ export function EmptyJobsState() {
                                     </motion.div>
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                                    <h3 className={`text-xl font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
                                         <Sparkles className="w-5 h-5 text-pink-600" />
                                         Save & Analyze Job Postings
                                     </h3>
-                                    <p className="text-gray-600 mb-4">
+                                    <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
                                         Visit any job posting website, use the extension to save applications, analyze your resume match, and get AI-powered improvement suggestions
                                     </p>
                                     <div className="grid grid-cols-2 gap-3 text-sm">
-                                        <div className="flex items-center gap-2 text-gray-700">
+                                        <div className={`flex items-center gap-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                                             <div className="w-1.5 h-1.5 bg-pink-500 rounded-full" />
                                             Save job applications
                                         </div>
-                                        <div className="flex items-center gap-2 text-gray-700">
+                                        <div className={`flex items-center gap-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                                             <div className="w-1.5 h-1.5 bg-pink-500 rounded-full" />
                                             Analyze resume match
                                         </div>
-                                        <div className="flex items-center gap-2 text-gray-700">
+                                        <div className={`flex items-center gap-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                                             <div className="w-1.5 h-1.5 bg-pink-500 rounded-full" />
                                             Get AI suggestions
                                         </div>
-                                        <div className="flex items-center gap-2 text-gray-700">
+                                        <div className={`flex items-center gap-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                                             <div className="w-1.5 h-1.5 bg-pink-500 rounded-full" />
                                             Improve your resume
                                         </div>
@@ -183,7 +187,7 @@ export function EmptyJobsState() {
                     transition={{ delay: 0.8, duration: 0.5 }}
                     className="mt-12 text-center"
                 >
-                    <div className="inline-flex items-center gap-2 text-sm text-gray-500">
+                    <div className={`inline-flex items-center gap-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                         <motion.div
                             animate={{
                                 y: [0, -5, 0],
