@@ -8,7 +8,7 @@ import { useTheme } from 'next-themes'
 export function EmptyJobsState() {
     const { theme } = useTheme()
     const isDark = theme === 'dark'
-
+    console.log("isDark:", isDark)
     // Enhanced animation variants
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -373,20 +373,7 @@ export function EmptyJobsState() {
                         className={`inline-flex items-center gap-3 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
                         whileHover={{ scale: 1.05 }}
                     >
-                        <motion.div
-                            animate={{
-                                y: [0, -8, 0],
-                                rotate: [0, 5, -5, 0]
-                            }}
-                            transition={{
-                                duration: 2.5,
-                                repeat: Infinity,
-                                ease: "easeInOut"
-                            }}
-                        >
-                            <Sparkles className="w-4 h-4 text-blue-500" />
-                        </motion.div>
-                        <span>Start building your perfect job application strategy today</span>
+
                     </motion.div>
                 </motion.div>
             </motion.div>
