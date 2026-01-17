@@ -87,6 +87,7 @@ export default function SingleJobPage({ params: paramsPromise }: { params: Promi
   }
 
   const analyzeResume = async () => {
+    const token = getCfAuthCookie();
     if (!resumeId) {
       console.error('Resume ID not available')
       return
@@ -99,6 +100,7 @@ export default function SingleJobPage({ params: paramsPromise }: { params: Promi
       const payload: Record<string, unknown> = {
         job_id: params.id,
         resume_id: resumeId,
+        token: token
       }
 
       // When analysis has already been run and the user clicked "Analyze Again",
