@@ -84,7 +84,7 @@ const SignIn2 = () => {
           if (rememberMe) {
             localStorage.setItem('rememberedEmail', email);
           }
-          router.push(`/verify?email=${encodeURIComponent(email)}`);
+          router.push('/waiting-list');
         } else {
           setError('An unexpected response was received.');
         }
