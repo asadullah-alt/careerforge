@@ -125,6 +125,19 @@ export function HeroSection() {
                             <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
                                 Everything you need to land your dream job
                             </h2>
+                            <div className="mt-8 mb-12 max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-2xl border border-border/50 aspect-video relative group">
+                                <iframe
+                                    width="100%"
+                                    height="100%"
+                                    src="https://www.youtube.com/embed/H7viGpV0XEo?autoplay=1&mute=1&controls=0&loop=1&playlist=H7viGpV0XEo&modestbranding=1&rel=0"
+                                    title="Bhai Kaam Do Product Demo"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    className="w-full h-full"
+                                ></iframe>
+                                <div className="absolute inset-0 bg-transparent pointer-events-none group-hover:bg-black/5 transition-colors duration-300" />
+                            </div>
                             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
                                 Powerful AI-driven tools that work together to streamline your entire job search journey
                             </p>
