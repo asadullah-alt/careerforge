@@ -23,7 +23,7 @@ export const WaitingList = () => {
                 transition={{ delay: 0.2 }}
                 className="text-3xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900"
             >
-                You're on the list!
+                You&apos;re on the list!
             </motion.h2>
 
             <motion.p
@@ -32,7 +32,7 @@ export const WaitingList = () => {
                 transition={{ delay: 0.3 }}
                 className="text-gray-600 text-center mb-10 leading-relaxed"
             >
-                Welcome to the future of career growth. We've added you to our exclusive waiting list. We'll notify you as soon as a spot opens up.
+                Welcome to the future of career growth. We&apos;ve added you to our exclusive waiting list. We&apos;ll notify you as soon as a spot opens up.
             </motion.p>
 
             <div className="w-full space-y-4 mb-8">
