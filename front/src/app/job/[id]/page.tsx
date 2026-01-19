@@ -283,7 +283,7 @@ export default function PublicJobPage({ params: paramsPromise }: { params: Promi
                 {/* CTA Section */}
                 <div className="space-y-6">
                     <div className="bg-card rounded-lg p-6 border shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/50">
-                        <h2 className="text-xl font-semibold mb-4 text-center">Land this job with CareerForge</h2>
+                        <h2 className="text-xl font-semibold mb-4 text-center">Land this job with Bhaikaamdo</h2>
                         <p className="text-muted-foreground text-center mb-6">
                             Sign up now to analyze your resume against this job, get AI-powered improvements, and generate tailored cover letters!
                         </p>
