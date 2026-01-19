@@ -103,7 +103,7 @@ export default function PublicJobPage({ params: paramsPromise }: { params: Promi
             <div className="flex min-h-screen items-center justify-center">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold mb-4">Job Not Found</h1>
-                    <Button onClick={() => router.back()}>Go Back</Button>
+                    <Button onClick={() => window.location.href = 'https://bhaikaamdo.com'}>Go Back</Button>
                 </div>
             </div>
         )
@@ -114,7 +114,7 @@ export default function PublicJobPage({ params: paramsPromise }: { params: Promi
             <Button
                 variant="ghost"
                 className="mb-6"
-                onClick={() => router.back()}
+                onClick={() => window.location.href = 'https://bhaikaamdo.com'}
             >
                 <IconArrowLeft className="mr-2 h-4 w-4" />
                 Back
