@@ -185,7 +185,7 @@ function PricingSection({ tiers, className }: PricingSectionProps) {
                   <span className="relative z-10 flex items-center justify-center gap-2">
                     {tier.highlight ? (
                       <>
-                        Buy now
+                        Coming soon
                         <ArrowRightIcon className="w-4 h-4" />
                       </>
                     ) : (
