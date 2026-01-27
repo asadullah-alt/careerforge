@@ -237,47 +237,6 @@ export function HeroSection() {
                     </div>
                 </section>
 
-                {/* Social Proof / Stats Section */}
-                <section className="bg-background py-16 md:py-32">
-                    <div className="mx-auto max-w-7xl px-6">
-                        <div className="text-center mb-12">
-                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4">
-                                Join thousands of successful job seekers
-                            </h2>
-                        </div>
-
-                        <div className="grid md:grid-cols-4 gap-8">
-                            {stats.map((stat, index) => (
-                                <div key={index} className="text-center">
-                                    <div className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
-                                        {stat.value}
-                                    </div>
-                                    <p className="text-muted-foreground">{stat.label}</p>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Testimonials */}
-                        <div className="mt-20 grid md:grid-cols-3 gap-6">
-                            {testimonials.map((testimonial, index) => (
-                                <div
-                                    key={index}
-                                    className="bg-muted/50 rounded-2xl border p-6 hover:border-foreground/20 transition-all duration-300">
-                                    <p className="text-muted-foreground mb-4 italic">&ldquo;{testimonial.quote}&rdquo;</p>
-                                    <div className="flex items-center gap-3">
-                                        <div className="bg-foreground/10 rounded-full size-10 flex items-center justify-center font-semibold">
-                                            {testimonial.initials}
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-sm">{testimonial.name}</p>
-                                            <p className="text-xs text-muted-foreground">{testimonial.role}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
 
                 {/* Final CTA Section */}
                 <section className="bg-muted/30 py-16 md:py-32">
@@ -365,33 +324,7 @@ const steps = [
     }
 ]
 
-const stats = [
-    { value: '50K+', label: 'Active Users' },
-    { value: '3x', label: 'Faster Job Search' },
-    { value: '10+', label: 'Hours Saved/Week' },
-    { value: '95%', label: 'Success Rate' }
-]
 
-const testimonials = [
-    {
-        quote: 'I was spending hours customizing my resume for each job. Bhai Kaam Do cut that time down to minutes. Landed 3 interviews in my first week!',
-        name: 'Sarah Chen',
-        role: 'Software Engineer at Google',
-        initials: 'SC'
-    },
-    {
-        quote: 'The AI resume builder is incredible. It picked up keywords I never would have thought of. My response rate went from 5% to over 40%.',
-        name: 'Marcus Rodriguez',
-        role: 'Product Manager at Spotify',
-        initials: 'MR'
-    },
-    {
-        quote: 'Finally, a job search tool that actually works! The match scores helped me focus on the right opportunities. Got my dream job in 3 weeks.',
-        name: 'Priya Sharma',
-        role: 'UX Designer at Adobe',
-        initials: 'PS'
-    }
-]
 
 const menuItems = [
     { name: 'Features', href: '/features' },
