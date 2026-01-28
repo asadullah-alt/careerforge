@@ -616,7 +616,7 @@ function NovoTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
           <View style={{ padding: '40px 40px 20px 40px', borderBottomWidth: 2, borderBottomColor: borderColor }}>
             <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
               {/* Left: Name and Summary */}
-              <View style={{ flex: 3.5, paddingRight: 20 }}>
+              <View style={{ flex: 3.5, paddingRight: 15 }}>
                 <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                   {firstName} {lastName}
                 </Text>
@@ -655,6 +655,34 @@ function NovoTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
 
           {/* Main Content */}
           <View style={{ padding: '30px 40px' }}>
+            {/* Skills Section */}
+            {resume.skills && resume.skills.length > 0 && (
+              <View style={{ marginBottom: 25 }}>
+                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 15 }}>
+                  <Text style={{ fontSize: 16, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>
+                    Skills
+                  </Text>
+                </View>
+                <View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                  {resume.skills.map((s: { skill_name: string }, i: number) => (
+                    <View
+                      key={i}
+                      style={{
+                        backgroundColor: darkBg,
+                        padding: '3px 8px',
+                        borderRadius: 3,
+                        marginBottom: 4,
+                        marginRight: 4,
+                      }}
+                    >
+                      <Text style={{ color: '#fff', fontSize: 10, fontWeight: '600' }}>
+                        {s.skill_name}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
             {/* Education Section - Now at the top */}
             {resume.education && resume.education.length > 0 && (
               <View style={{ marginBottom: 25 }}>
@@ -686,34 +714,7 @@ function NovoTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
               </View>
             )}
 
-            {/* Skills Section */}
-            {resume.skills && resume.skills.length > 0 && (
-              <View style={{ marginBottom: 25 }}>
-                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 15 }}>
-                  <Text style={{ fontSize: 16, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>
-                    Skills
-                  </Text>
-                </View>
-                <View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                  {resume.skills.map((s: { skill_name: string }, i: number) => (
-                    <View
-                      key={i}
-                      style={{
-                        backgroundColor: darkBg,
-                        padding: '3px 8px',
-                        borderRadius: 3,
-                        marginBottom: 4,
-                        marginRight: 4,
-                      }}
-                    >
-                      <Text style={{ color: '#fff', fontSize: 10, fontWeight: '600' }}>
-                        {s.skill_name}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            )}
+
 
             {/* Experience Section */}
             {resume.experiences && resume.experiences.length > 0 && (
