@@ -1377,8 +1377,8 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
           {/* Main Content */}
           <View style={{ width: '67%', padding: '30px 35px', fontSize: 10 }}>
             {/* Name */}
-            < View style={{ marginBottom: 20 }}>
-              <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#333' }}>
+            < View style={{ marginBottom: 25 }}>
+              <Text style={{ marginBottom: 5, fontSize: 26, fontWeight: 'bold', color: '#333' }}>
                 {firstName} {lastName}
               </Text>
               {
