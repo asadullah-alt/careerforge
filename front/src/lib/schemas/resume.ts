@@ -16,7 +16,7 @@ export const PersonalDataSchema = z.object({
   phone: z.string().optional().nullable(),
   linkedin: z.string().url().optional().nullable(),
   portfolio: z.string().url().optional().nullable(),
-  location: LocationSchema,
+  location: LocationSchema.optional().nullable(),
 });
 
 export type PersonalData = z.infer<typeof PersonalDataSchema>;
@@ -26,8 +26,8 @@ export const ExperienceSchema = z.object({
   job_title: z.string().min(1, "Job title is required"),
   company: z.string().optional().nullable(),
   location: z.string().optional().nullable(),
-  start_date: z.string().min(1, "Start date is required"),
-  end_date: z.string().min(1, "End date is required"),
+  start_date: z.string().optional().nullable(),
+  end_date: z.string().optional().nullable(),
   description: z.array(z.string()).default([]),
   technologies_used: z.array(z.string()).optional().default([]),
 });
@@ -38,7 +38,7 @@ export type Experience = z.infer<typeof ExperienceSchema>;
 export const ProjectSchema = z.object({
   project_name: z.string().min(1, "Project name is required"),
   description: z.string().optional().nullable(),
-  technologies_used: z.array(z.string()).min(1, "At least one technology is required"),
+  technologies_used: z.array(z.string()).optional().default([]),
   link: z.string().url().optional().nullable(),
   start_date: z.string().optional().nullable(),
   end_date: z.string().optional().nullable(),
@@ -78,16 +78,81 @@ export const EducationSchema = z.object({
 
 export type Education = z.infer<typeof EducationSchema>;
 
+// Publication Schema
+export const PublicationSchema = z.object({
+  title: z.string().optional().nullable(),
+  authors: z.array(z.string()).default([]),
+  publication_venue: z.string().optional().nullable(),
+  date: z.string().optional().nullable(),
+  link: z.string().url().optional().nullable(),
+  description: z.string().optional().nullable(),
+});
+
+export type Publication = z.infer<typeof PublicationSchema>;
+
+// Conference Type Enum
+export const ConferenceTypeEnum = z.enum(['conference', 'training', 'workshop']);
+export type ConferenceType = z.infer<typeof ConferenceTypeEnum>;
+
+// Conference/Training/Workshop Schema
+export const ConferenceTrainingWorkshopSchema = z.object({
+  type: ConferenceTypeEnum.optional().nullable(),
+  name: z.string().optional().nullable(),
+  organizer: z.string().optional().nullable(),
+  date: z.string().optional().nullable(),
+  location: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  certificate_link: z.string().url().optional().nullable(),
+});
+
+export type ConferenceTrainingWorkshop = z.infer<typeof ConferenceTrainingWorkshopSchema>;
+
+// Award Schema
+export const AwardSchema = z.object({
+  title: z.string().optional().nullable(),
+  issuer: z.string().optional().nullable(),
+  date: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+});
+
+export type Award = z.infer<typeof AwardSchema>;
+
+// Extracurricular Activity Schema
+export const ExtracurricularActivitySchema = z.object({
+  activity_name: z.string().optional().nullable(),
+  role: z.string().optional().nullable(),
+  organization: z.string().optional().nullable(),
+  start_date: z.string().optional().nullable(),
+  end_date: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+});
+
+export type ExtracurricularActivity = z.infer<typeof ExtracurricularActivitySchema>;
+
+// Language Schema
+export const LanguageSchema = z.object({
+  language: z.string().optional().nullable(),
+  proficiency: z.string().optional().nullable(),
+});
+
+export type Language = z.infer<typeof LanguageSchema>;
+
 // Main Structured Resume Schema
 export const StructuredResumeSchema = z.object({
   displayName: z.string().optional().nullable(),
   personal_data: PersonalDataSchema,
   experiences: z.array(ExperienceSchema).default([]),
-  projects: z.array(ProjectSchema).default([]),
-  skills: z.array(SkillSchema).default([]),
-  research_work: z.array(ResearchWorkSchema).default([]),
-  achievements: z.array(z.string()).default([]),
+  projects: z.array(ProjectSchema).optional().default([]),
+  skills: z.array(SkillSchema).optional().default([]),
+  research_work: z.array(ResearchWorkSchema).optional().default([]),
+  achievements: z.array(z.string()).optional().default([]),
   education: z.array(EducationSchema).default([]),
+  publications: z.array(PublicationSchema).optional().default([]),
+  conferences_trainings_workshops: z.array(ConferenceTrainingWorkshopSchema).optional().default([]),
+  awards: z.array(AwardSchema).optional().default([]),
+  extracurricular_activities: z.array(ExtracurricularActivitySchema).optional().default([]),
+  languages: z.array(LanguageSchema).optional().default([]),
+  summary: z.string().optional().nullable(),
   extracted_keywords: z.array(z.string()).default([]),
 });
 
