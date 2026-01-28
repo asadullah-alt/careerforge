@@ -354,7 +354,8 @@ ClassicTemplate.displayName = 'ClassicTemplate'
 // Modern Template - Sidebar layout with color accents
 function ModernTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
   const pdfStyles = { ...defaultPdfStyles, ...styles } as Required<PdfStyles>
-  const fontFamily = (pdfStyles.page as any).fontFamily || 'Helvetica'
+  const pageStyle = Array.isArray(pdfStyles.page) ? pdfStyles.page[0] : pdfStyles.page
+  const fontFamily = (pageStyle as Style).fontFamily || 'Helvetica'
   const accentColor = '#2563eb'
   const firstName = getPersonalDataField(resume.personal_data, 'first_name')
   const lastName = getPersonalDataField(resume.personal_data, 'last_name')
@@ -590,7 +591,8 @@ function ModernTemplate({ resume, styles }: { resume: StructuredResume; styles?:
 // Novo Template - Modern professional design with accent colors
 function NovoTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
   const pdfStyles = { ...defaultPdfStyles, ...styles } as Required<PdfStyles>
-  const fontFamily = (pdfStyles.page as any).fontFamily || 'Helvetica'
+  const pageStyle = Array.isArray(pdfStyles.page) ? pdfStyles.page[0] : pdfStyles.page
+  const fontFamily = (pageStyle as Style).fontFamily || 'Helvetica'
   const darkBg = '#1a1a1a'
   const borderColor = '#eee'
   const firstName = getPersonalDataField(resume.personal_data, 'first_name')
@@ -864,7 +866,8 @@ NovoTemplate.displayName = 'NovoTemplate'
 // Bold Template - High contrast, strong typography
 function BoldTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
   const pdfStyles = { ...defaultPdfStyles, ...styles } as Required<PdfStyles>
-  const fontFamily = (pdfStyles.page as any).fontFamily || 'Helvetica'
+  const pageStyle = Array.isArray(pdfStyles.page) ? pdfStyles.page[0] : pdfStyles.page
+  const fontFamily = (pageStyle as Style).fontFamily || 'Helvetica'
   const darkColor = '#1a1a1a'
   const firstName = getPersonalDataField(resume.personal_data, 'first_name')
   const lastName = getPersonalDataField(resume.personal_data, 'last_name')
@@ -1064,7 +1067,8 @@ BoldTemplate.displayName = 'BoldTemplate'
 // Executive Template - Professional one-page layout
 function ExecutiveTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
   const pdfStyles = { ...defaultPdfStyles, ...styles } as Required<PdfStyles>
-  const fontFamily = (pdfStyles.page as any).fontFamily || 'Helvetica'
+  const pageStyle = Array.isArray(pdfStyles.page) ? pdfStyles.page[0] : pdfStyles.page
+  const fontFamily = (pageStyle as Style).fontFamily || 'Helvetica'
   const firstName = getPersonalDataField(resume.personal_data, 'first_name')
   const lastName = getPersonalDataField(resume.personal_data, 'last_name')
   const email = getPersonalDataField(resume.personal_data, 'email')
@@ -1290,7 +1294,8 @@ ExecutiveTemplate.displayName = 'ExecutiveTemplate'
 
 function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
   const pdfStyles = { ...defaultPdfStyles, ...styles } as Required<PdfStyles>
-  const fontFamily = (pdfStyles.page as any).fontFamily || 'Helvetica'
+  const pageStyle = Array.isArray(pdfStyles.page) ? pdfStyles.page[0] : pdfStyles.page
+  const fontFamily = (pageStyle as Style).fontFamily || 'Helvetica'
   const sidebarBg = '#E8DED2'
   const accentColor = '#C4A675'
   const firstName = getPersonalDataField(resume.personal_data, 'first_name')
