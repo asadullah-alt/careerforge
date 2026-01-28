@@ -1313,10 +1313,9 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
             {/* Contact Info */}
             {
               phone && (
-                <View style={{ marginBottom: 12 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                   <Icons.Phone />
-                  < Text style={{ fontSize: 9, color: '#333' }
-                  }> {phone} </Text>
+                  <Text style={{ fontSize: 9, color: '#333', marginLeft: 4 }}>{phone}</Text>
                 </View>
               )}
             {
