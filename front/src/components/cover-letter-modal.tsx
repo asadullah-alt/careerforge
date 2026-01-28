@@ -123,7 +123,7 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
                                 ref={editorRef}
                                 value={content}
                                 onChange={setContent}
-                                className="h-full"
+                                className="h-[400px] mb-12"
                             />
                         </div>
                     )}
