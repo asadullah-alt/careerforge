@@ -5,9 +5,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button'
 import { useResumeStore } from '@/store/resume-store'
 import { getCfAuthCookie } from '@/utils/cookie'
-import { QuillEditor } from './quill-editor'
+import { QuillEditor, type QuillEditorHandle } from './quill-editor'
 import { FileDown, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { saveAs } from 'file-saver'
 
 interface CoverLetterModalProps {
     isOpen: boolean
@@ -20,6 +21,7 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
     const [content, setContent] = useState('')
     const [loading, setLoading] = useState(false)
     const [generating, setGenerating] = useState(false)
+    const editorRef = React.useRef<QuillEditorHandle>(null)
 
     useEffect(() => {
         if (isOpen && selectedResumeId) {
@@ -70,43 +72,18 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
 
     const handleDownloadPdf = async () => {
         try {
-            const html2canvas = (await import('html2canvas')).default
-            const jsPDF = (await import('jspdf')).default
+            const { pdfExporter } = await import('quill-to-pdf')
+            const quill = editorRef.current?.getQuill()
 
-            // Create a temporary element to render the content
-            const element = document.createElement('div')
-            element.innerHTML = content
-            element.className = 'canvas-capture' // Add a class for scoped styling if needed
-            element.style.width = '800px'
-            element.style.padding = '40px'
-            element.style.background = 'white'
-            element.style.color = 'black'
-            element.style.position = 'absolute'
-            element.style.left = '-9999px'
-            element.style.top = '0'
+            if (!quill) {
+                toast.error("Editor not ready")
+                return
+            }
 
-            // Critical fix: override modern color functions that html2canvas doesn't support
-            element.style.setProperty('--background', '255 255 255')
-            element.style.setProperty('--foreground', '0 0 0')
-            element.style.setProperty('color-scheme', 'light')
+            const delta = quill.getContents()
+            const blob = await pdfExporter.generatePdf(delta)
+            saveAs(blob, 'cover-letter.pdf')
 
-            document.body.appendChild(element)
-
-            const canvas = await html2canvas(element, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff'
-            })
-            const imgData = canvas.toDataURL('image/png')
-
-            const pdf = new jsPDF('p', 'mm', 'a4')
-            const pdfWidth = pdf.internal.pageSize.getWidth()
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width
-
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-            pdf.save('cover-letter.pdf')
-
-            document.body.removeChild(element)
             toast.success("Downloaded as PDF")
         } catch (error) {
             console.error("Error downloading PDF:", error)
@@ -135,6 +112,7 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
                     ) : (
                         <div className="flex-1 overflow-auto border rounded-md">
                             <QuillEditor
+                                ref={editorRef}
                                 value={content}
                                 onChange={setContent}
                                 className="h-full"
