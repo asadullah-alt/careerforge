@@ -1313,21 +1313,21 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
             {/* Contact Info */}
             {
               phone && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                   <Icons.Phone />
                   <Text style={{ fontSize: 9, color: '#333', marginLeft: 4 }}>{phone}</Text>
                 </View>
               )}
             {
               email && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                   <Icons.Mail />
                   <Text style={{ fontSize: 9, color: '#333', marginLeft: 4 }}>{email}</Text>
                 </View>
               )}
             {
               location && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                   <Icons.Location />
                   <Text style={{ fontSize: 9, color: '#333', marginLeft: 4 }}>
                     {location.city}
@@ -1343,7 +1343,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                   <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 10, color: '#333' }}> Skills </Text>
                   {
                     resume.skills.map((s: { skill_name: string }, i: number) => (
-                      <Text key={i} style={{ fontSize: 9, marginBottom: 4, color: '#555' }}>
+                      <Text key={i} style={{ marginLeft: 4, fontSize: 9, marginBottom: 4, color: '#555' }}>
                         {s.skill_name}
                       </Text>
                     ))
