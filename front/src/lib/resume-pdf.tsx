@@ -1,11 +1,13 @@
 import React from 'react'
 import { StructuredResume } from '@/lib/schemas/resume'
 import {
+  Svg, Path,
   Document,
   Page,
   Text,
   View,
   pdf,
+  Font,
 } from '@react-pdf/renderer'
 import type { Style } from '@react-pdf/types'
 import type {
@@ -18,6 +20,49 @@ import type {
   ExtracurricularActivity,
   Language
 } from '@/lib/schemas/resume'
+
+const Icons = {
+  Phone: () => (
+    <Svg width="10" height="10" viewBox="0 0 24 24" fill="#666">
+      <Path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+    </Svg>
+  ),
+  Mail: () => (
+    <Svg width="10" height="10" viewBox="0 0 24 24" fill="#666">
+      <Path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+    </Svg>
+  ),
+  Location: () => (
+    <Svg width="10" height="10" viewBox="0 0 24 24" fill="#666">
+      <Path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+    </Svg>
+  ),
+};
+// Register Google Fonts
+Font.register({
+  family: 'Roboto',
+  src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf'
+});
+Font.register({
+  family: 'Open Sans',
+  src: 'https://fonts.gstatic.com/s/opensans/v18/mem8YaGs126MiZpBA-UFVZ0e.ttf'
+});
+Font.register({
+  family: 'Montserrat',
+  src: 'https://fonts.gstatic.com/s/montserrat/v15/JTUSjIg1_i6t8kCHKm4df1XxNYG1.ttf'
+});
+Font.register({
+  family: 'Lato',
+  src: 'https://fonts.gstatic.com/s/lato/v17/S6uyw4BMUTPHvxk6Xweu.ttf'
+});
+Font.register({
+  family: 'Playfair Display',
+  src: 'https://fonts.gstatic.com/s/playfairdisplay/v21/nuFvD7K_rwGaPa3L_OR9n_mPrG-YOC69Uls0vYpD.ttf'
+});
+Font.register({
+  family: 'Oswald',
+  src: 'https://fonts.gstatic.com/s/oswald/v35/TK3iWkUHHAIjg752FD8G.ttf'
+});
 
 export type PdfStyles = {
   page?: Style | Style[]
@@ -308,6 +353,8 @@ ClassicTemplate.displayName = 'ClassicTemplate'
 
 // Modern Template - Sidebar layout with color accents
 function ModernTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
+  const pdfStyles = { ...defaultPdfStyles, ...styles } as Required<PdfStyles>
+  const fontFamily = (pdfStyles.page as any).fontFamily || 'Helvetica'
   const accentColor = '#2563eb'
   const firstName = getPersonalDataField(resume.personal_data, 'first_name')
   const lastName = getPersonalDataField(resume.personal_data, 'last_name')
@@ -317,7 +364,7 @@ function ModernTemplate({ resume, styles }: { resume: StructuredResume; styles?:
 
   return (
     <Document>
-      <Page size="A4" style={{ padding: 0 }}>
+      <Page size="A4" style={{ padding: 0, fontFamily }}>
         <View style={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
           {/* Sidebar */}
           <View style={{ width: '30%', backgroundColor: accentColor, padding: 20, color: '#fff' }}>
@@ -542,6 +589,8 @@ function ModernTemplate({ resume, styles }: { resume: StructuredResume; styles?:
 
 // Novo Template - Modern professional design with accent colors
 function NovoTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
+  const pdfStyles = { ...defaultPdfStyles, ...styles } as Required<PdfStyles>
+  const fontFamily = (pdfStyles.page as any).fontFamily || 'Helvetica'
   const darkBg = '#1a1a1a'
   const borderColor = '#eee'
   const firstName = getPersonalDataField(resume.personal_data, 'first_name')
@@ -552,7 +601,7 @@ function NovoTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
 
   return (
     <Document>
-      <Page size="A4" style={{ padding: 0, fontSize: 11, fontFamily: 'Helvetica' }}>
+      <Page size="A4" style={{ padding: 0, fontSize: 11, fontFamily }}>
         {/* Header Section */}
         <View style={{ padding: '40px 40px 20px 40px', borderBottomWidth: 2, borderBottomColor: borderColor }}>
           <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -814,6 +863,8 @@ NovoTemplate.displayName = 'NovoTemplate'
 
 // Bold Template - High contrast, strong typography
 function BoldTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
+  const pdfStyles = { ...defaultPdfStyles, ...styles } as Required<PdfStyles>
+  const fontFamily = (pdfStyles.page as any).fontFamily || 'Helvetica'
   const darkColor = '#1a1a1a'
   const firstName = getPersonalDataField(resume.personal_data, 'first_name')
   const lastName = getPersonalDataField(resume.personal_data, 'last_name')
@@ -822,7 +873,7 @@ function BoldTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
 
   return (
     <Document>
-      <Page size="A4" style={{ padding: 28, fontSize: 11, fontFamily: 'Helvetica' }}>
+      <Page size="A4" style={{ padding: 28, fontSize: 11, fontFamily }}>
         {/* Large Name Header */}
         <View style={{ marginBottom: 24, borderBottomWidth: 3, borderBottomColor: darkColor, paddingBottom: 12 }}>
           <Text style={{ fontSize: 28, fontWeight: '900', color: darkColor, lineHeight: 1.2 }}>
@@ -1012,6 +1063,8 @@ BoldTemplate.displayName = 'BoldTemplate'
 
 // Executive Template - Professional one-page layout
 function ExecutiveTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
+  const pdfStyles = { ...defaultPdfStyles, ...styles } as Required<PdfStyles>
+  const fontFamily = (pdfStyles.page as any).fontFamily || 'Helvetica'
   const firstName = getPersonalDataField(resume.personal_data, 'first_name')
   const lastName = getPersonalDataField(resume.personal_data, 'last_name')
   const email = getPersonalDataField(resume.personal_data, 'email')
@@ -1020,7 +1073,7 @@ function ExecutiveTemplate({ resume, styles }: { resume: StructuredResume; style
 
   return (
     <Document>
-      <Page size="A4" style={{ padding: 20, fontSize: 10, fontFamily: 'Helvetica' }}>
+      <Page size="A4" style={{ padding: 20, fontSize: 10, fontFamily }}>
         {/* Compact Header */}
         <View style={{ marginBottom: 12, paddingBottom: 8, borderBottomWidth: 2, borderBottomColor: '#2563eb' }}>
           <Text style={{ fontSize: 22, fontWeight: 'bold', marginBottom: 4 }}>
@@ -1236,6 +1289,8 @@ function ExecutiveTemplate({ resume, styles }: { resume: StructuredResume; style
 ExecutiveTemplate.displayName = 'ExecutiveTemplate'
 
 function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?: PdfStyles }) {
+  const pdfStyles = { ...defaultPdfStyles, ...styles } as Required<PdfStyles>
+  const fontFamily = (pdfStyles.page as any).fontFamily || 'Helvetica'
   const sidebarBg = '#E8DED2'
   const accentColor = '#C4A675'
   const firstName = getPersonalDataField(resume.personal_data, 'first_name')
@@ -1246,8 +1301,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
 
   return (
     <Document>
-      <Page size="A4" style={{ padding: 0 }
-      }>
+      <Page size="A4" style={{ padding: 0, fontFamily }}>
         <View style={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
           {/* Sidebar */}
           < View style={{ width: '33%', backgroundColor: sidebarBg, padding: 25 }}>
@@ -1255,7 +1309,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
             {
               phone && (
                 <View style={{ marginBottom: 12 }}>
-                  <Text style={{ fontSize: 9, color: '#666', marginBottom: 3 }}>📞</Text>
+                  <Icons.Phone />
                   < Text style={{ fontSize: 9, color: '#333' }
                   }> {phone} </Text>
                 </View>
@@ -1263,7 +1317,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
             {
               email && (
                 <View style={{ marginBottom: 12 }}>
-                  <Text style={{ fontSize: 9, color: '#666', marginBottom: 3 }}>✉</Text>
+                  <Icons.Mail />
                   < Text style={{ fontSize: 9, color: '#333' }
                   }> {email} </Text>
                 </View>
@@ -1271,7 +1325,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
             {
               location && (
                 <View style={{ marginBottom: 20 }}>
-                  <Text style={{ fontSize: 9, color: '#666', marginBottom: 3 }}>📍</Text>
+                  <Icons.Location />
                   < Text style={{ fontSize: 9, color: '#333' }
                   }>
                     {location.city}

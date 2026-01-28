@@ -213,6 +213,24 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
                     className="w-full px-2 py-1 rounded border text-sm"
                   />
                 </div>
+                <div>
+                  <label className="text-sm font-medium">Font Family</label>
+                  <select
+                    value={(customStyles.page as Record<string, number | string>)?.fontFamily || 'Helvetica'}
+                    onChange={(e) => handleStyleUpdate('page', { ...(customStyles.page as Record<string, number | string>), fontFamily: e.target.value })}
+                    className="w-full px-2 py-1 rounded border text-sm bg-card"
+                  >
+                    <option value="Helvetica">Helvetica (Standard Sans)</option>
+                    <option value="Times-Roman">Times New Roman (Standard Serif)</option>
+                    <option value="Courier">Courier (Standard Mono)</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Open Sans">Open Sans</option>
+                    <option value="Lato">Lato</option>
+                    <option value="Playfair Display">Playfair Display (Serif)</option>
+                    <option value="Oswald">Oswald</option>
+                  </select>
+                </div>
               </div>
             </DialogContent>
           </Dialog>
