@@ -139,6 +139,7 @@ export default function PdfViewer({ blobUrl, onTemplateChange, onStylesChange, c
             <option value="novo">Novo</option>
             <option value="bold">Bold</option>
             <option value="executive">Executive</option>
+            <option value="gentle">Gentle</option>
           </select>
 
           <button
