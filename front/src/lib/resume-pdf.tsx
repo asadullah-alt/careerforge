@@ -1383,7 +1383,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
               </Text>
               {
                 resume.summary && (
-                  <Text style={{ fontSize: 10, lineHeight: 1.6, marginTop: 8, color: '#555', textAlign: 'justify' }}>
+                  <Text style={{ fontSize: 10, marginTop: 8, color: '#555', textAlign: 'justify' }}>
                     {resume.summary}
                   </Text>
                 )
