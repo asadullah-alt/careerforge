@@ -170,12 +170,20 @@ function ClassicTemplate({ resume, styles }: { resume: StructuredResume; styles?
           <Text style={pdfStyles.name}>
             {firstName} {lastName}
           </Text>
-          {email && (
-            <Text style={pdfStyles.text}>
-              {email}
-              {phone ? ` | ${phone}` : ''}
-            </Text>
-          )}
+          <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 15, marginTop: 5 }}>
+            {email && (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Icons.Mail />
+                <Text style={{ ...pdfStyles.text, marginLeft: 3 }}>{email}</Text>
+              </View>
+            )}
+            {phone && (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Icons.Phone />
+                <Text style={{ ...pdfStyles.text, marginLeft: 3 }}>{phone}</Text>
+              </View>
+            )}
+          </View>
         </View>
 
         {/* Summary */}
@@ -619,23 +627,27 @@ function NovoTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
               )}
             </View>
 
-            {/* Right: Contact Info */}
-            <View style={{ flex: 1.5, textAlign: 'right', fontSize: 10 }}>
+            <View style={{ flex: 1.5, alignItems: 'flex-end', fontSize: 10 }}>
               {email && (
-                <Text style={{ marginBottom: 8, color: '#333' }}>
-                  ✉ {email}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                  <Text style={{ marginRight: 4, color: '#333' }}>{email}</Text>
+                  <Icons.Mail />
+                </View>
               )}
               {phone && (
-                <Text style={{ marginBottom: 8, color: '#333' }}>
-                  📱 {phone}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                  <Text style={{ marginRight: 4, color: '#333' }}>{phone}</Text>
+                  <Icons.Phone />
+                </View>
               )}
               {location?.city && (
-                <Text style={{ marginBottom: 8, color: '#333' }}>
-                  📍 {location.city}
-                  {location.country ? `, ${location.country}` : ''}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                  <Text style={{ marginRight: 4, color: '#333' }}>
+                    {location.city}
+                    {location.country ? `, ${location.country}` : ''}
+                  </Text>
+                  <Icons.Location />
+                </View>
               )}
             </View>
           </View>
@@ -1084,13 +1096,26 @@ function ExecutiveTemplate({ resume, styles }: { resume: StructuredResume; style
             {firstName} {lastName}
           </Text>
           <View style={{ display: 'flex', flexDirection: 'row', gap: 15, fontSize: 9 }}>
-            {email && <Text>{email}</Text>}
-            {phone && <Text>{phone}</Text>}
+            {email && (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Icons.Mail />
+                <Text style={{ marginLeft: 3 }}>{email}</Text>
+              </View>
+            )}
+            {phone && (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Icons.Phone />
+                <Text style={{ marginLeft: 3 }}>{phone}</Text>
+              </View>
+            )}
             {location?.city && (
-              <Text>
-                {location.city}
-                {location.country ? `, ${location.country}` : ''}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Icons.Location />
+                <Text style={{ marginLeft: 3 }}>
+                  {location.city}
+                  {location.country ? `, ${location.country}` : ''}
+                </Text>
+              </View>
             )}
           </View>
         </View>
