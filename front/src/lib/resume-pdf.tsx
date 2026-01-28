@@ -1343,7 +1343,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                   <Text style={{ fontSize: 11, fontWeight: 'bold', marginBottom: 10, color: '#333' }}> Skills </Text>
                   {
                     resume.skills.map((s: { skill_name: string }, i: number) => (
-                      <Text key={i} style={{ marginLeft: 4, fontSize: 9, marginBottom: 4, color: '#555' }}>
+                      <Text key={i} style={{ marginLeft: 5, fontSize: 9, marginBottom: 4, color: '#555' }}>
                         {s.skill_name}
                       </Text>
                     ))
@@ -1359,12 +1359,12 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                   {
                     resume.languages.map((l: Language, i: number) => (
                       <View key={i} style={{ marginBottom: 6 }}>
-                        <Text style={{ fontSize: 9, color: '#555' }}>
+                        <Text style={{ marginLeft: 5, fontSize: 9, color: '#555' }}>
                           {l.language}
                         </Text>
                         {
                           l.proficiency && (
-                            <Text style={{ fontSize: 8, color: '#777' }}> {l.proficiency} </Text>
+                            <Text style={{ marginLeft: 6, fontSize: 8, color: '#777' }}> {l.proficiency} </Text>
                           )
                         }
                       </View>
