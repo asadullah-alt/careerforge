@@ -76,13 +76,27 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
             // Create a temporary element to render the content
             const element = document.createElement('div')
             element.innerHTML = content
+            element.className = 'canvas-capture' // Add a class for scoped styling if needed
             element.style.width = '800px'
             element.style.padding = '40px'
             element.style.background = 'white'
             element.style.color = 'black'
+            element.style.position = 'absolute'
+            element.style.left = '-9999px'
+            element.style.top = '0'
+
+            // Critical fix: override modern color functions that html2canvas doesn't support
+            element.style.setProperty('--background', '255 255 255')
+            element.style.setProperty('--foreground', '0 0 0')
+            element.style.setProperty('color-scheme', 'light')
+
             document.body.appendChild(element)
 
-            const canvas = await html2canvas(element)
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            })
             const imgData = canvas.toDataURL('image/png')
 
             const pdf = new jsPDF('p', 'mm', 'a4')
@@ -100,9 +114,50 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
         }
     }
 
+    const handleDownloadDocx = async () => {
+        try {
+            const HTMLToDOCX = (await import('html-to-docx')).default
+
+            // Prepare HTML content for DOCX
+            // Wrap in basic HTML structure for better conversion
+            const fullHtml = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <style>
+                        body { font-family: 'Arial', sans-serif; line-height: 1.6; }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                </body>
+                </html>
+            `
+
+            const fileBuffer = await HTMLToDOCX(fullHtml, null, {
+                table: { row: { canSplit: true } },
+                footer: true,
+                pageNumber: true,
+            })
+
+            const url = window.URL.createObjectURL(fileBuffer)
+            const link = document.createElement('a')
+            link.href = url
+            link.download = 'cover-letter.docx'
+            link.click()
+            window.URL.revokeObjectURL(url)
+
+            toast.success("Downloaded as DOCX")
+        } catch (error) {
+            console.error("Error downloading DOCX:", error)
+            toast.error("Failed to download DOCX")
+        }
+    }
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+            <DialogContent className="max-w-4xl h-[95vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle>Cover Letter Generator</DialogTitle>
                     <DialogDescription>
@@ -129,9 +184,13 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
 
                 <div className="flex justify-end gap-2 mt-4">
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button onClick={handleDownloadPdf} disabled={loading || !content}>
+                    <Button onClick={handleDownloadPdf} disabled={loading || !content} variant="secondary">
                         <FileDown className="mr-2 h-4 w-4" />
                         Download PDF
+                    </Button>
+                    <Button onClick={handleDownloadDocx} disabled={loading || !content}>
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Download DOCX
                     </Button>
                 </div>
             </DialogContent>
