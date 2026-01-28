@@ -430,7 +430,7 @@ function ModernTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                 <Text style={{ fontSize: 12, fontWeight: 'bold', borderBottomWidth: 1, borderBottomColor: accentColor, paddingBottom: 4, marginBottom: 8 }}>
                   SUMMARY
                 </Text>
-                <Text style={{ fontSize: 9, lineHeight: 1.4 }}>{resume.summary}</Text>
+                <Text style={{ fontSize: 9 }}>{resume.summary}</Text>
               </View>
             )}
 
@@ -613,7 +613,7 @@ function NovoTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
                 {firstName} {lastName}
               </Text>
               {resume.summary && (
-                <Text style={{ fontSize: 11, color: '#666', textAlign: 'justify', lineHeight: 1.4 }}>
+                <Text style={{ fontSize: 11, color: '#666', textAlign: 'justify' }}>
                   {resume.summary}
                 </Text>
               )}
@@ -879,7 +879,7 @@ function BoldTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
       <Page size="A4" style={{ padding: 28, fontSize: 11, fontFamily }}>
         {/* Large Name Header */}
         <View style={{ marginBottom: 24, borderBottomWidth: 3, borderBottomColor: darkColor, paddingBottom: 12 }}>
-          <Text style={{ fontSize: 28, fontWeight: '900', color: darkColor, lineHeight: 1.2 }}>
+          <Text style={{ fontSize: 28, fontWeight: '900', color: darkColor }}>
             {firstName}
           </Text>
           <Text style={{ fontSize: 28, fontWeight: '900', color: darkColor }}>
@@ -898,7 +898,7 @@ function BoldTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
             <View style={{ backgroundColor: darkColor, padding: 12, marginBottom: 12 }}>
               <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>SUMMARY</Text>
             </View>
-            <Text style={{ fontSize: 10, lineHeight: 1.5 }}>{resume.summary}</Text>
+            <Text style={{ fontSize: 10 }}>{resume.summary}</Text>
           </View>
         )}
 
@@ -958,7 +958,7 @@ function BoldTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
             <View style={{ backgroundColor: darkColor, padding: 12, marginBottom: 12 }}>
               <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>TECHNICAL SKILLS</Text>
             </View>
-            <Text style={{ fontSize: 10, lineHeight: 1.8 }}>
+            <Text style={{ fontSize: 10 }}>
               {resume.skills.map((s: { skill_name: string }) => s.skill_name).join(' • ')}
             </Text>
           </View>
@@ -1053,7 +1053,7 @@ function BoldTemplate({ resume, styles }: { resume: StructuredResume; styles?: P
             <View style={{ backgroundColor: darkColor, padding: 12, marginBottom: 12 }}>
               <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>LANGUAGES</Text>
             </View>
-            <Text style={{ fontSize: 10, lineHeight: 1.8 }}>
+            <Text style={{ fontSize: 10 }}>
               {resume.languages.map((l: Language) => `${l.language}${l.proficiency ? ` (${l.proficiency})` : ''}`).join(' • ')}
             </Text>
           </View>
@@ -1098,7 +1098,7 @@ function ExecutiveTemplate({ resume, styles }: { resume: StructuredResume; style
         {/* Summary */}
         {resume.summary && (
           <View style={{ marginBottom: 10 }}>
-            <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#444' }}>
+            <Text style={{ fontSize: 10, color: '#444' }}>
               {resume.summary}
             </Text>
           </View>
@@ -1427,7 +1427,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                         }
                         {
                           e.description && (
-                            <Text style={{ fontSize: 9, color: '#666', marginTop: 3, lineHeight: 1.4 }}>
+                            <Text style={{ fontSize: 9, color: '#666', marginTop: 3 }}>
                               {e.description}
                             </Text>
                           )
@@ -1464,7 +1464,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                                 exp.description.map((d: string, idx: number) => (
                                   <View key={idx} style={{ flexDirection: 'row', marginBottom: 4 }} >
                                     <Text style={{ width: 10, fontSize: 9, color: '#888' }}>•</Text>
-                                    <Text style={{ flex: 1, fontSize: 9, color: '#555', lineHeight: 1.4 }}>{d.trim()}</Text>
+                                    <Text style={{ flex: 1, fontSize: 9, color: '#555' }}>{d.trim()}</Text>
                                   </View>
                                 ))}
                             </View>
@@ -1485,7 +1485,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                   <View key={i} style={{ marginBottom: 10, paddingLeft: 14 }}>
                     <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#333' }}>{p.project_name}</Text>
                     {p.description && (
-                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3, lineHeight: 1.4 }}>
+                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3 }}>
                         {p.description}
                       </Text>
                     )}
@@ -1517,7 +1517,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                       {pub.date && <Text style={{ fontSize: 9, color: '#999' }}>{pub.date}</Text>}
                     </View>
                     {pub.description && (
-                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3, lineHeight: 1.4 }}>
+                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3 }}>
                         {pub.description}
                       </Text>
                     )}
@@ -1542,7 +1542,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                       {item.date && <Text style={{ fontSize: 9, color: '#999' }}>{item.date}</Text>}
                     </View>
                     {item.description && (
-                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3, lineHeight: 1.4 }}>
+                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3 }}>
                         {item.description}
                       </Text>
                     )}
@@ -1566,7 +1566,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                     </View>
                     {award.issuer && <Text style={{ fontSize: 10, color: '#888', fontStyle: 'italic' }}>{award.issuer}</Text>}
                     {award.description && (
-                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3, lineHeight: 1.4 }}>
+                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3 }}>
                         {award.description}
                       </Text>
                     )}
@@ -1593,7 +1593,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                     {item.organization && <Text style={{ fontSize: 10, color: '#888', fontStyle: 'italic' }}>{item.organization}</Text>}
                     {item.role && <Text style={{ fontSize: 9, color: '#999', marginTop: 1 }}>Role: {item.role}</Text>}
                     {item.description && (
-                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3, lineHeight: 1.4 }}>
+                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3 }}>
                         {item.description}
                       </Text>
                     )}
