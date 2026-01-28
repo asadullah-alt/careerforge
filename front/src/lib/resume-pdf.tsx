@@ -1320,18 +1320,16 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
               )}
             {
               email && (
-                <View style={{ marginBottom: 12 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                   <Icons.Mail />
-                  < Text style={{ fontSize: 9, color: '#333' }
-                  }> {email} </Text>
+                  <Text style={{ fontSize: 9, color: '#333', marginLeft: 4 }}>{email}</Text>
                 </View>
               )}
             {
               location && (
-                <View style={{ marginBottom: 20 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
                   <Icons.Location />
-                  < Text style={{ fontSize: 9, color: '#333' }
-                  }>
+                  <Text style={{ fontSize: 9, color: '#333', marginLeft: 4 }}>
                     {location.city}
                     {location.country ? `, ${location.country}` : ''}
                   </Text>
@@ -1385,7 +1383,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
               </Text>
               {
                 resume.summary && (
-                  <Text style={{ fontSize: 10, lineHeight: 1.5, marginTop: 8, color: '#555', textAlign: 'justify' }}>
+                  <Text style={{ fontSize: 10, lineHeight: 1.6, marginTop: 8, color: '#555', textAlign: 'justify' }}>
                     {resume.summary}
                   </Text>
                 )
@@ -1429,7 +1427,7 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                         }
                         {
                           e.description && (
-                            <Text style={{ fontSize: 9, color: '#666', marginTop: 3 }}>
+                            <Text style={{ fontSize: 9, color: '#666', marginTop: 3, lineHeight: 1.4 }}>
                               {e.description}
                             </Text>
                           )
@@ -1464,10 +1462,9 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                             <View style={{ marginTop: 4 }}>
                               {
                                 exp.description.map((d: string, idx: number) => (
-                                  <View key={idx} style={{ flexDirection: 'row', marginBottom: 2 }} >
-                                    <Text style={{ width: 8, fontSize: 9, color: '#888' }}>•</Text>
-                                    < Text style={{ flex: 1, fontSize: 9, color: '#555' }
-                                    }> {d} </Text>
+                                  <View key={idx} style={{ flexDirection: 'row', marginBottom: 4 }} >
+                                    <Text style={{ width: 10, fontSize: 9, color: '#888' }}>•</Text>
+                                    <Text style={{ flex: 1, fontSize: 9, color: '#555', lineHeight: 1.4 }}>{d.trim()}</Text>
                                   </View>
                                 ))}
                             </View>
@@ -1477,7 +1474,133 @@ function GentleTemplate({ resume, styles }: { resume: StructuredResume; styles?:
                 </View>
               )}
 
-            {/* Projects, Publications, Conferences, Awards, Extracurricular sections follow similar pattern */}
+            {/* Projects */}
+            {resume.projects && resume.projects.length > 0 && (
+              <View style={{ marginBottom: 18 }}>
+                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: accentColor, marginRight: 8 }}> </View>
+                  <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#333' }}>Projects</Text>
+                </View>
+                {resume.projects.map((p: Project, i: number) => (
+                  <View key={i} style={{ marginBottom: 10, paddingLeft: 14 }}>
+                    <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#333' }}>{p.project_name}</Text>
+                    {p.description && (
+                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3, lineHeight: 1.4 }}>
+                        {p.description}
+                      </Text>
+                    )}
+                    {p.technologies_used && p.technologies_used.length > 0 && (
+                      <Text style={{ fontSize: 8, color: '#999', marginTop: 3 }}>
+                        Technologies: {p.technologies_used.join(', ')}
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Publications */}
+            {resume.publications && resume.publications.length > 0 && (
+              <View style={{ marginBottom: 18 }}>
+                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: accentColor, marginRight: 8 }}> </View>
+                  <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#333' }}>Publications</Text>
+                </View>
+                {resume.publications.map((pub: Publication, i: number) => (
+                  <View key={i} style={{ marginBottom: 10, paddingLeft: 14 }}>
+                    <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#333' }}>{pub.title}</Text>
+                    {pub.authors && pub.authors.length > 0 && (
+                      <Text style={{ fontSize: 9, color: '#888', fontStyle: 'italic' }}>{pub.authors.join(', ')}</Text>
+                    )}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 }}>
+                      {pub.publication_venue && <Text style={{ fontSize: 9, color: '#999' }}>{pub.publication_venue}</Text>}
+                      {pub.date && <Text style={{ fontSize: 9, color: '#999' }}>{pub.date}</Text>}
+                    </View>
+                    {pub.description && (
+                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3, lineHeight: 1.4 }}>
+                        {pub.description}
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Conferences, Trainings & Workshops */}
+            {resume.conferences_trainings_workshops && resume.conferences_trainings_workshops.length > 0 && (
+              <View style={{ marginBottom: 18 }}>
+                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: accentColor, marginRight: 8 }}> </View>
+                  <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#333' }}>Conferences, Trainings & Workshops</Text>
+                </View>
+                {resume.conferences_trainings_workshops.map((item: ConferenceTrainingWorkshop, i: number) => (
+                  <View key={i} style={{ marginBottom: 10, paddingLeft: 14 }}>
+                    <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#333' }}>{item.name}</Text>
+                    {item.organizer && <Text style={{ fontSize: 10, color: '#888', fontStyle: 'italic' }}>{item.organizer}</Text>}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 }}>
+                      {item.location && <Text style={{ fontSize: 9, color: '#999' }}>{item.location}</Text>}
+                      {item.date && <Text style={{ fontSize: 9, color: '#999' }}>{item.date}</Text>}
+                    </View>
+                    {item.description && (
+                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3, lineHeight: 1.4 }}>
+                        {item.description}
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Awards */}
+            {resume.awards && resume.awards.length > 0 && (
+              <View style={{ marginBottom: 18 }}>
+                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: accentColor, marginRight: 8 }}> </View>
+                  <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#333' }}>Awards</Text>
+                </View>
+                {resume.awards.map((award: Award, i: number) => (
+                  <View key={i} style={{ marginBottom: 10, paddingLeft: 14 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#333' }}>{award.title}</Text>
+                      {award.date && <Text style={{ fontSize: 9, color: '#999' }}>{award.date}</Text>}
+                    </View>
+                    {award.issuer && <Text style={{ fontSize: 10, color: '#888', fontStyle: 'italic' }}>{award.issuer}</Text>}
+                    {award.description && (
+                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3, lineHeight: 1.4 }}>
+                        {award.description}
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Extracurricular Activities */}
+            {resume.extracurricular_activities && resume.extracurricular_activities.length > 0 && (
+              <View style={{ marginBottom: 18 }}>
+                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: accentColor, marginRight: 8 }}> </View>
+                  <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#333' }}>Extracurricular Activities</Text>
+                </View>
+                {resume.extracurricular_activities.map((item: ExtracurricularActivity, i: number) => (
+                  <View key={i} style={{ marginBottom: 10, paddingLeft: 14 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#333' }}>{item.activity_name}</Text>
+                      {(item.start_date || item.end_date) && (
+                        <Text style={{ fontSize: 9, color: '#999' }}>{item.start_date} - {item.end_date || 'Present'}</Text>
+                      )}
+                    </View>
+                    {item.organization && <Text style={{ fontSize: 10, color: '#888', fontStyle: 'italic' }}>{item.organization}</Text>}
+                    {item.role && <Text style={{ fontSize: 9, color: '#999', marginTop: 1 }}>Role: {item.role}</Text>}
+                    {item.description && (
+                      <Text style={{ fontSize: 9, color: '#666', marginTop: 3, lineHeight: 1.4 }}>
+                        {item.description}
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
         </View>
       </Page>
