@@ -103,7 +103,7 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
                             Review and edit your AI-generated cover letter below.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="flex shrink-0 -ml-2">
+                    <div className="flex shrink-0 mr-8">
                         <Button onClick={handleDownloadPdf} disabled={loading || !content}>
                             <FileDown className="mr-2 h-4 w-4" />
                             Download PDF
