@@ -118,7 +118,7 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
                             <p className="text-muted-foreground">Generating your cover letter...</p>
                         </div>
                     ) : (
-                        <div className="h-screen max-h-[500px] flex-1 overflow-auto border rounded-md">
+                        <div className="h-screen max-h-[500px] flex-1 border rounded-md">
                             <QuillEditor
                                 ref={editorRef}
                                 value={content}
