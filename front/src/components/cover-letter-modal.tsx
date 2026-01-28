@@ -95,7 +95,7 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl h-[95vh] flex flex-col">
+            <DialogContent className="max-w-4xl h-[100vh] flex flex-col">
                 <div className="flex items-start justify-between">
                     <DialogHeader>
                         <DialogTitle>Cover Letter Generator</DialogTitle>
