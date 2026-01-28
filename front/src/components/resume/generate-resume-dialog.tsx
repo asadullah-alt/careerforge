@@ -75,7 +75,7 @@ export function GenerateResumeDialog({ open: controlledOpen, onOpenChange }: Gen
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">
+        <Button variant="default" disabled>
           Generate with AI
         </Button>
       </DialogTrigger>
