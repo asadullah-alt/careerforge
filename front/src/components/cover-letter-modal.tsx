@@ -114,46 +114,7 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
         }
     }
 
-    const handleDownloadDocx = async () => {
-        try {
-            const HTMLToDOCX = (await import('html-to-docx')).default
 
-            // Prepare HTML content for DOCX
-            // Wrap in basic HTML structure for better conversion
-            const fullHtml = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="utf-8">
-                    <style>
-                        body { font-family: 'Arial', sans-serif; line-height: 1.6; }
-                    </style>
-                </head>
-                <body>
-                    ${content}
-                </body>
-                </html>
-            `
-
-            const fileBuffer = await HTMLToDOCX(fullHtml, null, {
-                table: { row: { canSplit: true } },
-                footer: true,
-                pageNumber: true,
-            })
-
-            const url = window.URL.createObjectURL(fileBuffer)
-            const link = document.createElement('a')
-            link.href = url
-            link.download = 'cover-letter.docx'
-            link.click()
-            window.URL.revokeObjectURL(url)
-
-            toast.success("Downloaded as DOCX")
-        } catch (error) {
-            console.error("Error downloading DOCX:", error)
-            toast.error("Failed to download DOCX")
-        }
-    }
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -184,13 +145,9 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
 
                 <div className="flex justify-end gap-2 mt-4">
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button onClick={handleDownloadPdf} disabled={loading || !content} variant="secondary">
+                    <Button onClick={handleDownloadPdf} disabled={loading || !content}>
                         <FileDown className="mr-2 h-4 w-4" />
                         Download PDF
-                    </Button>
-                    <Button onClick={handleDownloadDocx} disabled={loading || !content}>
-                        <FileDown className="mr-2 h-4 w-4" />
-                        Download DOCX
                     </Button>
                 </div>
             </DialogContent>
