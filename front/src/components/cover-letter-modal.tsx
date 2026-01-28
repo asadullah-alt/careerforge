@@ -96,14 +96,22 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-4xl h-[95vh] flex flex-col">
-                <DialogHeader>
-                    <DialogTitle>Cover Letter Generator</DialogTitle>
-                    <DialogDescription>
-                        Review and edit your AI-generated cover letter below.
-                    </DialogDescription>
-                </DialogHeader>
+                <div className="flex items-start justify-between">
+                    <DialogHeader>
+                        <DialogTitle>Cover Letter Generator</DialogTitle>
+                        <DialogDescription>
+                            Review and edit your AI-generated cover letter below.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex shrink-0 pt-2">
+                        <Button onClick={handleDownloadPdf} disabled={loading || !content}>
+                            <FileDown className="mr-2 h-4 w-4" />
+                            Download PDF
+                        </Button>
+                    </div>
+                </div>
 
-                <div className="flex-1 overflow-hidden flex flex-col gap-4">
+                <div className="flex-1 overflow-hidden flex flex-col gap-4 min-h-0">
                     {loading ? (
                         <div className="flex-1 flex items-center justify-center flex-col gap-4">
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -119,14 +127,6 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
                             />
                         </div>
                     )}
-                </div>
-
-                <div className="flex justify-end gap-2 mt-4">
-                    <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button onClick={handleDownloadPdf} disabled={loading || !content}>
-                        <FileDown className="mr-2 h-4 w-4" />
-                        Download PDF
-                    </Button>
                 </div>
             </DialogContent>
         </Dialog>
