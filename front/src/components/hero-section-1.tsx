@@ -8,7 +8,7 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import type { Variants } from 'framer-motion'
 import { useTheme } from '@/context/theme-context'
-
+import PageAssemblyAnimationWithProps from '@/components/analysis-matcher/page-assembly-with-props'
 const transitionVariants: {
     container?: Variants;
     item: Variants;
@@ -31,7 +31,12 @@ const transitionVariants: {
         },
     },
 }
-
+const jobDetails = {
+    jobTitle: "Data Scientist",
+    company: "AI Corp",
+    location: "Boston, MA",
+    matchScore: 82
+}
 const platforms = [
     { name: 'LinkedIn', icon: '/linkedin.svg' },
     { name: 'Indeed', icon: '/indeed.svg' },
@@ -185,6 +190,16 @@ export function HeroSection() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+                </section>
+
+                {/* Page Assembly Animation */}
+                <section className="bg-background py-16 md:py-32 overflow-hidden">
+                    <div className="mx-auto max-w-7xl px-6">
+                        <PageAssemblyAnimationWithProps
+                            {...jobDetails}
+                            autoPlay={true}
+                        />
                     </div>
                 </section>
 
