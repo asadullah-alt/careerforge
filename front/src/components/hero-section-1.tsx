@@ -198,7 +198,8 @@ export function HeroSection() {
                     <div className="mx-auto max-w-7xl px-6">
                         <PageAssemblyAnimationWithProps
                             {...jobDetails}
-                            autoPlay={true}
+                            autoPlay={false}
+                            playOnScroll={true}
                         />
                     </div>
                 </section>
