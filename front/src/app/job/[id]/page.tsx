@@ -125,6 +125,16 @@ export default function PublicJobPage({ params: paramsPromise }: { params: Promi
                 <div className="md:col-span-2 space-y-6">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
+                            {jobData.isVisaSponsored && (
+                                <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 text-xs">
+                                    Visa Sponsored
+                                </Badge>
+                            )}
+                            {jobData.isRemote && (
+                                <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 text-xs">
+                                    Remote
+                                </Badge>
+                            )}
                             <h1 className="text-3xl font-bold">{jobData.jobPosition || jobData.jobTitle}</h1>
                             {(() => {
                                 const jobUrl = (jobData.job_url ?? jobData.jobUrl ?? jobData.src ?? jobData.applicationInfo?.applyLink) as string | undefined

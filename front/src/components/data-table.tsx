@@ -120,6 +120,9 @@ export const schema = z.object({
   deadline: z.string().nullable(),
   dateApplied: z.string().nullable(),
   followUp: z.string().nullable(),
+  isVisaSponsored: z.boolean().nullable(),
+  isRemote: z.boolean().nullable(),
+
 })
 
 // Create a separate component for the drag handle
@@ -616,12 +619,24 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   }
 
   return (
-    <Button
-      variant="link"
-      className="text-foreground w-fit px-0 text-left"
-      onClick={handleClick}
-    >
-      {item.jobTitle}
-    </Button>
+    <div className="flex items-center gap-2">
+      {item.isVisaSponsored && (
+        <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 text-xs">
+          Visa Sponsored
+        </Badge>
+      )}
+      {item.isRemote && (
+        <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-0.5 text-xs">
+          Remote
+        </Badge>
+      )}
+      <Button
+        variant="link"
+        className="text-foreground w-fit px-0 text-left"
+        onClick={handleClick}
+      >
+        {item.jobTitle}
+      </Button>
+    </div>
   )
 }
