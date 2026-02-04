@@ -74,6 +74,7 @@ export default function PublicJobPage({ params: paramsPromise }: { params: Promi
                         job_id: String(params.id),
                         id: processedJob.id || params.id
                     }
+                    console.log("FETCHED", fetched)
                     setJobData(fetched)
                 }
             } catch (error) {
