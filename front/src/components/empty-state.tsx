@@ -114,7 +114,115 @@ export function EmptyJobsState() {
 
                 {/* Steps */}
                 <div className="space-y-6">
-                    {/* Step 1: Download Extension */}
+                    {/* Step 1: Upload Resume - MOST IMPORTANT */}
+                    <motion.div
+                        variants={itemVariants}
+                        className="group relative"
+                        whileHover={{ scale: 1.02, y: -5 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    >
+                        {/* Extra strong animated glow effect */}
+                        <motion.div
+                            className={`absolute inset-0 bg-gradient-to-r ${isDark ? 'from-purple-500/30 to-pink-500/30' : 'from-purple-500/20 to-pink-500/20'} rounded-2xl blur-xl transition-all`}
+                            animate={{
+                                scale: [1, 1.08, 1],
+                                opacity: [0.6, 0.9, 0.6]
+                            }}
+                            transition={{
+                                duration: 2.5,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                        />
+                        <div className={`relative ${isDark ? 'bg-gray-800/90 border-gray-700 backdrop-blur-sm' : 'bg-white border-gray-100'} border-2 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:border-purple-300 ${isDark ? 'hover:border-purple-500' : ''}`}>
+                            {/* Important Badge */}
+                            <motion.div
+                                className="absolute -top-3 right-6 px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold rounded-full shadow-lg"
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                                whileHover={{ scale: 1.1 }}
+                            >
+                                ⚡ CRITICAL FIRST STEP
+                            </motion.div>
+                            <div className="flex items-start gap-6">
+                                <div className="flex-shrink-0">
+                                    <motion.div
+                                        className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg relative overflow-hidden"
+                                        whileHover={{ scale: 1.15, rotate: -360 }}
+                                        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                                    >
+                                        <motion.div
+                                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                                            animate={{
+                                                x: ['-100%', '100%']
+                                            }}
+                                            transition={{
+                                                duration: 2,
+                                                repeat: Infinity,
+                                                repeatDelay: 1
+                                            }}
+                                        />
+                                        <span className="relative z-10">1</span>
+                                    </motion.div>
+                                </div>
+                                <div className="flex-1">
+                                    <motion.h3
+                                        className={`text-xl font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}
+                                        whileHover={{ x: 5 }}
+                                        transition={{ type: "spring", stiffness: 300 }}
+                                    >
+                                        <FileUp className="w-5 h-5 text-purple-600" />
+                                        Add Your Complete Resume
+                                    </motion.h3>
+                                    <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} mb-3`}>
+                                        <span className="font-semibold text-purple-600 dark:text-purple-400">Include ALL your skills and experience!</span> This is essential for accurately matching you with jobs and providing personalized recommendations.
+                                    </p>
+                                    <motion.div
+                                        className={`mb-4 p-3 rounded-lg ${isDark ? 'bg-purple-900/20 border border-purple-700' : 'bg-purple-50 border border-purple-200'}`}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.4 }}
+                                    >
+                                        <div className="flex items-start gap-2">
+                                            <Sparkles className={`w-4 h-4 mt-0.5 flex-shrink-0 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+                                            <p className={`text-sm ${isDark ? 'text-purple-300' : 'text-purple-700'} font-medium`}>
+                                                Make sure to include: work experience, technical skills, soft skills, certifications, education, and projects
+                                            </p>
+                                        </div>
+                                    </motion.div>
+                                    <div className="flex flex-wrap gap-3">
+                                        {['Upload Resume', 'Create New', 'Import LinkedIn'].map((text, index) => (
+                                            <motion.div
+                                                key={text}
+                                                className={`flex items-center gap-2 px-4 py-2 ${isDark ? 'bg-purple-900/30 text-purple-300' : 'bg-purple-50 text-purple-700'} rounded-lg text-sm font-medium`}
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ delay: 0.6 + index * 0.1 }}
+                                                whileHover={{ scale: 1.05, y: -2 }}
+                                            >
+                                                <motion.span
+                                                    className="w-2 h-2 bg-purple-500 rounded-full"
+                                                    animate={{
+                                                        scale: [1, 1.2, 1],
+                                                        opacity: [1, 0.7, 1]
+                                                    }}
+                                                    transition={{
+                                                        duration: 1.5,
+                                                        repeat: Infinity,
+                                                        delay: index * 0.2
+                                                    }}
+                                                />
+                                                {text}
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Step 2: Download Extension */}
                     <motion.div
                         variants={itemVariants}
                         className="group relative"
@@ -131,7 +239,8 @@ export function EmptyJobsState() {
                             transition={{
                                 duration: 3,
                                 repeat: Infinity,
-                                ease: "easeInOut"
+                                ease: "easeInOut",
+                                delay: 0.5
                             }}
                         />
                         <div className={`relative ${isDark ? 'bg-gray-800/90 border-gray-700 backdrop-blur-sm' : 'bg-white border-gray-100'} border-2 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:border-blue-300 ${isDark ? 'hover:border-blue-500' : ''}`}>
@@ -150,10 +259,11 @@ export function EmptyJobsState() {
                                             transition={{
                                                 duration: 2,
                                                 repeat: Infinity,
-                                                repeatDelay: 1
+                                                repeatDelay: 1,
+                                                delay: 0.5
                                             }}
                                         />
-                                        <span className="relative z-10">1</span>
+                                        <span className="relative z-10">2</span>
                                     </motion.div>
                                 </div>
                                 <div className="flex-1">
@@ -187,93 +297,6 @@ export function EmptyJobsState() {
                                         <span className="relative z-10">Download Extension</span>
                                         <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform relative z-10" />
                                     </motion.a>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {/* Step 2: Upload Resume */}
-                    <motion.div
-                        variants={itemVariants}
-                        className="group relative"
-                        whileHover={{ scale: 1.02, y: -5 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    >
-                        {/* Animated glow effect */}
-                        <motion.div
-                            className={`absolute inset-0 bg-gradient-to-r ${isDark ? 'from-purple-500/20 to-pink-500/20' : 'from-purple-500/10 to-pink-500/10'} rounded-2xl blur-xl transition-all`}
-                            animate={{
-                                scale: [1, 1.05, 1],
-                                opacity: [0.5, 0.8, 0.5]
-                            }}
-                            transition={{
-                                duration: 3,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                                delay: 0.5
-                            }}
-                        />
-                        <div className={`relative ${isDark ? 'bg-gray-800/90 border-gray-700 backdrop-blur-sm' : 'bg-white border-gray-100'} border-2 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:border-purple-300 ${isDark ? 'hover:border-purple-500' : ''}`}>
-                            <div className="flex items-start gap-6">
-                                <div className="flex-shrink-0">
-                                    <motion.div
-                                        className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg relative overflow-hidden"
-                                        whileHover={{ scale: 1.15, rotate: -360 }}
-                                        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                                    >
-                                        <motion.div
-                                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                                            animate={{
-                                                x: ['-100%', '100%']
-                                            }}
-                                            transition={{
-                                                duration: 2,
-                                                repeat: Infinity,
-                                                repeatDelay: 1,
-                                                delay: 0.5
-                                            }}
-                                        />
-                                        <span className="relative z-10">2</span>
-                                    </motion.div>
-                                </div>
-                                <div className="flex-1">
-                                    <motion.h3
-                                        className={`text-xl font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}
-                                        whileHover={{ x: 5 }}
-                                        transition={{ type: "spring", stiffness: 300 }}
-                                    >
-                                        <FileUp className="w-5 h-5 text-purple-600" />
-                                        Upload or Create Your Resume
-                                    </motion.h3>
-                                    <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
-                                        Upload your existing resume, create a new one, or import your LinkedIn profile using the extension
-                                    </p>
-                                    <div className="flex flex-wrap gap-3">
-                                        {['Upload Resume', 'Create New', 'Import LinkedIn'].map((text, index) => (
-                                            <motion.div
-                                                key={text}
-                                                className={`flex items-center gap-2 px-4 py-2 ${isDark ? 'bg-purple-900/30 text-purple-300' : 'bg-purple-50 text-purple-700'} rounded-lg text-sm font-medium`}
-                                                initial={{ opacity: 0, scale: 0.8 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ delay: 0.6 + index * 0.1 }}
-                                                whileHover={{ scale: 1.05, y: -2 }}
-                                            >
-                                                <motion.span
-                                                    className="w-2 h-2 bg-purple-500 rounded-full"
-                                                    animate={{
-                                                        scale: [1, 1.2, 1],
-                                                        opacity: [1, 0.7, 1]
-                                                    }}
-                                                    transition={{
-                                                        duration: 1.5,
-                                                        repeat: Infinity,
-                                                        delay: index * 0.2
-                                                    }}
-                                                />
-                                                {text}
-                                            </motion.div>
-                                        ))}
-                                    </div>
                                 </div>
                             </div>
                         </div>
