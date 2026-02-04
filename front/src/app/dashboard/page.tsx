@@ -49,6 +49,8 @@ interface ProcessedJob {
   processed_at: string;
   updated_at: string;
   job_url: string;
+  isVisaSponsored?: boolean | null;
+  isRemote?: boolean | null;
 }
 
 interface ApiResponse {
@@ -80,6 +82,8 @@ interface TransformedJob {
   deadline: string | null;
   dateApplied: string | null;
   followUp: string | null;
+  isVisaSponsored: boolean | null;
+  isRemote: boolean | null;
 }
 
 export default function Page() {
@@ -154,7 +158,9 @@ export default function Page() {
             followUp: null,
             job_url: job.job_url,
             applicationInfo: job.applicationInfo,
-            extractedKeywords: job.extractedKeywords || []
+            extractedKeywords: job.extractedKeywords || [],
+            isVisaSponsored: job.isVisaSponsored ?? null,
+            isRemote: job.isRemote ?? null
           } satisfies TransformedJob
         })
 
