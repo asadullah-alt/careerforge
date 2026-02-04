@@ -404,10 +404,24 @@ export default function SingleJobPage({ params: paramsPromise }: { params: Promi
               <span>{[
                 jobData.location.city,
                 jobData.location.state,
-                jobData.location.country,
-                jobData.location.remoteStatus
+                jobData.location.country
+
               ].filter(Boolean).join(', ') || 'Remote'}</span>
             </div>
+            {(jobData.isRemote || jobData.isVisaSponsored) && (
+              <div className="flex items-center gap-2 mt-2">
+                {jobData.isVisaSponsored && (
+                  <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 text-xs">
+                    Visa Sponsored
+                  </Badge>
+                )}
+                {jobData.isRemote && (
+                  <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 text-xs">
+                    Remote
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
 
           <Separator />
