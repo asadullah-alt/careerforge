@@ -82,7 +82,7 @@ export function EmptyJobsState() {
                         whileHover={{ scale: 1.02 }}
                         transition={{ type: "spring", stiffness: 300 }}
                     >
-                        No Jobs Saved Yet
+                        Start by Adding Your Resume
                         {/* Shimmer effect */}
                         <motion.div
                             className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent"
@@ -93,13 +93,23 @@ export function EmptyJobsState() {
                         />
                     </motion.h2>
                     <motion.p
-                        className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'} max-w-2xl mx-auto`}
+                        className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'} max-w-2xl mx-auto mb-3`}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.3, duration: 0.6 }}
                     >
-                        Get started in 3 easy steps to streamline your job application process
+                        <span className="font-semibold text-purple-600 dark:text-purple-400">First step:</span> Add your complete resume with all your skills and experience
                     </motion.p>
+                    <motion.div
+                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${isDark ? 'bg-purple-900/30 text-purple-300 border border-purple-700' : 'bg-purple-50 text-purple-700 border border-purple-200'}`}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, duration: 0.6 }}
+                        whileHover={{ scale: 1.05 }}
+                    >
+                        <Sparkles className="w-4 h-4" />
+                        This is critical for accurate job matching
+                    </motion.div>
                 </motion.div>
 
                 {/* Steps */}
