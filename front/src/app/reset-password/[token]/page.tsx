@@ -1,10 +1,11 @@
 'use client'
 
-import React from 'react'
+import React, { use } from 'react'
 import { BackgroundReset } from '@/components/ui/background-reset'
 
-export default function ResetPasswordPage({ params }: { params: { token: string } }) {
+export default function ResetPasswordPage({ params }: { params: Promise<{ token: string }> }) {
+    const resolvedParams = use(params)
     return (
-        <BackgroundReset token={params.token} />
+        <BackgroundReset token={resolvedParams.token} />
     )
 }
