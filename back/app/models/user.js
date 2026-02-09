@@ -47,6 +47,10 @@ let userSchema = mongoose.Schema({
         blockedUntil: Date
     },
 
+    // password reset fields
+    passwordResetToken: String,
+    passwordResetExpires: Date,
+
     // extension token used by the browser extension to identify the user
     Extensiontoken: String,
     extensionToken: String,

@@ -241,6 +241,108 @@ module.exports = function (app, passport) {
     }
   });
 
+  // Forgot password - send reset link
+  app.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+
+    try {
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email is required'
+        });
+      }
+
+      // Find user by email
+      const user = await User.findOne({
+        $or: [
+          { 'local.email': email },
+          { 'google.email': email }
+        ]
+      });
+
+      if (!user) {
+        // For security, don't reveal if email exists or not
+        return res.json({
+          success: true,
+          message: 'If that email exists, a password reset link has been sent'
+        });
+      }
+
+      // Generate UUID for password reset
+      const resetToken = crypto.randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10); // 10 minutes expiry
+
+      // Save reset token and expiry to user
+      user.passwordResetToken = resetToken;
+      user.passwordResetExpires = expiresAt;
+      await user.save();
+
+      // Send password reset email
+      const { sendPasswordResetEmail } = require('./utils/emailService');
+      await sendPasswordResetEmail(email, resetToken);
+
+      res.json({
+        success: true,
+        message: 'If that email exists, a password reset link has been sent'
+      });
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'An error occurred while processing your request'
+      });
+    }
+  });
+
+  // Reset password with token
+  app.post('/reset-password', async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    try {
+      if (!token || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          message: 'Token and new password are required'
+        });
+      }
+
+      // Find user with valid reset token
+      const user = await User.findOne({
+        passwordResetToken: token,
+        passwordResetExpires: { $gt: new Date() }
+      });
+
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid or expired reset token'
+        });
+      }
+
+      // Update password
+      user.local.password = user.generateHash(newPassword);
+
+      // Clear reset token fields
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+
+      await user.save();
+
+      res.json({
+        success: true,
+        message: 'Password has been reset successfully'
+      });
+    } catch (error) {
+      console.error('Reset password error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'An error occurred while resetting your password'
+      });
+    }
+  });
+
   app.get('/token', (req, res, next) => {
 
     return passport.authenticate('jwt-auth', { session: false }, (err, passportUser, info) => {
