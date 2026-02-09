@@ -1,15 +1,11 @@
 'use client'
 
 import React from 'react'
-import { HeroHeader } from '@/components/hero-section-1'
+import { BackgroundForgot } from '@/components/ui/background-forgot'
 
 
 export default function ForgotPasswordPage() {
   return (
-    <div>
-      <HeroHeader />
-      
-      
-    </div>
+    <BackgroundForgot />
   )
 }

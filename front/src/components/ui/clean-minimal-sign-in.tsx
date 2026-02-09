@@ -80,9 +80,10 @@ const SignIn2 = () => {
           document.cookie = `cf_auth=${data.token}; path=/; max-age=${maxAge}`;
           router.push('/dashboard');
         } else if (data.success && data.message.includes('Verification')) {
-          // Save email in localStorage if remember me is checked
+          // Save email and password in localStorage if remember me is checked
           if (rememberMe) {
             localStorage.setItem('rememberedEmail', email);
+            localStorage.setItem('rememberedPassword', password);
           }
           router.push(`/verify?email=${encodeURIComponent(email)}`);
         } else {
@@ -99,12 +100,16 @@ const SignIn2 = () => {
     }
   };
 
-  // Load remembered email on component mount
+  // Load remembered email and password on component mount
   React.useEffect(() => {
     const rememberedEmail = localStorage.getItem('rememberedEmail');
+    const rememberedPassword = localStorage.getItem('rememberedPassword');
     if (rememberedEmail) {
       setEmail(rememberedEmail);
       setRememberMe(true);
+    }
+    if (rememberedPassword) {
+      setPassword(rememberedPassword);
     }
   }, []);
 

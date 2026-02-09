@@ -9,7 +9,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '/'
-  const hidePaths = ['/', '/signup', '/features', '/about', '/pricing', '/verify', '/forgot-password', '/privacy-policy', '/signin', '/waiting-list', '/job']
+  const hidePaths = ['/', '/signup', '/features', '/about', '/pricing', '/verify', '/forgot-password', '/privacy-policy', '/signin', '/waiting-list', '/job', '/forgot-password']
 
   const [shouldHideShell, setShouldHideShell] = useState<boolean | null>(null)
 

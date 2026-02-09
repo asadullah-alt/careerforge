@@ -71,12 +71,16 @@ const SignInForm = () => {
         }
     };
 
-    // Load remembered email on component mount
+    // Load remembered email and password on component mount
     React.useEffect(() => {
         const rememberedEmail = localStorage.getItem('rememberedEmail');
+        const rememberedPassword = localStorage.getItem('rememberedPassword');
         if (rememberedEmail) {
             setEmail(rememberedEmail);
             setRememberMe(true);
+        }
+        if (rememberedPassword) {
+            setPassword(rememberedPassword);
         }
     }, []);
 
