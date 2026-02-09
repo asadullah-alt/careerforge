@@ -66,8 +66,8 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    token,
-                    newPassword
+                    token: token,
+                    newPassword: newPassword
                 })
             });
 
