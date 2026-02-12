@@ -224,44 +224,20 @@ const SignIn2 = () => {
         <span className="mx-2 text-xs text-gray-400">Or sign in with</span>
         <div className="flex-grow border-t border-dashed border-gray-200"></div>
       </div>
-      <div className="flex gap-3 w-full justify-center mt-2 opacity-50 cursor-not-allowed">
+      <div className="flex gap-3 w-full justify-center mt-2">
         <button
           type="button"
-          disabled
           onClick={() => (window.location.href = 'https://careerback.bhaikaamdo.com/auth/google')}
-          className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow cursor-not-allowed"
+          className="flex items-center justify-center w-full h-12 rounded-xl border bg-white hover:bg-gray-100 transition cursor-pointer"
         >
           <Image
             src="/google-color.svg"
             alt="Google"
-            className="w-6 h-6"
+            className="w-6 h-6 mr-2"
             width={24}
             height={24}
           />
-        </button>
-        <button
-          disabled
-          className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow cursor-not-allowed"
-        >
-          <Image
-            src="/facebook.svg"
-            alt="Facebook"
-            className="w-6 h-6"
-            width={24}
-            height={24}
-          />
-        </button>
-        <button
-          disabled
-          className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow cursor-not-allowed"
-        >
-          <Image
-            src="/apple-173.svg"
-            alt="Apple"
-            className="w-6 h-6"
-            width={24}
-            height={24}
-          />
+          <span className="text-sm font-medium">Continue with Google</span>
         </button>
       </div>
     </div>
