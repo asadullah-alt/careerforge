@@ -70,7 +70,7 @@ export default function VerifyClient({ email }: { email?: string | null }) {
       const data = await response.json()
 
       if (response.ok) {
-        alert('A new verification code has been sent to your email')
+        alert('A new verification code has been sent to your email. Don\'t forget to check your junk/spam folder if it doesn\'t appear in your inbox.')
       } else {
         setError(data.message || 'Failed to resend verification code')
       }
@@ -103,6 +103,9 @@ export default function VerifyClient({ email }: { email?: string | null }) {
           <p className="text-muted-foreground mt-2">
             Please enter the verification code sent to<br />
             <span className="font-medium">{email}</span>
+          </p>
+          <p className="text-xs text-muted-foreground mt-4 italic">
+            Tip: If you don&apos;t see the email, please check your junk or spam folder.
           </p>
         </div>
 
