@@ -1,25 +1,25 @@
-"use client" 
+"use client"
 
 import * as React from "react"
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
- 
+
 import { useState } from "react";
 
-import {LogIn, Lock, Mail} from "lucide-react";
- 
+import { LogIn, Lock, Mail } from "lucide-react";
+
 const SignIn2 = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
- 
+
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
- 
+
   const handleSignIn = async () => {
     // if the jackass doesnt type in a password
     if (!email || !password) {
@@ -35,7 +35,7 @@ const SignIn2 = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://careerback.bhaikaamdo.com/signup', {
+      const response = await fetch('http://localhost:8000/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,112 +69,112 @@ const SignIn2 = () => {
       setIsLoading(false);
     }
   };
- 
+
   return (
-   
-      <div className="w-full max-w-sm bg-gradient-to-b from-sky-50/50 to-white  rounded-3xl shadow-xl shadow-opacity-10 p-8 flex flex-col items-center border border-blue-100 text-black">
-        <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white mb-6 shadow-lg shadow-opacity-5">
-          <LogIn className="w-7 h-7 text-black" />
+
+    <div className="w-full max-w-sm bg-gradient-to-b from-sky-50/50 to-white  rounded-3xl shadow-xl shadow-opacity-10 p-8 flex flex-col items-center border border-blue-100 text-black">
+      <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white mb-6 shadow-lg shadow-opacity-5">
+        <LogIn className="w-7 h-7 text-black" />
+      </div>
+      <h2 className="text-2xl font-semibold mb-2 text-center">
+        Sign up with email
+      </h2>
+      <p className="text-gray-500 text-sm mb-6 text-center">
+        Create a new account to start using Bhai Kaam Do
+      </p>
+      <div className="w-full flex flex-col gap-3 mb-2">
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <Mail className="w-4 h-4" />
+          </span>
+          <input
+            placeholder="Email"
+            type="email"
+            value={email}
+            className="w-full pl-10 pr-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-black text-sm"
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
-        <h2 className="text-2xl font-semibold mb-2 text-center">
-          Sign up with email
-        </h2>
-        <p className="text-gray-500 text-sm mb-6 text-center">
-          Create a new account to start using Bhai Kaam Do
-        </p>
-        <div className="w-full flex flex-col gap-3 mb-2">
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <Mail className="w-4 h-4" />
-            </span>
-            <input
-              placeholder="Email"
-              type="email"
-              value={email}
-              className="w-full pl-10 pr-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-black text-sm"
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <Lock className="w-4 h-4" />
-            </span>
-            <input
-              placeholder="Password"
-              type="password"
-              value={password}
-              className="w-full pl-10 pr-10 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-black text-sm"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer text-xs select-none"></span>
-          </div>
-          <div className="w-full flex justify-end">
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <Lock className="w-4 h-4" />
+          </span>
+          <input
+            placeholder="Password"
+            type="password"
+            value={password}
+            className="w-full pl-10 pr-10 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 bg-gray-50 text-black text-sm"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer text-xs select-none"></span>
+        </div>
+        <div className="w-full flex justify-end">
           {error && (
             <div className="text-sm text-red-500 text-left">{error}</div>
           )}
-            <Link href="/forgot-password" className="text-xs hover:underline font-medium">
-              Forgot password?
-            </Link>
-          </div>
-        </div>
-        <button
-          onClick={handleSignIn}
-          disabled={isLoading}
-          className="w-full bg-gradient-to-b from-gray-700 to-gray-900 text-white font-medium py-2 rounded-xl shadow hover:brightness-105 cursor-pointer transition mb-4 mt-2 disabled:opacity-50"
-        >
-          {isLoading ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Creating Account...
-            </span>
-          ) : (
-            'Get Started'
-          )}
-        </button>
-        <div className="flex items-center w-full my-2">
-          <div className="flex-grow border-t border-dashed border-gray-200"></div>
-          <span className="mx-2 text-xs text-gray-400">Or sign in with</span>
-          <div className="flex-grow border-t border-dashed border-gray-200"></div>
-        </div>
-        <div className="flex gap-3 w-full justify-center mt-2">
-          <button
-            type="button"
-            onClick={() => (window.location.href = 'https://careerback.bhaikaamdo.com/auth/google')}
-            className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow"
-          >
-            <Image
-              src="/google-color.svg"
-              alt="Google"
-              className="w-6 h-6"
-              width={24}
-              height={24}
-            />
-          </button>
-          <button className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow">
-            <Image
-              src="/facebook.svg"
-              alt="Facebook"
-              className="w-6 h-6"
-              width={24}
-              height={24}
-            />
-          </button>
-          <button className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow">
-            <Image
-              src="/apple-173.svg"
-              alt="Apple"
-              className="w-6 h-6"
-              width={24}
-              height={24}
-            />
-          </button>
+          <Link href="/forgot-password" className="text-xs hover:underline font-medium">
+            Forgot password?
+          </Link>
         </div>
       </div>
-    
+      <button
+        onClick={handleSignIn}
+        disabled={isLoading}
+        className="w-full bg-gradient-to-b from-gray-700 to-gray-900 text-white font-medium py-2 rounded-xl shadow hover:brightness-105 cursor-pointer transition mb-4 mt-2 disabled:opacity-50"
+      >
+        {isLoading ? (
+          <span className="flex items-center justify-center gap-2">
+            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+            Creating Account...
+          </span>
+        ) : (
+          'Get Started'
+        )}
+      </button>
+      <div className="flex items-center w-full my-2">
+        <div className="flex-grow border-t border-dashed border-gray-200"></div>
+        <span className="mx-2 text-xs text-gray-400">Or sign in with</span>
+        <div className="flex-grow border-t border-dashed border-gray-200"></div>
+      </div>
+      <div className="flex gap-3 w-full justify-center mt-2">
+        <button
+          type="button"
+          onClick={() => (window.location.href = 'http://localhost:8000/auth/google')}
+          className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow"
+        >
+          <Image
+            src="/google-color.svg"
+            alt="Google"
+            className="w-6 h-6"
+            width={24}
+            height={24}
+          />
+        </button>
+        <button className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow">
+          <Image
+            src="/facebook.svg"
+            alt="Facebook"
+            className="w-6 h-6"
+            width={24}
+            height={24}
+          />
+        </button>
+        <button className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow">
+          <Image
+            src="/apple-173.svg"
+            alt="Apple"
+            className="w-6 h-6"
+            width={24}
+            height={24}
+          />
+        </button>
+      </div>
+    </div>
+
   );
 };
- 
+
 export { SignIn2 };

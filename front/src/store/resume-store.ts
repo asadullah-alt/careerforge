@@ -123,7 +123,7 @@ export const useResumeStore = create<ResumeState>()(
                   resume_id: resumeId || undefined,
                 }
 
-                await fetch('https://careerback.bhaikaamdo.com/api/savePersonalData', {
+                await fetch('http://localhost:8000/api/savePersonalData', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',

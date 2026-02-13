@@ -101,7 +101,7 @@ export default function Page() {
           return
         }
 
-        const response = await fetch('https://careerback.bhaikaamdo.com/api/allJobs', {
+        const response = await fetch('http://localhost:8000/api/allJobs', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

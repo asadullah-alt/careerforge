@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     const id = body.id || `resume_${Date.now()}`
     const title = body.title || `${validatedResume.personal_data?.first_name || ''} ${validatedResume.personal_data?.last_name || ''}`.trim() || 'Untitled Resume'
 
-    const backendUrl = process.env.BACKEND_URL || 'https://careerback.bhaikaamdo.com'
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000'
     const backendRes = await fetch(`${backendUrl}/api/resume/save`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -84,7 +84,7 @@ export default function ResumesListPage() {
   async function loadFromServer() {
     setIsLoading(true)
     try {
-      const res = await fetch('https://careerback.bhaikaamdo.com/api/resume/list', {
+      const res = await fetch('http://localhost:8000/list', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ "token": token }),
@@ -111,7 +111,7 @@ export default function ResumesListPage() {
   async function handleEdit(item: ResumeListItem) {
     try {
       console.log("Editing resume with ID:", item);
-      const res = await fetch('https://careerback.bhaikaamdo.com/api/resume/load', {
+      const res = await fetch('http://localhost:8000/api/resume/load', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: item._id, token: token }),
@@ -135,7 +135,7 @@ export default function ResumesListPage() {
   async function handleDelete(id: string) {
     if (!confirm("Delete this resume? This cannot be undone.")) return
     try {
-      const res = await fetch('https://careerback.bhaikaamdo.com/api/resume/delete', {
+      const res = await fetch('http://localhost:8000/api/resume/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, token }),
@@ -162,7 +162,7 @@ export default function ResumesListPage() {
   async function submitRename() {
     if (!renameId) return
     try {
-      const res = await fetch('https://careerback.bhaikaamdo.com//api/resume/rename', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: renameId, title: renameTitle, token }) })
+      const res = await fetch('http://localhost:8000//api/resume/rename', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: renameId, title: renameTitle, token }) })
       const json = await res.json()
       if (json?.success) {
         toast.success('Renamed')
