@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "preinstall": "node -e \"const fs=require('fs'); try { const nvm=fs.readFileSync('.nvmrc','utf8').trim().replace('v',''); if(!process.version.includes(nvm)) { console.error('\\x1b[31m%s\\x1b[0m', 'ERROR: Node version mismatch!'); console.error('Project requires: ' + nvm); console.error('Current version: ' + process.version); console.error('Run: nvm use'); process.exit(1); } } catch(e) { console.warn('No .nvmrc found, skipping version check.') }\"",
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",

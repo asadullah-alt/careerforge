@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "preinstall": "node -e \"const fs=require('fs'); try { const nvm=fs.readFileSync('.nvmrc','utf8').trim().replace('v',''); if(!process.version.includes(nvm)) { console.error('\\x1b[31m%s\\x1b[0m', 'ERROR: Node version mismatch!'); console.error('Project requires: ' + nvm); console.error('Current version: ' + process.version); console.error('Run: nvm use'); process.exit(1); } } catch(e) { console.warn('No .nvmrc found, skipping version check.') }\"",
     "start": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -28,6 +29,7 @@
     "morgan": "^1.10.0",
     "nodemailer": "^7.0.10",
     "ollama": "^0.6.0",
+    "openai": "^6.21.0",
     "passport": "^0.4.1",
     "passport-facebook": "^3.0.0",
     "passport-google-oauth2": "^0.2.0",
@@ -39,5 +41,8 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/faizmhd/passport-app.git"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
   }
 }
