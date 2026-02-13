@@ -21,7 +21,7 @@ export default function VerifyClient({ email }: { email?: string | null }) {
     setError('')
 
     try {
-      const response = await fetch('https://careerback.bhaikaamdo.com/verify-email', {
+      const response = await fetch('http://localhost:8000/verify-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export default function VerifyClient({ email }: { email?: string | null }) {
     setError('')
 
     try {
-      const response = await fetch('https://careerback.bhaikaamdo.com/resend-verification', {
+      const response = await fetch('http://localhost:8000/resend-verification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

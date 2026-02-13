@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Token is required' }, { status: 400 })
     }
 
-    const backendUrl = process.env.BACKEND_URL || 'https://careerback.bhaikaamdo.com'
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000'
     const backendRes = await fetch(`${backendUrl}/api/resume/list`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

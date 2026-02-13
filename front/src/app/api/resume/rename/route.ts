@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Token is required' }, { status: 400 })
     }
 
-    const backendUrl = process.env.BACKEND_URL || 'https://careerback.bhaikaamdo.com'
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000'
     await fetch(`${backendUrl}/api/resume/rename`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
