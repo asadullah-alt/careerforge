@@ -127,69 +127,76 @@ module.exports = (passport) => {
     //         });
     //     }));
 
-    // Passport Google Strategy
-    passport.use(new GoogleStrategy({
+    // Passport Google Strategy - only register when credentials are present to avoid startup crash
+    if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_CALLBACK_URL) {
+        passport.use(new GoogleStrategy({
 
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL,
+            clientID: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            callbackURL: process.env.GOOGLE_CALLBACK_URL,
 
-    },
-        async (token, refreshToken, profile, done) => {
-            try {
-                const user = await User.findOne({ 'google.id': profile.id });
+        },
+            async (token, refreshToken, profile, done) => {
+                try {
+                    const user = await User.findOne({ 'google.id': profile.id });
 
-                if (user) {
-                    return done(null, user);
-                } else {
-                    let newUser = new User();
+                    if (user) {
+                        return done(null, user);
+                    } else {
+                        let newUser = new User();
 
-                    newUser.google.id = profile.id;
-                    newUser.google.token = token;
-                    newUser.google.name = profile.displayName;
-                    newUser.google.email = profile.emails[0].value;
-                    // Mark OAuth-created users as verified (no email/password verification required)
-                    newUser.isVerified = true;
+                        newUser.google.id = profile.id;
+                        newUser.google.token = token;
+                        newUser.google.name = profile.displayName;
+                        newUser.google.email = profile.emails[0].value;
+                        // Mark OAuth-created users as verified (no email/password verification required)
+                        newUser.isVerified = true;
 
-                    await newUser.save();
-                    return done(null, newUser);
+                        await newUser.save();
+                        return done(null, newUser);
+                    }
+                } catch (err) {
+                    return done(err);
                 }
-            } catch (err) {
-                return done(err);
-            }
-        }));
-    //Gmail Google Strategy - register only when credentials are present to avoid startup crash
-    // Passport Google Strategy
-    passport.use('gmail-creds', new GoogleStrategy({
+            }));
+    } else {
+        console.warn('Google OAuth not configured: set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and GOOGLE_CALLBACK_URL to enable it.');
+    }
+    // Gmail Google Strategy - only register when credentials are present to avoid startup crash
+    if (process.env.GMAIL_CLIENT_ID && process.env.GMAIL_CLIENT_SECRET && process.env.GMAIL_CALLBACK_URL) {
+        passport.use('gmail-creds', new GoogleStrategy({
 
-        clientID: process.env.GMAIL_CLIENT_ID,
-        clientSecret: process.env.GMAIL_CLIENT_SECRET,
-        callbackURL: process.env.GMAIL_CALLBACK_URL,
+            clientID: process.env.GMAIL_CLIENT_ID,
+            clientSecret: process.env.GMAIL_CLIENT_SECRET,
+            callbackURL: process.env.GMAIL_CALLBACK_URL,
 
-    },
-        async (token, refreshToken, profile, done) => {
-            try {
-                const user = await User.findOne({ 'google.id': profile.id });
+        },
+            async (token, refreshToken, profile, done) => {
+                try {
+                    const user = await User.findOne({ 'google.id': profile.id });
 
-                if (user) {
-                    return done(null, user);
-                } else {
-                    let newUser = new User();
+                    if (user) {
+                        return done(null, user);
+                    } else {
+                        let newUser = new User();
 
-                    newUser.google.id = profile.id;
-                    newUser.google.token = token;
-                    newUser.google.name = profile.displayName;
-                    newUser.google.email = profile.emails[0].value;
-                    // Mark OAuth-created users as verified (no email/password verification required)
-                    newUser.isVerified = true;
+                        newUser.google.id = profile.id;
+                        newUser.google.token = token;
+                        newUser.google.name = profile.displayName;
+                        newUser.google.email = profile.emails[0].value;
+                        // Mark OAuth-created users as verified (no email/password verification required)
+                        newUser.isVerified = true;
 
-                    await newUser.save();
-                    return done(null, newUser);
+                        await newUser.save();
+                        return done(null, newUser);
+                    }
+                } catch (err) {
+                    return done(err);
                 }
-            } catch (err) {
-                return done(err);
-            }
-        }));
+            }));
+    } else {
+        console.warn('Gmail OAuth not configured: set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET and GMAIL_CALLBACK_URL to enable it.');
+    }
     // Linkedin Strategy - register only when credentials are present to avoid startup crash
     if (process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET && process.env.LINKEDIN_CALLBACK_URL) {
         passport.use(new LinkedInStrategy({
