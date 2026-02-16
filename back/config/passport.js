@@ -29,8 +29,8 @@ module.exports = (passport) => {
         passReqToCallback: true
     },
         async (req, email, password, done) => {
-          console.log("email", email);
-          console.log("password", password);
+          console.log("==========email=============", email);
+          console.log("============password===========", password);
             try {
                 const user = await User.findOne({ 'local.email': email });
 
