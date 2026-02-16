@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separatorInteractive"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import FileUpload from "@/components/file-upload"
 import { usePathname, useRouter } from "next/navigation"
+import { resumesApi } from "@/lib/api"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet"
 import { UploadCloud, Linkedin, Mail, ChevronDown, BookOpenCheck, Download } from "lucide-react"
 import { Sun, Moon } from 'lucide-react'
@@ -104,10 +105,7 @@ export function SiteHeader() {
         const token = getCfAuthCookie()
         if (!token) return
 
-        const response = await fetch(
-          `https://resume.bhaikaamdo.com/api/v1/resumes/getAllUserResumes?token=${token}`
-        )
-        const data = await response.json()
+        const data = await resumesApi.getAllUserResumes(token)
         if (data.data && data.data.resumes && Array.isArray(data.data.resumes)) {
           setResumes(data.data.resumes)
 
@@ -161,25 +159,10 @@ export function SiteHeader() {
         return
       }
 
-      const response = await fetch("https://resume.bhaikaamdo.com/api/v1/resumes/setDefaultResume", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          resume_id: resumeId,
-          token: token
-        })
-      })
+      await resumesApi.setDefaultResume(resumeId, token)
 
-      const data = await response.json()
-
-      if (
-        data.request_id &&
-        typeof data.request_id === 'string' &&
-        data.request_id.startsWith("resumes:") &&
-        data.message === "Default resume updated successfully"
-      ) {
+      // Verify success (api client throws on error, so we just proceed)
+      if (true) {
         setSelectedResumeId(resumeId)
         setCookie('bhaikaamdo_defaultresume', resumeId)
         toast.success("Default resume updated successfully")

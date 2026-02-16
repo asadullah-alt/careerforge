@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from "react";
 
 import { KeyRound, Mail } from "lucide-react";
+import { authApi } from '@/lib/api';
 
 const ForgotPasswordForm = () => {
   const router = useRouter();
@@ -34,31 +35,17 @@ const ForgotPasswordForm = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess("Password reset instructions have been sent to your email.");
-        setEmail("");
-        // Optionally redirect after a delay
-        setTimeout(() => {
-          router.push('/signin');
-        }, 3000);
-      } else {
-        setError(data.info?.message || data.message || 'Failed to process request');
-      }
+      await authApi.forgotPassword(email);
+      setSuccess("Password reset instructions have been sent to your email.");
+      setEmail("");
+      // Optionally redirect after a delay
+      setTimeout(() => {
+        router.push('/signin');
+      }, 3000);
     } catch (err) {
       console.error('Forgot password error:', err);
-      setError('An error occurred while processing your request');
+      // @ts-ignore
+      setError(err.body?.info?.message || err.body?.message || 'Failed to process request');
     } finally {
       setIsLoading(false);
     }

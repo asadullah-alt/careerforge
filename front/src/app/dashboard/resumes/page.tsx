@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { StructuredResume } from '@/lib/schemas/resume'
 import { getCfAuthCookie } from "@/utils/cookie"
+import { resumeBuilderApi } from "@/lib/api"
 
 // Add button blink animation styles
 const buttonAnimationStyle = `
@@ -82,14 +83,10 @@ export default function ResumesListPage() {
   }, [token])
 
   async function loadFromServer() {
+    if (!token) return
     setIsLoading(true)
     try {
-      const res = await fetch('http://localhost:8000/list', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ "token": token }),
-      })
-      const json = await res.json()
+      const json = await resumeBuilderApi.listResumes(token as string)
       if (json?.data) setResumes(json.data || [])
       else setResumes([])
       console.log(json.data)
@@ -111,12 +108,8 @@ export default function ResumesListPage() {
   async function handleEdit(item: ResumeListItem) {
     try {
       console.log("Editing resume with ID:", item);
-      const res = await fetch('http://localhost:8000/api/resume/load', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: item._id, token: token }),
-      })
-      const json = await res.json()
+      console.log("Editing resume with ID:", item);
+      const json = await resumeBuilderApi.loadResume(item._id, token as string)
       console.log("Resume load response:", json)
       if (json?.success && json.data) {
         console.log("Calling initializeResume with data:", json.data)
@@ -134,13 +127,9 @@ export default function ResumesListPage() {
 
   async function handleDelete(id: string) {
     if (!confirm("Delete this resume? This cannot be undone.")) return
+    if (!token) return
     try {
-      const res = await fetch('http://localhost:8000/api/resume/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, token }),
-      })
-      const json = await res.json()
+      const json = await resumeBuilderApi.deleteResume(id, token as string)
       if (json?.success) {
         toast.success('Resume deleted')
         await loadFromServer()
@@ -160,10 +149,9 @@ export default function ResumesListPage() {
   }
 
   async function submitRename() {
-    if (!renameId) return
+    if (!renameId || !token) return
     try {
-      const res = await fetch('http://localhost:8000//api/resume/rename', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: renameId, title: renameTitle, token }) })
-      const json = await res.json()
+      const json = await resumeBuilderApi.renameResume(renameId, renameTitle, token as string)
       if (json?.success) {
         toast.success('Renamed')
         setRenameOpen(false)

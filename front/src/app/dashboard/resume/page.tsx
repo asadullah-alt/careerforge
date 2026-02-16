@@ -14,7 +14,8 @@ import { Save, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import AuthGuard from "@/components/auth-guard"
 import { ExportResumeDialog } from "@/components/resume/export-resume-dialog"
-import { getCfAuthCookie } from "@/utils/cookie"
+
+import { resumeBuilderApi } from "@/lib/api"
 import dynamic from "next/dynamic"
 
 const PdfViewer = dynamic(() => import("@/components/resume/pdf-viewer"), {
@@ -175,23 +176,16 @@ export default function ResumePage() {
     try {
       const token = getCfAuthCookie()
       const title = `${resume.personal_data?.first_name || ""} ${resume.personal_data?.last_name || ""}`.trim() || "Untitled Resume"
-      const response = await fetch("/api/resume/save", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ data: resume, title, token }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to save resume")
+      if (!token) {
+        throw new Error("Authentication token missing")
       }
+      const json = await resumeBuilderApi.saveResume(resume, title, token)
 
-      const json = await response.json()
       if (json?.success) {
         toast.success("Resume saved successfully!")
       } else {
-        throw new Error(json?.error || 'Failed to save resume')
+        // @ts-ignore
+        throw new Error(json?.error || json?.message || 'Failed to save resume')
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to save resume"

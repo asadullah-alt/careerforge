@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { StructuredResume, PersonalData, Experience, Project, Skill, Education, ResearchWork } from '@/lib/schemas/resume';
+import { resumeBuilderApi } from '@/lib/api';
 
 export interface ResumeState {
   resume: StructuredResume | null;
@@ -118,18 +119,7 @@ export const useResumeStore = create<ResumeState>()(
 
                 if (!personal) return
 
-                const payload = {
-                  personal_data: personal,
-                  resume_id: resumeId || undefined,
-                }
-
-                await fetch('http://localhost:8000/api/savePersonalData', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify(payload),
-                })
+                await resumeBuilderApi.savePersonalData(personal, resumeId)
               } catch (err: unknown) {
                 try {
                   const message = err instanceof Error ? err.message : String(err)

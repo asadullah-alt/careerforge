@@ -4,6 +4,7 @@ import React from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/inputInteractive"
 import { useRouter } from 'next/navigation'
+import { authApi } from '@/lib/api'
 
 export default function VerifyClient({ email }: { email?: string | null }) {
   const router = useRouter()
@@ -21,20 +22,9 @@ export default function VerifyClient({ email }: { email?: string | null }) {
     setError('')
 
     try {
-      const response = await fetch('http://localhost:8000/verify-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          code: verificationCode
-        })
-      })
+      const data = await authApi.verifyEmail(email, verificationCode)
 
-      const data = await response.json()
-
-      if (response.ok) {
+      if (data.token) {
         // Store token and redirect to dashboard
         document.cookie = `cf_auth=${data.token}; path=/; max-age=86400` // 24 hours
         router.push('/dashboard')
@@ -43,7 +33,8 @@ export default function VerifyClient({ email }: { email?: string | null }) {
       }
     } catch (error) {
       console.error('Verification error:', error)
-      setError('An error occurred during verification')
+      // @ts-ignore
+      setError(error.body?.message || 'An error occurred during verification')
     } finally {
       setIsLoading(false)
     }
@@ -59,24 +50,12 @@ export default function VerifyClient({ email }: { email?: string | null }) {
     setError('')
 
     try {
-      const response = await fetch('http://localhost:8000/resend-verification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email })
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        alert('A new verification code has been sent to your email. Don\'t forget to check your junk/spam folder if it doesn\'t appear in your inbox.')
-      } else {
-        setError(data.message || 'Failed to resend verification code')
-      }
+      await authApi.resendVerification(email)
+      alert('A new verification code has been sent to your email. Don\'t forget to check your junk/spam folder if it doesn\'t appear in your inbox.')
     } catch (error) {
       console.error('Resend verification error:', error)
-      setError('An error occurred while resending the code')
+      // @ts-ignore
+      setError(error.body?.message || 'An error occurred while resending the code')
     } finally {
       setIsLoading(false)
     }

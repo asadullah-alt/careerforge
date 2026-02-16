@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from "react";
 
 import { Lock, Check, AlertCircle } from "lucide-react";
+import { authApi } from '@/lib/api';
 
 const PASSWORD_REQUIREMENTS = [
   { id: 'length', label: 'At least 8 characters', regex: /.{8,}/ },
@@ -60,31 +61,16 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token: token,
-          newPassword: newPassword
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSuccess("Password reset successfully! Redirecting to sign in...");
-        // Redirect after 2 seconds
-        setTimeout(() => {
-          router.push('/signin');
-        }, 2000);
-      } else {
-        setError(data.message || 'Failed to reset password');
-      }
+      await authApi.resetPassword(token, newPassword);
+      setSuccess("Password reset successfully! Redirecting to sign in...");
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        router.push('/signin');
+      }, 2000);
     } catch (err) {
       console.error('Reset password error:', err);
-      setError('An error occurred while resetting your password');
+      // @ts-ignore
+      setError(err.body?.message || 'Failed to reset password');
     } finally {
       setIsLoading(false);
     }

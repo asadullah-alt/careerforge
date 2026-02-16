@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from "react";
 
 import { LogIn, Lock, Mail } from "lucide-react";
+import { authApi } from '@/lib/api';
 
 const SignInForm = () => {
   const router = useRouter();
@@ -36,32 +37,17 @@ const SignInForm = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
-      });
-
-      const data = await response.json();
+      const data = await authApi.login(email, password);
       console.log(data)
-      if (response.ok) {
-        if (data.token) {
-          // Store token in cookie with proper expiration based on remember me
-          const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days : 24 hours
-          // Remove existing cookie if present
-          document.cookie = 'cf_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-          document.cookie = `cf_auth=${data.token}; path=/; max-age=${maxAge}`;
-          router.push('/dashboard');
-        } else {
-          setError('An unexpected response was received.');
-        }
+      if (data.token) {
+        // Store token in cookie with proper expiration based on remember me
+        const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days : 24 hours
+        // Remove existing cookie if present
+        document.cookie = 'cf_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        document.cookie = `cf_auth=${data.token}; path=/; max-age=${maxAge}`;
+        router.push('/dashboard');
       } else {
-        setError(data.info?.message || data.message || data.errors?.message || 'Failed to sign in');
+        setError('An unexpected response was received.');
       }
     } catch (err) {
       console.error('Signin error:', err);
@@ -178,7 +164,7 @@ const SignInForm = () => {
         <button
           type="button"
           disabled
-          onClick={() => (window.location.href = 'http://localhost:8000/auth/google')}
+          onClick={() => (window.location.href = authApi.getGoogleAuthUrl())}
           className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow cursor-not-allowed"
         >
           <Image

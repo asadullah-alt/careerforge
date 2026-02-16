@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { formatBytes, useFileUpload, FileMetadata } from '@/hooks/use-file-upload';
 import { Button } from '@/components/ui/buttonTable';
+import { resumesApi } from '@/lib/api';
 
 const acceptedFileTypes = [
   'application/pdf', // .pdf
@@ -18,8 +19,7 @@ const acceptedFileTypes = [
 ];
 
 const acceptString = acceptedFileTypes.join(',');
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://resume.bhaikaamdo.com';
-const API_RESUME_UPLOAD_URL = `${API_BASE_URL}/api/v1/resumes/upload`; // API endpoint
+const API_RESUME_UPLOAD_URL = resumesApi.getResumeUploadUrl();
 interface FileUploadProps {
   onUploadComplete?: (resume_id: string) => void;
 }

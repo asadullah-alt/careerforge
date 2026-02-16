@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from "react";
 
 import { LogIn, Lock, Mail, Check, AlertCircle } from "lucide-react";
+import { authApi } from '@/lib/api';
 
 const PASSWORD_REQUIREMENTS = [
   { id: 'length', label: 'At least 8 characters', regex: /.{8,}/ },
@@ -57,44 +58,29 @@ const SignIn2 = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          remember: rememberMe
-        })
-      });
+      const data = await authApi.signup(email, password, rememberMe);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        if (data.token) {
-          // Store token in cookie with proper expiration based on remember me
-          const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days : 24 hours
-          // Remove existing cookie if present
-          document.cookie = 'cf_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-          document.cookie = `cf_auth=${data.token}; path=/; max-age=${maxAge}`;
-          router.push('/dashboard');
-        } else if (data.success && data.message.includes('Verification')) {
-          // Save email and password in localStorage if remember me is checked
-          if (rememberMe) {
-            localStorage.setItem('rememberedEmail', email);
-            localStorage.setItem('rememberedPassword', password);
-          }
-          router.push(`/verify?email=${encodeURIComponent(email)}`);
-        } else {
-          setError('An unexpected response was received.');
+      if (data.token) {
+        // Store token in cookie with proper expiration based on remember me
+        const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days : 24 hours
+        // Remove existing cookie if present
+        document.cookie = 'cf_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        document.cookie = `cf_auth=${data.token}; path=/; max-age=${maxAge}`;
+        router.push('/dashboard');
+      } else if (data.success && data.message.includes('Verification')) {
+        // Save email and password in localStorage if remember me is checked
+        if (rememberMe) {
+          localStorage.setItem('rememberedEmail', email);
+          localStorage.setItem('rememberedPassword', password);
         }
+        router.push(`/verify?email=${encodeURIComponent(email)}`);
       } else {
-        setError(data.info?.message || data.message || 'Failed to create account');
+        setError('An unexpected response was received.');
       }
     } catch (err) {
       console.error('Signup error:', err);
-      setError('An error occurred while creating your account');
+      // @ts-ignore
+      setError(err.body?.info?.message || err.body?.message || 'Failed to create account');
     } finally {
       setIsLoading(false);
     }
@@ -227,7 +213,7 @@ const SignIn2 = () => {
       <div className="flex gap-3 w-full justify-center mt-2">
         <button
           type="button"
-          onClick={() => (window.location.href = 'http://localhost:8000/auth/google')}
+          onClick={() => (window.location.href = authApi.getGoogleAuthUrl())}
           className="flex items-center justify-center w-full h-12 rounded-xl border bg-white hover:bg-gray-100 transition cursor-pointer"
         >
           <Image

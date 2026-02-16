@@ -6,6 +6,7 @@ import { DataTable } from "@/components/data-table"
 import { SectionCards } from "@/components/section-cards"
 import { EmptyJobsState } from "@/components/empty-state"
 import { getCfAuthCookie } from "@/utils/cookie"
+import { jobsApi } from "@/lib/api"
 
 interface CompanyProfile {
   companyName: string;
@@ -101,19 +102,7 @@ export default function Page() {
           return
         }
 
-        const response = await fetch('http://localhost:8000/api/allJobs', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ token })
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch jobs')
-        }
-
-        const data = await response.json() as ApiResponse
+        const data = await jobsApi.getAllJobs(token) as ApiResponse
 
         // Transform the API response to match the DataTable schema
         const transformedJobs = data.jobs.map((job: ProcessedJob) => {
