@@ -2,10 +2,10 @@ import { getCfAuthCookie } from '@/utils/cookie';
 
 // ── Base URLs ───────────────────────────────────────────────────────────────
 export const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
+  process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const RESUME_API_URL =
-  process.env.NEXT_PUBLIC_RESUME_API_URL ?? 'https://resume.bhaikaamdo.com';
+  process.env.NEXT_PUBLIC_RESUME_API_URL;
 
 // ── Error class ─────────────────────────────────────────────────────────────
 export class ApiError extends Error {
