@@ -3,7 +3,7 @@ import { StructuredResume } from '@/lib/schemas/resume';
 
 /** POST /list — list all resumes for the user */
 export async function listResumes(token: string) {
-  return apiPost(`${BACKEND_URL}'/api/resume/list`, { token });
+  return apiPost(`${BACKEND_URL}/api/resume/list`, { token });
 }
 
 /** POST /api/resume/load — load a single resume by id */
