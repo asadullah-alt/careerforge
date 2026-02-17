@@ -149,7 +149,7 @@ export const useFileUpload = (
     return `${file.name}-${file.size}-${file.lastModified}-${Math.random().toString(36).substring(2, 9)}`
   }, [])
 
-  const _uploadFileInternal = async (fileToUpload: FileWithPreview) => {
+  const _uploadFileInternal = useCallback(async (fileToUpload: FileWithPreview) => {
     // Ensure fileToUpload.file is a File instance for upload
     if (!(fileToUpload.file instanceof File)) {
       const errorMsg = `Cannot upload "${(fileToUpload.file as FileMetadata).name}"; it's not a valid file object for direct upload.`;
@@ -158,9 +158,9 @@ export const useFileUpload = (
       const updatedFileWithMetaError: FileWithPreview = {
         ...fileToUpload,
         file: {
-            ...(fileToUpload.file as FileMetadata), // Keep existing metadata
-            uploadError: errorMsg,
-            uploaded: false,
+          ...(fileToUpload.file as FileMetadata), // Keep existing metadata
+          uploadError: errorMsg,
+          uploaded: false,
         }
       };
       setState(prev => ({
@@ -177,23 +177,23 @@ export const useFileUpload = (
       const errorMsg = "Upload URL is not configured."
       console.warn(errorMsg, "File not uploaded:", fileToUpload.file.name)
       // Update file metadata to reflect it wasn't uploaded due to config
-       const fileWithConfigError: FileWithPreview = {
+      const fileWithConfigError: FileWithPreview = {
         ...fileToUpload,
         file: { // Convert to FileMetadata with error
-            name: fileToUpload.file.name,
-            size: fileToUpload.file.size,
-            type: fileToUpload.file.type,
-            id: fileToUpload.id,
-            url: fileToUpload.preview || '',
-            uploaded: false,
-            uploadError: errorMsg,
+          name: fileToUpload.file.name,
+          size: fileToUpload.file.size,
+          type: fileToUpload.file.type,
+          id: fileToUpload.id,
+          url: fileToUpload.preview || '',
+          uploaded: false,
+          uploadError: errorMsg,
         }
       };
       setState(prev => ({
-          ...prev,
-          files: prev.files.map(f => f.id === fileWithConfigError.id ? fileWithConfigError : f),
-          errors: [...prev.errors, errorMsg],
-          isUploadingGlobal: false
+        ...prev,
+        files: prev.files.map(f => f.id === fileWithConfigError.id ? fileWithConfigError : f),
+        errors: [...prev.errors, errorMsg],
+        isUploadingGlobal: false
       }));
       onUploadError?.(fileWithConfigError, errorMsg);
       return;
@@ -208,76 +208,76 @@ export const useFileUpload = (
     } catch (err) {
       console.warn('getUploadFormData callback threw an error', err)
     }
-      
+
     const authCookie = getCfAuthCookie();
     setState(prev => ({ ...prev, isUploadingGlobal: true, errors: [] }))
     if (authCookie) {
-    formData.append("token", authCookie);
-       try {
-      // If a cf_auth cookie exists, include it as a `token` query parameter
-      const token = getCfAuthCookie()
-      const urlWithToken = token
-        ? `${uploadUrl}${uploadUrl.includes("?") ? "&" : "?"}token=${encodeURIComponent(
+      formData.append("token", authCookie);
+      try {
+        // If a cf_auth cookie exists, include it as a `token` query parameter
+        const token = getCfAuthCookie()
+        const urlWithToken = token
+          ? `${uploadUrl}${uploadUrl.includes("?") ? "&" : "?"}token=${encodeURIComponent(
             token
           )}`
-        : uploadUrl
+          : uploadUrl
 
-      const response = await fetch(urlWithToken, {
-        method: "POST",
-        body: formData,
-      })
+        const response = await fetch(urlWithToken, {
+          method: "POST",
+          body: formData,
+        })
 
-      let responseData: Record<string, unknown> = {}; // Initialize for broader scope
-      const contentType = response.headers.get("content-type");
+        let responseData: Record<string, unknown> = {}; // Initialize for broader scope
+        const contentType = response.headers.get("content-type");
 
-      if (!response.ok) {
-        let errorDetail = `Upload failed for ${fileToUpload.file.name}. Status: ${response.status} ${response.statusText}`;
-        try {
-          const errorText = await response.text();
-          errorDetail += ` - Server response: ${errorText.substring(0, 200)}${errorText.length > 200 ? '...' : ''}`;
-        } catch (textError: unknown) {
-          console.warn("Could not read error response text:", textError);
+        if (!response.ok) {
+          let errorDetail = `Upload failed for ${fileToUpload.file.name}. Status: ${response.status} ${response.statusText}`;
+          try {
+            const errorText = await response.text();
+            errorDetail += ` - Server response: ${errorText.substring(0, 200)}${errorText.length > 200 ? '...' : ''}`;
+          } catch (textError: unknown) {
+            console.warn("Could not read error response text:", textError);
+          }
+          throw new Error(errorDetail);
         }
-        throw new Error(errorDetail);
-      }
-      
-      if (contentType && contentType.includes("application/json")) {
-        responseData = await response.json() as Record<string, unknown>;
-      } else {
-         // Handle non-JSON or missing Content-Type response if necessary,
-         // or assume success if response.ok and no JSON is expected for some cases.
-         // For now, we'll assume JSON is expected on success.
-        console.warn(`Response for ${fileToUpload.file.name} was not JSON. Content-Type: ${contentType}`);
-        // If JSON is strictly required, this could be an error condition:
-        // throw new Error(`Unexpected response type: ${contentType}. Expected JSON.`);
-      }
 
-      const successfullyUploadedFile: FileWithPreview = {
-        ...fileToUpload,
-        file: { // This is FileMetadata
+        if (contentType && contentType.includes("application/json")) {
+          responseData = await response.json() as Record<string, unknown>;
+        } else {
+          // Handle non-JSON or missing Content-Type response if necessary,
+          // or assume success if response.ok and no JSON is expected for some cases.
+          // For now, we'll assume JSON is expected on success.
+          console.warn(`Response for ${fileToUpload.file.name} was not JSON. Content-Type: ${contentType}`);
+          // If JSON is strictly required, this could be an error condition:
+          // throw new Error(`Unexpected response type: ${contentType}. Expected JSON.`);
+        }
+
+        const successfullyUploadedFile: FileWithPreview = {
+          ...fileToUpload,
+          file: { // This is FileMetadata
             name: fileToUpload.file.name,
             size: fileToUpload.file.size,
             type: fileToUpload.file.type,
             id: fileToUpload.id, // Use existing FileWithPreview ID as FileMetadata ID
             url: typeof responseData.file_url === 'string' ? responseData.file_url : // Assuming server returns 'file_url'
-                 (typeof responseData.url === 'string' ? responseData.url : fileToUpload.preview || ''),
+              (typeof responseData.url === 'string' ? responseData.url : fileToUpload.preview || ''),
             uploaded: true,
-        }
-      };
+          }
+        };
 
-      setState(prev => {
-        const updatedFiles = prev.files.map(f =>
-          f.id === successfullyUploadedFile.id ? successfullyUploadedFile : f
-        )
-        onUploadSuccess?.(successfullyUploadedFile, responseData)
-        return { ...prev, files: updatedFiles, isUploadingGlobal: false }
-      })
+        setState(prev => {
+          const updatedFiles = prev.files.map(f =>
+            f.id === successfullyUploadedFile.id ? successfullyUploadedFile : f
+          )
+          onUploadSuccess?.(successfullyUploadedFile, responseData)
+          return { ...prev, files: updatedFiles, isUploadingGlobal: false }
+        })
 
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : `Error uploading ${ (fileToUpload.file as File).name}.`;
-      const fileWithError: FileWithPreview = {
-        ...fileToUpload,
-        file: { // This is FileMetadata
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : `Error uploading ${(fileToUpload.file as File).name}.`;
+        const fileWithError: FileWithPreview = {
+          ...fileToUpload,
+          file: { // This is FileMetadata
             name: (fileToUpload.file as File).name,
             size: (fileToUpload.file as File).size,
             type: (fileToUpload.file as File).type,
@@ -285,27 +285,24 @@ export const useFileUpload = (
             url: fileToUpload.preview || '',
             uploaded: false,
             uploadError: errorMessage,
-        }
-      };
-      setState(prev => {
-        const updatedFiles = prev.files.map(f =>
-          f.id === fileWithError.id ? fileWithError : f
-        )
-        // Add to general errors in addition to specific file error
-        const newErrors = prev.errors.filter(e => !e.includes(fileWithError.file.name)); // Avoid duplicate general messages for the same file
-        newErrors.push(errorMessage);
+          }
+        };
+        setState(prev => {
+          const updatedFiles = prev.files.map(f =>
+            f.id === fileWithError.id ? fileWithError : f
+          )
+          // Add to general errors in addition to specific file error
+          const newErrors = prev.errors.filter(e => !e.includes(fileWithError.file.name)); // Avoid duplicate general messages for the same file
+          newErrors.push(errorMessage);
 
-        onUploadError?.(fileWithError, errorMessage)
-        return { ...prev, files: updatedFiles, errors: newErrors, isUploadingGlobal: false }
-      })
-    }
+          onUploadError?.(fileWithError, errorMessage)
+          return { ...prev, files: updatedFiles, errors: newErrors, isUploadingGlobal: false }
+        })
+      }
     } else {
       // Handle no auth cookie case
     }
-    
-
-   
-  }
+  }, [uploadUrl, getUploadFormData, onUploadSuccess, onUploadError])
 
   const addFilesAndUpload = useCallback(
     (newFilesInput: FileList | File[]) => {
@@ -317,7 +314,7 @@ export const useFileUpload = (
 
       // For single file mode, if a file already exists (even if being uploaded or failed), replace it.
       if (!multiple && state.files.length > 0) {
-         state.files.forEach((fwp) => { // Revoke old preview
+        state.files.forEach((fwp) => { // Revoke old preview
           if (fwp.preview && fwp.file instanceof File && fwp.file.type.startsWith("image/")) {
             URL.revokeObjectURL(fwp.preview)
           }
@@ -349,11 +346,11 @@ export const useFileUpload = (
 
         // Duplicate check (more robust for multiple additions)
         const isDuplicate = (!multiple && state.files.length > 0) ? false : // In single mode, we already cleared
-                             state.files.some(existingFwp =>
-                                existingFwp.file.name === file.name &&
-                                existingFwp.file.size === file.size &&
-                                (existingFwp.file instanceof File ? existingFwp.file.lastModified === file.lastModified : true)
-                             );
+          state.files.some(existingFwp =>
+            existingFwp.file.name === file.name &&
+            existingFwp.file.size === file.size &&
+            (existingFwp.file instanceof File ? existingFwp.file.lastModified === file.lastModified : true)
+          );
         if (isDuplicate) continue;
 
 
@@ -392,8 +389,8 @@ export const useFileUpload = (
           filesToAddUpdate.forEach(fileToUpload => _uploadFileInternal(fileToUpload))
         } else {
           console.warn("uploadUrl not provided. Files added locally but not uploaded.")
-           // If no uploadUrl, mark files as 'pending' or similar if needed, or convert to FileMetadata locally
-           const filesAsMetadataLocally = filesToAddUpdate.map(fwp => ({
+          // If no uploadUrl, mark files as 'pending' or similar if needed, or convert to FileMetadata locally
+          const filesAsMetadataLocally = filesToAddUpdate.map(fwp => ({
             ...fwp,
             file: { // Convert to FileMetadata to indicate they are processed by the hook
               name: (fwp.file as File).name,
@@ -425,7 +422,7 @@ export const useFileUpload = (
       multiple, maxFiles, uploadUrl,
       validateFile, generateUniqueId, createPreview, // Other useCallback deps
       onFilesChange, onFilesAdded, // Callbacks
-        _uploadFileInternal, // Used within the callback
+      _uploadFileInternal, // Used within the callback
       // setState itself is stable.
     ]
   )
@@ -439,19 +436,19 @@ export const useFileUpload = (
         }
         const newFiles = prev.files.filter((file) => file.id !== id)
         onFilesChange?.(newFiles)
-        
+
         let updatedErrors = prev.errors;
         if (fileToRemove?.file?.name) {
-            // Remove errors specifically mentioning this file by name
-            updatedErrors = prev.errors.filter(err => !err.includes(fileToRemove.file.name));
+          // Remove errors specifically mentioning this file by name
+          updatedErrors = prev.errors.filter(err => !err.includes(fileToRemove.file.name));
         }
         // If all files are removed, clear all errors
         if (newFiles.length === 0) {
-            updatedErrors = [];
+          updatedErrors = [];
         }
 
         if (inputRef.current && newFiles.length === 0) {
-            inputRef.current.value = "";
+          inputRef.current.value = "";
         }
         return { ...prev, files: newFiles, errors: updatedErrors, isUploadingGlobal: newFiles.length > 0 ? prev.isUploadingGlobal : false }
       })
@@ -492,7 +489,7 @@ export const useFileUpload = (
     e.stopPropagation()
     if (state.isUploadingGlobal && !multiple) return;
     if (e.currentTarget.contains(e.relatedTarget as Node)) {
-        return;
+      return;
     }
     setState((prev) => ({ ...prev, isDragging: false }))
   }, [state.isUploadingGlobal, multiple])

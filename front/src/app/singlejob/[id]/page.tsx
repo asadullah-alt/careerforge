@@ -43,7 +43,6 @@ export default function SingleJobPage({ params: paramsPromise }: { params: Promi
   const [copied, setCopied] = React.useState(false)
   const [resumeId, setResumeId] = React.useState<string | null>(null)
   const [isCoverLetterModalOpen, setIsCoverLetterModalOpen] = React.useState(false)
-  const [isImproveResumeModalOpen, setIsImproveResumeModalOpen] = React.useState(false)
 
   React.useEffect(() => {
     if (copied) {
@@ -632,7 +631,7 @@ export default function SingleJobPage({ params: paramsPromise }: { params: Promi
               )}
             </Button>
 
-            <Button
+            {/* <Button
               className="w-full mt-4"
               variant="secondary"
               size="lg"
@@ -641,7 +640,7 @@ export default function SingleJobPage({ params: paramsPromise }: { params: Promi
             >
               <FileText className="mr-2 h-4 w-4" />
               Improve Resume
-            </Button>
+            </Button> */}
 
             <Button
               className="w-full mt-4"

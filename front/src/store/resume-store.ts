@@ -124,7 +124,7 @@ export const useResumeStore = create<ResumeState>()(
                 try {
                   const message = err instanceof Error ? err.message : String(err)
                   set({ error: `Failed saving personal data: ${message}` })
-                } catch (_) { }
+                } catch { }
               }
             })()
         },

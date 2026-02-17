@@ -6,7 +6,6 @@ import { IconArrowLeft, IconChevronDown, IconLogin, IconUserPlus } from '@tabler
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separatorInteractive'
 import { Badge } from '@/components/ui/badgeTable'
-import dynamic from "next/dynamic";
 import { Link, Share2 } from "lucide-react";
 
 import { ExtendedJob } from '@/store/job-store'

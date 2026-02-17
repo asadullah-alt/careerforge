@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Validate input
-    const validatedInput = GenerateResumeRequestSchema.parse(body);
+    GenerateResumeRequestSchema.parse(body);
 
     // In a real implementation, this would call an AI service like OpenAI's GPT
     // For now, we'll return mock data

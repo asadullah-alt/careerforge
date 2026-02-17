@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Menu, X, Target, FileText, Sparkles, TrendingUp, BarChart3, CheckCircle2, Clock, Zap, Moon, Sun, Globe } from 'lucide-react'
+import { ArrowRight, Menu, X, Target, Sparkles, TrendingUp, BarChart3, CheckCircle2, Clock, Zap, Moon, Sun, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/buttonHome'
 import { AnimatedGroup } from '@/components/ui/animated-group'
 import Image from 'next/image'

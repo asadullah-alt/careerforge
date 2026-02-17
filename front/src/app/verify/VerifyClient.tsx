@@ -33,7 +33,7 @@ export default function VerifyClient({ email }: { email?: string | null }) {
       }
     } catch (error) {
       console.error('Verification error:', error)
-      // @ts-ignore
+      // @ts-expect-error - legacy error body structure
       setError(error.body?.message || 'An error occurred during verification')
     } finally {
       setIsLoading(false)
@@ -54,7 +54,7 @@ export default function VerifyClient({ email }: { email?: string | null }) {
       alert('A new verification code has been sent to your email. Don\'t forget to check your junk/spam folder if it doesn\'t appear in your inbox.')
     } catch (error) {
       console.error('Resend verification error:', error)
-      // @ts-ignore
+      // @ts-expect-error - legacy error body structure
       setError(error.body?.message || 'An error occurred while resending the code')
     } finally {
       setIsLoading(false)

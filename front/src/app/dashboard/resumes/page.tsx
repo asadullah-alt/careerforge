@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 import { useResumeStore } from "@/store/resume-store"
 import AuthGuard from "@/components/auth-guard"
 import { Button } from "@/components/ui/button"
@@ -76,13 +76,7 @@ export default function ResumesListPage() {
     setToken(authToken)
   }, [])
 
-  useEffect(() => {
-    if (token !== null) {
-      loadFromServer()
-    }
-  }, [token])
-
-  async function loadFromServer() {
+  const loadFromServer = useCallback(async () => {
     if (!token) return
     setIsLoading(true)
     try {
@@ -96,14 +90,20 @@ export default function ResumesListPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [token])
+
+  useEffect(() => {
+    if (token !== null) {
+      loadFromServer()
+    }
+  }, [token, loadFromServer])
 
   function handleCreateNew() {
     // Reset the in-memory/persisted resume store to a fresh resume
     resetResume()
     // Navigate to the resume builder
     router.push("/dashboard/resume")
-  } ``
+  }
 
   async function handleEdit(item: ResumeListItem) {
     try {

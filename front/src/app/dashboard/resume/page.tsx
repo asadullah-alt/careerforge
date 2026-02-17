@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useCallback, useRef } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { useResumeStore } from "@/store/resume-store"
 import { PersonalDataForm } from "@/components/resume/personal-data-form"
 import { ExperiencesForm } from "@/components/resume/experiences-form"
@@ -184,7 +184,6 @@ export default function ResumePage() {
       if (json?.success) {
         toast.success("Resume saved successfully!")
       } else {
-        // @ts-ignore
         throw new Error(json?.error || json?.message || 'Failed to save resume')
       }
     } catch (error) {

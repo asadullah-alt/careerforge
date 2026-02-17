@@ -69,8 +69,8 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
       }, 2000);
     } catch (err) {
       console.error('Reset password error:', err);
-      // @ts-ignore
-      setError(err.body?.message || 'Failed to reset password');
+      // @ts-expect-error - backend error response shape
+      setError(err.body?.message || 'An error occurred during password reset');
     } finally {
       setIsLoading(false);
     }

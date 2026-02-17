@@ -44,8 +44,8 @@ const ForgotPasswordForm = () => {
       }, 3000);
     } catch (err) {
       console.error('Forgot password error:', err);
-      // @ts-ignore
-      setError(err.body?.info?.message || err.body?.message || 'Failed to process request');
+      // @ts-expect-error - backend error response shape
+      setError(err.body?.message || 'An error occurred during password reset');
     } finally {
       setIsLoading(false);
     }

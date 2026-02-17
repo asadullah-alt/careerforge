@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useResumeStore } from '@/store/resume-store'
@@ -20,16 +20,9 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
     const { selectedResumeId } = useResumeStore()
     const [content, setContent] = useState('')
     const [loading, setLoading] = useState(false)
-    const [generating, setGenerating] = useState(false)
     const editorRef = React.useRef<QuillEditorHandle>(null)
 
-    useEffect(() => {
-        if (isOpen && selectedResumeId) {
-            generateCoverLetter()
-        }
-    }, [isOpen, selectedResumeId])
-
-    const generateCoverLetter = async () => {
+    const generateCoverLetter = useCallback(async () => {
         if (!selectedResumeId) {
             toast.error("Please select a resume first")
             return
@@ -37,7 +30,6 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
 
         try {
             setLoading(true)
-            setGenerating(true)
             const token = getCfAuthCookie()
 
             const response = await fetch('https://resume.bhaikaamdo.com/api/v1/cover-letters/getCoverletter', {
@@ -64,9 +56,14 @@ export function CoverLetterModal({ isOpen, onClose, jobId }: CoverLetterModalPro
             toast.error("An error occurred while generating the cover letter")
         } finally {
             setLoading(false)
-            setGenerating(false)
         }
-    }
+    }, [jobId, selectedResumeId])
+
+    useEffect(() => {
+        if (isOpen && selectedResumeId) {
+            generateCoverLetter()
+        }
+    }, [isOpen, selectedResumeId, generateCoverLetter])
 
 
 

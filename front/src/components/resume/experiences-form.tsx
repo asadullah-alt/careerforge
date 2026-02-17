@@ -3,7 +3,7 @@
 import React from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Experience, ExperienceSchema, StructuredResumeSchema } from "@/lib/schemas/resume"
+import { StructuredResumeSchema } from "@/lib/schemas/resume"
 import { useResumeStore } from "@/store/resume-store"
 import {
   Form,
@@ -11,7 +11,6 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"

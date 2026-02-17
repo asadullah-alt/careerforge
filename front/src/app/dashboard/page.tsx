@@ -3,7 +3,6 @@
 import React from "react"
 import AuthGuard from '@/components/auth-guard'
 import { DataTable } from "@/components/data-table"
-import { SectionCards } from "@/components/section-cards"
 import { EmptyJobsState } from "@/components/empty-state"
 import { getCfAuthCookie } from "@/utils/cookie"
 import { jobsApi } from "@/lib/api"

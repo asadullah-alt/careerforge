@@ -28,7 +28,6 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error('Server PDF generation failed', err)
     return new Response(JSON.stringify({ error: 'PDF generation failed' }), { status: 500 })
   }

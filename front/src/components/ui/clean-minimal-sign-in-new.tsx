@@ -50,7 +50,7 @@ const SignIn2 = () => {
       }
     } catch (err) {
       console.error('Signup error:', err);
-      // @ts-ignore
+      // @ts-expect-error - dynamic error body structure
       setError(err.body?.info?.message || err.body?.message || 'Failed to create account');
     } finally {
       setIsLoading(false);
