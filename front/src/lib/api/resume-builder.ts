@@ -1,4 +1,5 @@
 import { BACKEND_URL, apiPost } from './client';
+import { StructuredResume } from '@/lib/schemas/resume';
 
 /** POST /list — list all resumes for the user */
 export async function listResumes(token: string) {
@@ -22,6 +23,16 @@ export async function renameResume(
   token: string,
 ) {
   return apiPost(`${BACKEND_URL}/api/resume/rename`, { id, title, token });
+}
+
+/** POST /api/resume/save — save or update a resume */
+export async function saveResume(
+  data: StructuredResume,
+  token: string,
+  id?: string,
+  title?: string,
+) {
+  return apiPost(`${BACKEND_URL}/api/resume/save`, { id, title, data, token });
 }
 
 /** POST /api/savePersonalData — fire-and-forget sync of personal data */

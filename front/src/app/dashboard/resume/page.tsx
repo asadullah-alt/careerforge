@@ -14,7 +14,7 @@ import { Save, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import AuthGuard from "@/components/auth-guard"
 import { ExportResumeDialog } from "@/components/resume/export-resume-dialog"
-
+import { getCfAuthCookie } from "@/utils/cookie"
 import { resumeBuilderApi } from "@/lib/api"
 import dynamic from "next/dynamic"
 
