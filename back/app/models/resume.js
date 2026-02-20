@@ -101,9 +101,30 @@ const ResumeSchema = new mongoose.Schema({
 
 ResumeSchema.index({ user_id: 1, created_at: -1 });
 
-// ...existing code...
+// Improvement schema (mirrors ProcessedResume but for 'Improvement' collection)
+const ImprovementSchema = new mongoose.Schema({
+  resume_id: { type: String, index: true },
+  user_id: { type: String },
+  resume_name: { type: String, default: 'Untitled Resume' },
+  personal_data: { type: PersonalDataSchema, required: true },
+  experiences: { type: [ExperienceSchema], default: [] },
+  projects: { type: [ProjectSchema], default: [] },
+  certifications: { type: [CertificationSchema], default: [] },
+  skills: { type: [SkillSchema], default: [] },
+  research_work: { type: [ResearchWorkSchema], default: [] },
+  achievements: { type: [String], default: [] },
+  education: { type: [EducationSchema], default: [] },
+  extracted_keywords: { type: [String], default: [] },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+}, {
+  collection: 'Improvement'
+});
+
+ImprovementSchema.index({ user_id: 1, updatedAt: -1 });
 
 module.exports = {
   ProcessedResume: mongoose.model('ProcessedResume', ProcessedResumeSchema),
-  Resume: mongoose.model('Resume', ResumeSchema)
+  Resume: mongoose.model('Resume', ResumeSchema),
+  Improvement: mongoose.model('Improvement', ImprovementSchema)
 };
