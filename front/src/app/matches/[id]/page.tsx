@@ -248,8 +248,10 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                                 </div>
 
                                 <div className="space-y-3">
-                                    <Button className="w-full h-12 text-lg font-bold" size="lg">
-                                        Apply Now
+                                    <Button className="w-full h-12 text-lg font-bold" size="lg" asChild>
+                                        <a href={job_details.job_url} target="_blank" rel="noopener noreferrer">
+                                            Apply Now
+                                        </a>
                                     </Button>
                                     {(() => {
                                         try {
