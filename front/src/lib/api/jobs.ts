@@ -20,7 +20,7 @@ export async function getOpenJob(jobId: string) {
 
 /** GET /matches/enriched — fetch enriched job matches with user context */
 export async function getEnrichedMatches(token: string) {
-  return apiGet(`${RESUME_API_URL}/matches/enriched`, {
+  return apiGet(`${RESUME_API_URL}/api/v1/matches/enriched`, {
     headers: {
       'X-User-Token': token,
     },
