@@ -19,7 +19,7 @@ export default function LoadingPage() {
     }
 
     const t = setTimeout(() => {
-      router.replace('/dashboard')
+      router.replace('/matches')
     }, 2000)
 
     return () => clearTimeout(t)
