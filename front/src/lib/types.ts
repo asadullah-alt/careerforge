@@ -126,3 +126,67 @@ export interface Job {
   updated_at: string
   is_active: boolean
 }
+
+// Enriched Matches and Processed Job details
+export interface CompanyProfile {
+  companyName: string
+  industry?: string | null
+  website?: string | null
+  description?: string | null
+}
+
+export interface JobLocation {
+  city?: string | null
+  state?: string | null
+  country?: string | null
+  remoteStatus: string
+}
+
+export interface Qualifications {
+  required: string[]
+  preferred?: string[] | null
+}
+
+export interface CompensationAndBenefits {
+  salaryRange?: string | null
+  benefits?: string[] | null
+}
+
+export interface ApplicationInfo {
+  howToApply?: string | null
+  applyLink?: string | null
+  contactEmail?: string | null
+}
+
+export interface ProcessedOpenJob {
+  job_url: string
+  user_id: string
+  job_id: string
+  jobTitle?: string | null
+  companyProfile?: CompanyProfile | null
+  location?: JobLocation | null
+  datePosted?: string | null
+  employmentType?: string | null
+  jobSummary?: string | null
+  keyResponsibilities?: string[] | null
+  qualifications?: Qualifications | null
+  compensationAndBenefits?: CompensationAndBenefits | null
+  applicationInfo?: ApplicationInfo | null
+  extractedKeywords?: string[] | null
+  isVisaSponsored?: boolean | null
+  isRemote?: boolean | null
+}
+
+export interface UserJobMatch {
+  id?: string
+  user_id: string
+  job_id: string
+  percentage_match: number
+  matched_at: string
+}
+
+export interface EnrichedMatch {
+  match: UserJobMatch
+  job_details: ProcessedOpenJob
+}
+

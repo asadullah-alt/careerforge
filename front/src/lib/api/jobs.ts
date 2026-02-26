@@ -17,3 +17,12 @@ export async function getOpenJob(jobId: string) {
     `${RESUME_API_URL}/api/v1/jobs/openjob?job_id=${encodeURIComponent(jobId)}`,
   );
 }
+
+/** GET /matches/enriched — fetch enriched job matches with user context */
+export async function getEnrichedMatches(token: string) {
+  return apiGet(`${RESUME_API_URL}/matches/enriched`, {
+    headers: {
+      'X-User-Token': token,
+    },
+  });
+}
