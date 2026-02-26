@@ -251,11 +251,19 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                                     <Button className="w-full h-12 text-lg font-bold" size="lg">
                                         Apply Now
                                     </Button>
-                                    {job_details.applicationInfo?.applyLink && (
-                                        <p className="text-center text-xs text-muted-foreground">
-                                            Opens {new URL(job_details.applicationInfo.applyLink).hostname} in a new tab
-                                        </p>
-                                    )}
+                                    {(() => {
+                                        try {
+                                            if (!job_details.applicationInfo?.applyLink) return null;
+                                            const hostname = new URL(job_details.applicationInfo.applyLink).hostname;
+                                            return (
+                                                <p className="text-center text-xs text-muted-foreground">
+                                                    Opens {hostname} in a new tab
+                                                </p>
+                                            );
+                                        } catch {
+                                            return null;
+                                        }
+                                    })()}
                                 </div>
                             </CardContent>
                         </Card>
