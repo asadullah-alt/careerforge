@@ -8,7 +8,7 @@ const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({});
 const crypto = require('crypto');
 const { ProcessedJob } = require('./models/jobApplication');
-const { ProcessedResume, Resume } = require('./models/resume');
+const { ProcessedResume, Resume, Improvement } = require('./models/resume');
 const { extractSkills, extractSkillsWithRegex, cleanHTML, parseLinkedInProjects } = require('./util');
 const { error } = require('console');
 
@@ -805,7 +805,7 @@ module.exports = function (app, passport) {
   app.post('/api/resume/delete', async (req, res) => {
     try {
       const token = req.body.token || req.headers.authorization?.replace(/^Bearer\s+/i, '') || null;
-      const { id } = req.body;
+      const { id } = req.body; // This 'id' refers to the _id of the ProcessedResume
 
       if (!token) {
         return res.status(400).json({ success: false, message: 'Missing token' });
@@ -819,13 +819,36 @@ module.exports = function (app, passport) {
         const user = await User.findOne({ $or: [{ 'Extensiontoken': token }, { 'local.token': token }, { 'extensionToken': token }, { 'linkedin.token': token }, { 'google.token': token }] });
         if (!user) return res.status(401).json({ success: false, message: 'Invalid token or user not found' });
 
-        const deleted = await Resume.findOneAndDelete({ _id: id, user_id: user._id });
-        if (!deleted) return res.status(404).json({ success: false, message: 'Resume not found' });
-        return res.json({ success: true, message: 'Resume deleted' });
+        // 1. Find the processed resume to get the resume_id (UUID)
+        const processedResume = await ProcessedResume.findOne({ _id: id, user_id: user._id.toString() });
+        if (!processedResume) {
+          return res.status(404).json({ success: false, message: 'Resume not found' });
+        }
+
+        const resumeId = processedResume.resume_id;
+
+        // 2. Delete from ProcessedResume
+        await ProcessedResume.deleteOne({ _id: id });
+
+        // 3. Delete related documents from Resume collection
+        await Resume.deleteMany({ resume_id: resumeId, user_id: user._id.toString() });
+
+        // 4. Cleanup of 'improvement' collection using Mongoose
+        try {
+          await Improvement.deleteMany({ resume_id: resumeId, user_id: user._id.toString() });
+          console.log(`Cleanup of 'improvement' collection for resume_id: ${resumeId} completed.`);
+        } catch (improveErr) {
+          console.error("Error cleaning up 'improvement' collection:", improveErr);
+          // Best effort, so we don't fail the whole request
+        }
+
+        return res.json({ success: true, message: 'Resume and all linked data deleted successfully' });
       } catch (err) {
+        console.error('Inner deletion error:', err);
         return res.status(500).json({ success: false, message: err.message });
       }
     } catch (e) {
+      console.error('Outer deletion error:', e);
       return res.status(500).json({ success: false, message: e.message });
     }
   });

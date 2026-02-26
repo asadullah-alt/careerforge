@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Backend",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/back/server.js",
+      "cwd": "${workspaceFolder}/back",
+      "env": {
+        "SERVER_PORT": "9000"
+      },
+      "runtimeArgs": [
+        "--env-file=.env.development"
+      ],
+      "runtimeExecutable": "nodemon",
+      "restart": true,
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}
