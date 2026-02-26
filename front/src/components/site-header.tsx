@@ -8,10 +8,9 @@ import FileUpload from "@/components/file-upload"
 import { usePathname, useRouter } from "next/navigation"
 import { resumesApi } from "@/lib/api"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet"
-import { UploadCloud, Linkedin, Mail, ChevronDown, BookOpenCheck, Download } from "lucide-react"
+import { UploadCloud, Linkedin, Mail, ChevronDown, BookOpenCheck, Download, Briefcase } from "lucide-react"
 import { Sun, Moon } from 'lucide-react'
 import { useTheme } from '@/context/theme-context'
-import LinkedinModal from "@/components/linkedin-modal"
 import { toast } from "sonner"
 import {
   DropdownMenu,
@@ -60,7 +59,6 @@ export function SiteHeader() {
     // 2. Close the sheet
     setSheetOpen(false);
   };
-  const [linkedinOpen, setLinkedinOpen] = useState(false)
   const [emailModalOpen, setEmailModalOpen] = useState(false)
   const [resumes, setResumes] = useState<Array<{ id: string; resume_name?: string }>>([])
   const { selectedResumeId, setSelectedResumeId } = useResumeStore()
@@ -202,13 +200,13 @@ export function SiteHeader() {
             variant="ghost"
             size="sm"
             onClick={() => {
-              handleButtonClick('linkedin')
-              setLinkedinOpen(true)
+              handleButtonClick('matches')
+              router.push('/matches')
             }}
-            className={`border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'linkedin' ? 'animate-double-blink' : ''}`}
+            className={`border border-gray-200 dark:border-gray-700 rounded-md px-2 cursor-pointer transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'matches' ? 'animate-double-blink' : ''}`}
           >
-            <Linkedin className="size-4 mr-2" />
-            <span className="hidden md:inline">Connect to LinkedIn</span>
+            <Briefcase className="size-4 mr-2" />
+            <span className="hidden md:inline">Matched Jobs</span>
           </Button>
           <Button
             variant="ghost"
@@ -259,7 +257,7 @@ export function SiteHeader() {
             <span className="hidden md:inline">Download extension</span>
           </Button>
         </div>
-        <LinkedinModal open={linkedinOpen} onOpenChange={setLinkedinOpen} />
+
 
         {/* Email Modal */}
         <Dialog open={emailModalOpen} onOpenChange={setEmailModalOpen}>
