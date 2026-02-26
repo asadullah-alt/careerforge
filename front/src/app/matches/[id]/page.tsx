@@ -35,6 +35,7 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
 
                 if (found) {
                     setMatchData(found)
+                    console.log("Job details:", found.job_details)
                 } else {
                     setError("Job match not found.")
                 }
