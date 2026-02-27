@@ -1,9 +1,8 @@
 "use client"
 
 import React from "react"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badgeTable"
-import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { EnrichedMatch } from "@/lib/types"
 import { IconMapPin, IconBuilding } from "@tabler/icons-react"

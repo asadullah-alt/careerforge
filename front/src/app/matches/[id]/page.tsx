@@ -40,6 +40,7 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                     setError("Job match not found.")
                 }
             } catch (err: unknown) {
+                console.error("Error fetching job details:", err)
                 setError("Failed to load job details.")
             } finally {
                 setLoading(false)

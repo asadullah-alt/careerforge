@@ -22,7 +22,11 @@ import { UserPreferences } from "@/lib/api/user"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Separator } from '@/components/ui/separatorInteractive'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+// Proper type for global event dispatcher
+interface CustomWindow extends Window {
+    dispatchGlobalEvent?: (event: string) => void
+}
 
 export default function MatchesPage() {
     const [loading, setLoading] = useState(true)
@@ -122,7 +126,7 @@ export default function MatchesPage() {
                                         <IconTarget size={12} />
                                         <span>Target Preferences</span>
                                     </div>
-                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => (window as any).dispatchGlobalEvent?.('open-preferences')}>
+                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => (window as unknown as CustomWindow).dispatchGlobalEvent?.('open-preferences')}>
                                         <IconAdjustmentsHorizontal size={12} />
                                     </Button>
                                 </div>
