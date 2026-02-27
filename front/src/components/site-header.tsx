@@ -8,9 +8,12 @@ import FileUpload from "@/components/file-upload"
 import { usePathname, useRouter } from "next/navigation"
 import { resumesApi } from "@/lib/api"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet"
-import { UploadCloud, Linkedin, Mail, ChevronDown, BookOpenCheck, Download, Briefcase } from "lucide-react"
+import { UploadCloud, Mail, ChevronDown, BookOpenCheck, Download, Briefcase, Settings } from "lucide-react"
 import { Sun, Moon } from 'lucide-react'
 import { useTheme } from '@/context/theme-context'
+import { userApi } from "@/lib/api"
+import UserPreferencesModal from "./user-preferences-modal"
+import { UserPreferences } from "@/lib/api/user"
 import { toast } from "sonner"
 import {
   DropdownMenu,
@@ -64,6 +67,8 @@ export function SiteHeader() {
   const { selectedResumeId, setSelectedResumeId } = useResumeStore()
   const [loadingResumes, setLoadingResumes] = useState(false)
   const [blinkingButton, setBlinkingButton] = useState<string | null>(null)
+  const [preferencesModalOpen, setPreferencesModalOpen] = useState(false)
+  const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null)
 
   // Inject animation styles
   useEffect(() => {
@@ -136,6 +141,33 @@ export function SiteHeader() {
 
     void fetchResumes()
   }, [selectedResumeId, setSelectedResumeId])
+
+  // Fetch user preferences on mount
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      try {
+        const token = getCfAuthCookie()
+        if (!token) return
+        const prefs = await userApi.getUserPreferences(token)
+        setUserPreferences(prefs)
+
+        // Auto-open if preferences are not set (all fields are null or empty)
+        const isNotSet =
+          prefs.salary_min === null &&
+          prefs.salary_max === null &&
+          (prefs.country === null || prefs.country === "") &&
+          prefs.visa_sponsorship === null &&
+          prefs.remote_friendly === null;
+
+        if (isNotSet) {
+          setPreferencesModalOpen(true)
+        }
+      } catch (error) {
+        console.error('Error fetching user preferences:', error)
+      }
+    }
+    void fetchPreferences()
+  }, [])
 
   const router = useRouter()
 
@@ -317,6 +349,18 @@ export function SiteHeader() {
             variant="ghost"
             size="sm"
             onClick={() => {
+              handleButtonClick('settings')
+              setPreferencesModalOpen(true)
+            }}
+            className={`hidden sm:flex border border-gray-200 dark:border-gray-700 rounded-md px-2 transition-all duration-200 hover:bg-primary/10 hover:border-primary dark:hover:border-primary ${blinkingButton === 'settings' ? 'animate-double-blink' : ''}`}
+          >
+            <Settings className="size-4" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
               handleButtonClick('logout')
               handleLogout()
             }}
@@ -325,6 +369,13 @@ export function SiteHeader() {
             Logout
           </Button>
         </div>
+
+        <UserPreferencesModal
+          open={preferencesModalOpen}
+          onOpenChange={setPreferencesModalOpen}
+          initialData={userPreferences}
+          onSaved={(prefs) => setUserPreferences(prefs)}
+        />
 
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetContent side="right" className="data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right data-[state=open]:duration-500">

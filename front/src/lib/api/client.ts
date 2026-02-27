@@ -92,3 +92,20 @@ export async function apiPostFormData(
   });
   return handleResponse(res);
 }
+/** Standard JSON PATCH request. */
+export async function apiPatch(
+  url: string,
+  body: unknown,
+  opts?: RequestInit,
+) {
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(opts?.headers as Record<string, string> | undefined),
+    },
+    body: JSON.stringify(body),
+    ...opts,
+  });
+  return handleResponse(res);
+}
