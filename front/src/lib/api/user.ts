@@ -1,4 +1,4 @@
-import { BACKEND_URL, apiGet, apiPatch } from './client';
+import { BACKEND_URL, apiGet, apiPatch, RESUME_API_URL } from './client';
 
 export interface UserPreferences {
     salary_min: number | null;
@@ -14,10 +14,10 @@ export interface UserPreferencesUpdate extends Partial<UserPreferences> {
 
 /** GET /preferences */
 export async function getUserPreferences(token: string): Promise<UserPreferences> {
-    return apiGet(`${BACKEND_URL}/api/v1/user/preferences?token=${encodeURIComponent(token)}`);
+    return apiGet(`${RESUME_API_URL}/api/v1/users/preferences?token=${encodeURIComponent(token)}`);
 }
 
 /** PATCH /preferences */
 export async function updateUserPreferences(payload: UserPreferencesUpdate): Promise<UserPreferences> {
-    return apiPatch(`${BACKEND_URL}/api/v1/user/preferences`, payload);
+    return apiPatch(`${RESUME_API_URL}/api/v1/users/preferences`, payload);
 }
