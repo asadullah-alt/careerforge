@@ -1,20 +1,36 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
+import Link from "next/link"
 import AuthGuard from "@/components/auth-guard"
-import { getAuthToken, jobsApi } from "@/lib/api"
+import { getAuthToken, jobsApi, userApi } from "@/lib/api"
 import { EnrichedMatch } from "@/lib/types"
 import { JobMatchCard } from "@/components/job-match-card"
 import { EmptyJobsState } from "@/components/empty-state"
-import { IconSearch, IconAdjustmentsHorizontal } from "@tabler/icons-react"
+import {
+    IconSearch,
+    IconAdjustmentsHorizontal,
+    IconTarget,
+    IconBuilding,
+    IconMapPin,
+    IconCalendar,
+    IconRosette,
+    IconBriefcase
+} from "@tabler/icons-react"
+import { Badge } from "@/components/ui/badgeTable"
+import { UserPreferences } from "@/lib/api/user"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Separator } from '@/components/ui/separatorInteractive'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function MatchesPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
     const [matches, setMatches] = useState<EnrichedMatch[]>([])
     const [searchQuery, setSearchQuery] = useState("")
+    const [preferences, setPreferences] = useState<UserPreferences | null>(null)
+    const [selectedId, setSelectedId] = useState<string | null>(null)
 
     useEffect(() => {
         const fetchMatches = async () => {
@@ -28,12 +44,15 @@ export default function MatchesPage() {
 
                 const data = await jobsApi.getEnrichedMatches(token) as EnrichedMatch[]
 
-                // Backend already filters > 30, but let's ensure sorting by percentage desk
+                // Backend already filters > 30, but let's ensure sorting by percentage desc
                 const sorted = [...data].sort((a, b) =>
                     b.match.percentage_match - a.match.percentage_match
                 )
 
                 setMatches(sorted)
+                if (sorted.length > 0) {
+                    setSelectedId(sorted[0].job_details.job_id)
+                }
             } catch (err: unknown) {
                 console.error("Error fetching matches:", err)
                 setError(err instanceof Error ? err.message : "Failed to load matches. Please try again later.")
@@ -42,7 +61,19 @@ export default function MatchesPage() {
             }
         }
 
+        const fetchPreferences = async () => {
+            try {
+                const token = getAuthToken()
+                if (!token) return
+                const data = await userApi.getUserPreferences(token)
+                setPreferences(data)
+            } catch (err) {
+                console.error("Error fetching preferences:", err)
+            }
+        }
+
         fetchMatches()
+        fetchPreferences()
     }, [])
 
     const filteredMatches = matches.filter(m => {
@@ -52,65 +83,186 @@ export default function MatchesPage() {
         return title.includes(query) || company.includes(query)
     })
 
+    const selectedMatch = matches.find(m => m.job_details.job_id === selectedId)
+
     return (
         <AuthGuard>
-            <div className="container mx-auto px-4 py-8 max-w-7xl">
-                <header className="mb-10 space-y-4">
+            <div className="h-[calc(100vh-4rem)] flex flex-col bg-background/50">
+                {/* Fixed Header */}
+                <header className="px-6 py-4 border-b bg-background shadow-sm space-y-4">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                         <div>
-                            <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                                 Recommended Matches
                             </h1>
-                            <p className="text-muted-foreground text-lg">
-                                We&apos;ve found these opportunities based on your profile and preferences.
-                            </p>
                         </div>
 
                         <div className="flex items-center gap-2">
                             <div className="relative w-full md:w-80">
                                 <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                                 <Input
-                                    placeholder="Search jobs or companies..."
-                                    className="pl-10 h-11"
+                                    placeholder="Search jobs..."
+                                    className="pl-10 h-10"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
-                            <Button variant="outline" size="icon" className="h-11 w-11">
-                                <IconAdjustmentsHorizontal size={20} />
-                            </Button>
+                            {preferences && (
+                                <div className="hidden lg:flex flex-wrap items-center gap-2 pl-4 border-l ml-2">
+                                    <div className="flex items-center gap-1.5 text-xs font-semibold text-primary/70 uppercase tracking-wider">
+                                        <IconTarget size={14} />
+                                        <span>Target:</span>
+                                    </div>
+                                    {preferences.country && (
+                                        <Badge variant="outline" className="text-[10px] py-0">{preferences.country}</Badge>
+                                    )}
+                                    {preferences.salary_min && (
+                                        <Badge variant="outline" className="text-[10px] py-0">${preferences.salary_min / 1000}k+</Badge>
+                                    )}
+                                    {preferences.remote_friendly && (
+                                        <Badge variant="outline" className="text-[10px] py-0">Remote</Badge>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </header>
 
-                {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[...Array(6)].map((_, i) => (
-                            <div key={i} className="h-[400px] rounded-xl border bg-card animate-pulse shadow-sm" />
-                        ))}
-                    </div>
-                ) : error ? (
-                    <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 border-2 border-dashed rounded-3xl bg-red-50/50 dark:bg-red-950/10">
-                        <div className="text-red-500 mb-4 text-xl font-medium">Something went wrong</div>
-                        <p className="text-muted-foreground max-w-md mb-6">{error}</p>
-                        <Button onClick={() => window.location.reload()}>Try Again</Button>
-                    </div>
-                ) : filteredMatches.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center min-h-[400px]">
-                        <EmptyJobsState />
-                        {searchQuery && (
-                            <p className="mt-4 text-muted-foreground">
-                                No matches found for &quot;{searchQuery}&quot;
-                            </p>
+                <div className="flex-grow flex overflow-hidden">
+                    {/* Left: Master List */}
+                    <aside className="w-full md:w-[400px] lg:w-[450px] border-r overflow-y-auto bg-background/40 p-4 space-y-4">
+                        {loading ? (
+                            [...Array(6)].map((_, i) => (
+                                <div key={i} className="h-32 rounded-xl border bg-card animate-pulse" />
+                            ))
+                        ) : error ? (
+                            <div className="p-4 text-center text-destructive">{error}</div>
+                        ) : filteredMatches.length === 0 ? (
+                            <div className="text-center py-20">
+                                <EmptyJobsState />
+                                <p className="mt-4 text-muted-foreground">No matches found.</p>
+                            </div>
+                        ) : (
+                            filteredMatches.map((match) => (
+                                <JobMatchCard
+                                    key={match.job_details.job_id}
+                                    match={match}
+                                    isActive={selectedId === match.job_details.job_id}
+                                    onClick={() => setSelectedId(match.job_details.job_id)}
+                                />
+                            ))
                         )}
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        {filteredMatches.map((match) => (
-                            <JobMatchCard key={match.match.job_id} match={match} />
-                        ))}
-                    </div>
-                )}
+                    </aside>
+
+                    {/* Right: Detailed View */}
+                    <main className="hidden md:block flex-grow overflow-y-auto bg-background p-8">
+                        {selectedMatch ? (
+                            <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                                <header className="space-y-4">
+                                    <div className="flex flex-wrap gap-2">
+                                        <Badge variant="secondary" className="px-3 py-1">
+                                            {selectedMatch.job_details.employmentType}
+                                        </Badge>
+                                        {selectedMatch.job_details.isRemote && (
+                                            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200">
+                                                Remote
+                                            </Badge>
+                                        )}
+                                        {selectedMatch.job_details.isVisaSponsored && (
+                                            <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200">
+                                                Visa Sponsored
+                                            </Badge>
+                                        )}
+                                    </div>
+
+                                    <div className="flex justify-between items-start gap-4">
+                                        <h1 className="text-4xl font-bold tracking-tight">{selectedMatch.job_details.jobTitle}</h1>
+                                        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/20 text-center min-w-[120px]">
+                                            <div className="text-xs font-bold text-muted-foreground uppercase mb-1">Match Score</div>
+                                            <div className="text-4xl font-black text-primary">{Math.round(selectedMatch.match.percentage_match)}%</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-muted-foreground">
+                                        <div className="flex items-center gap-2">
+                                            <IconBuilding size={20} className="text-primary" />
+                                            <span className="font-semibold text-foreground text-lg">
+                                                {selectedMatch.job_details.companyProfile?.companyName}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <IconMapPin size={20} />
+                                            <span>
+                                                {[
+                                                    selectedMatch.job_details.location?.city,
+                                                    selectedMatch.job_details.location?.state,
+                                                    selectedMatch.job_details.location?.country
+                                                ].filter(Boolean).join(", ") || selectedMatch.job_details.location?.remoteStatus}
+                                            </span>
+                                        </div>
+                                        {selectedMatch.job_details.datePosted && (
+                                            <div className="flex items-center gap-2">
+                                                <IconCalendar size={20} />
+                                                <span>Posted {selectedMatch.job_details.datePosted}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </header>
+
+                                <div className="flex gap-4">
+                                    <Button className="h-11 px-8 font-bold" asChild>
+                                        <a href={selectedMatch.job_details.job_url} target="_blank" rel="noopener noreferrer">
+                                            Apply Now
+                                        </a>
+                                    </Button>
+                                    <Button variant="outline" className="h-11 px-8" asChild>
+                                        <Link href={`/matches/${selectedMatch.job_details.job_id}`}>Full Page Mode</Link>
+                                    </Button>
+                                </div>
+
+                                <Separator />
+
+                                <section className="space-y-4">
+                                    <h2 className="text-2xl font-bold">Job Summary</h2>
+                                    <p className="text-muted-foreground leading-relaxed text-lg italic bg-primary/5 p-4 rounded-xl border-l-4 border-primary">
+                                        {selectedMatch.job_details.jobSummary || "No summary available."}
+                                    </p>
+                                </section>
+
+                                {selectedMatch.job_details.keyResponsibilities && (
+                                    <section className="space-y-4">
+                                        <h2 className="text-2xl font-bold">Key Responsibilities</h2>
+                                        <ul className="grid gap-3">
+                                            {selectedMatch.job_details.keyResponsibilities.map((item, i) => (
+                                                <li key={i} className="flex gap-3">
+                                                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold mt-0.5">{i + 1}</span>
+                                                    <span className="text-muted-foreground leading-relaxed">{item}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </section>
+                                )}
+
+                                {selectedMatch.job_details.qualifications && (
+                                    <section className="space-y-6">
+                                        <h2 className="text-2xl font-bold">Qualifications</h2>
+                                        <div className="space-y-4">
+                                            <h3 className="text-lg font-semibold flex items-center gap-2"><IconRosette className="text-primary" />Required</h3>
+                                            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
+                                                {selectedMatch.job_details.qualifications.required.map((q, i) => <li key={i}>{q}</li>)}
+                                            </ul>
+                                        </div>
+                                    </section>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                                <IconBriefcase size={64} className="opacity-20 mb-4" />
+                                <p>Select a job from the list to see details</p>
+                            </div>
+                        )}
+                    </main>
+                </div>
             </div>
         </AuthGuard>
     )

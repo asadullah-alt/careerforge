@@ -7,13 +7,16 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { EnrichedMatch } from "@/lib/types"
 import { IconMapPin, IconBuilding } from "@tabler/icons-react"
-import Link from "next/link"
+import { cn } from "@/lib/utils"
+// import Link from "next/link" // Removing Link as we use onClick now
 
 interface JobMatchCardProps {
     match: EnrichedMatch
+    isActive?: boolean
+    onClick?: () => void
 }
 
-export function JobMatchCard({ match }: JobMatchCardProps) {
+export function JobMatchCard({ match, isActive, onClick }: JobMatchCardProps) {
     const { job_details, match: matchInfo } = match
     const percentage = Math.round(matchInfo.percentage_match)
 
@@ -31,7 +34,13 @@ export function JobMatchCard({ match }: JobMatchCardProps) {
     }
 
     return (
-        <Card className="hover:shadow-lg transition-all duration-300 border-primary/10 overflow-hidden flex flex-col h-full">
+        <Card
+            className={cn(
+                "hover:shadow-md transition-all duration-300 border-primary/10 overflow-hidden flex flex-col h-full cursor-pointer",
+                isActive ? "ring-2 ring-primary bg-primary/5 shadow-md" : "hover:bg-accent/5"
+            )}
+            onClick={onClick}
+        >
             <CardHeader className="pb-2">
                 <div className="flex justify-between items-start mb-2">
                     <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
@@ -41,7 +50,7 @@ export function JobMatchCard({ match }: JobMatchCardProps) {
                         {percentage}% Match
                     </div>
                 </div>
-                <CardTitle className="text-xl line-clamp-2 min-h-[3.5rem]">
+                <CardTitle className="text-xl line-clamp-2">
                     {job_details.jobTitle || "Untitled Position"}
                 </CardTitle>
             </CardHeader>
@@ -56,7 +65,7 @@ export function JobMatchCard({ match }: JobMatchCardProps) {
                     </div>
                     <div className="flex items-center gap-2">
                         <IconMapPin size={16} />
-                        <span>
+                        <span className="line-clamp-1">
                             {[
                                 job_details.location?.city,
                                 job_details.location?.state
@@ -72,21 +81,13 @@ export function JobMatchCard({ match }: JobMatchCardProps) {
                     </div>
                     <Progress value={percentage} className="h-2" indicatorClassName={getProgressColor(percentage)} />
                 </div>
-
-                {job_details.jobSummary && (
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                        {job_details.jobSummary}
-                    </p>
-                )}
             </CardContent>
 
             <CardFooter className="pt-2">
-                <Link href={`/matches/${job_details.job_id}`} className="w-full">
-                    <Button variant="outline" className="w-full group">
-                        View Details
-                        <span className="ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
-                    </Button>
-                </Link>
+                <Button variant={isActive ? "default" : "outline"} className="w-full group">
+                    View Details
+                    <span className="ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
+                </Button>
             </CardFooter>
         </Card>
     )
