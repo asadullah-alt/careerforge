@@ -23,10 +23,6 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Separator } from '@/components/ui/separatorInteractive'
 
-// Proper type for global event dispatcher
-interface CustomWindow extends Window {
-    dispatchGlobalEvent?: (event: string) => void
-}
 
 export default function MatchesPage() {
     const [loading, setLoading] = useState(true)
@@ -76,8 +72,17 @@ export default function MatchesPage() {
             }
         }
 
+        const handlePrefsUpdated = () => {
+            fetchPreferences()
+        }
+
         fetchMatches()
         fetchPreferences()
+
+        window.addEventListener('preferences-updated', handlePrefsUpdated)
+        return () => {
+            window.removeEventListener('preferences-updated', handlePrefsUpdated)
+        }
     }, [])
 
     const filteredMatches = matches.filter(m => {
@@ -126,7 +131,7 @@ export default function MatchesPage() {
                                         <IconTarget size={12} />
                                         <span>Target Preferences</span>
                                     </div>
-                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => (window as unknown as CustomWindow).dispatchGlobalEvent?.('open-preferences')}>
+                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => window.dispatchEvent(new CustomEvent('open-preferences'))}>
                                         <IconAdjustmentsHorizontal size={12} />
                                     </Button>
                                 </div>

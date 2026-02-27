@@ -98,6 +98,7 @@ export default function UserPreferencesModal({
             })
             toast.success("Preferences updated successfully")
             onSaved?.(updatedPrefs)
+            window.dispatchEvent(new CustomEvent('preferences-updated', { detail: updatedPrefs }))
             onOpenChange(false)
         } catch (error) {
             console.error("Failed to update preferences:", error)

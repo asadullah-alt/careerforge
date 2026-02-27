@@ -184,6 +184,16 @@ export function SiteHeader() {
     }
   }, [pathname]) // Re-run slightly on path changes to ensure it hits when landing on dashboard
 
+  // Listen for global 'open-preferences' event
+  useEffect(() => {
+    const handleOpenPrefs = () => {
+      console.log('[SiteHeader] Received open-preferences event')
+      setPreferencesModalOpen(true)
+    }
+    window.addEventListener('open-preferences', handleOpenPrefs)
+    return () => window.removeEventListener('open-preferences', handleOpenPrefs)
+  }, [])
+
   const router = useRouter()
 
   function handleLogout() {
