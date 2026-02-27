@@ -13,6 +13,13 @@ import { Button } from "@/components/ui/buttonTable"
 import { Input } from "@/components/ui/inputInteractive"
 import { Label } from "@/components/ui/labelInteractive"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { userApi, getAuthToken } from "@/lib/api"
 import { toast } from "sonner"
 import { UserPreferences } from "@/lib/api/user"
@@ -23,6 +30,21 @@ interface UserPreferencesModalProps {
     onSaved?: (prefs: UserPreferences) => void
     initialData?: UserPreferences | null
 }
+
+const COUNTRIES = [
+    "United States",
+    "United Kingdom",
+    "Canada",
+    "Australia",
+    "Germany",
+    "France",
+    "Pakistan",
+    "India",
+    "United Arab Emirates",
+    "Saudi Arabia",
+    "Singapore",
+    "Other",
+]
 
 export default function UserPreferencesModal({
     open,
@@ -126,12 +148,21 @@ export default function UserPreferencesModal({
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="country">Country</Label>
-                        <Input
-                            id="country"
-                            placeholder="e.g. USA, UK, Pakistan"
+                        <Select
                             value={formData.country ?? ""}
-                            onChange={(e) => handleChange("country", e.target.value)}
-                        />
+                            onValueChange={(value) => handleChange("country", value)}
+                        >
+                            <SelectTrigger id="country">
+                                <SelectValue placeholder="Select a country" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {COUNTRIES.map((country) => (
+                                    <SelectItem key={country} value={country}>
+                                        {country}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="flex items-center space-x-2">
                         <Checkbox

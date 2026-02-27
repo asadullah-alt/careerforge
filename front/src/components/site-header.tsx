@@ -144,30 +144,45 @@ export function SiteHeader() {
 
   // Fetch user preferences on mount
   useEffect(() => {
+    let mounted = true
     const fetchPreferences = async () => {
       try {
         const token = getCfAuthCookie()
         if (!token) return
+
         const prefs = await userApi.getUserPreferences(token)
+        if (!mounted) return
         setUserPreferences(prefs)
 
-        // Auto-open if preferences are not set (all fields are null or empty)
-        const isNotSet =
-          prefs.salary_min === null &&
-          prefs.salary_max === null &&
-          (prefs.country === null || prefs.country === "") &&
-          prefs.visa_sponsorship === null &&
-          prefs.remote_friendly === null;
+        // Auto-open if preferences are not set
+        // Loosen the check: if most critical fields are null/unset
+        const isMinSalaryNotSet = prefs.salary_min === null || prefs.salary_min === 0;
+        const isMaxSalaryNotSet = prefs.salary_max === null || prefs.salary_max === 0;
+        const isCountryNotSet = !prefs.country;
 
-        if (isNotSet) {
-          setPreferencesModalOpen(true)
+        // If all three main identity/matching fields are basically unset, show prompt
+        if (isMinSalaryNotSet && isMaxSalaryNotSet && isCountryNotSet) {
+          // Add a small delay for better UX
+          setTimeout(() => {
+            if (mounted) setPreferencesModalOpen(true)
+          }, 1000)
         }
       } catch (error) {
         console.error('Error fetching user preferences:', error)
       }
     }
+
+    // Immediate attempt
     void fetchPreferences()
-  }, [])
+
+    // Retry once after a short delay in case AuthGuard was still setting the cookie
+    const timer = setTimeout(fetchPreferences, 2000)
+
+    return () => {
+      mounted = false
+      clearTimeout(timer)
+    }
+  }, [pathname]) // Re-run slightly on path changes to ensure it hits when landing on dashboard
 
   const router = useRouter()
 
