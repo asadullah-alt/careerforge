@@ -107,40 +107,60 @@ export default function MatchesPage() {
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
-                            {preferences && (
-                                <div className="hidden lg:flex flex-wrap items-center gap-2 pl-4 border-l ml-2">
-                                    <div className="flex items-center gap-1.5 text-xs font-semibold text-primary/70 uppercase tracking-wider">
-                                        <IconTarget size={14} />
-                                        <span>Target:</span>
-                                    </div>
-                                    {preferences.country && (
-                                        <Badge variant="outline" className="text-[10px] py-0">{preferences.country}</Badge>
-                                    )}
-                                    {preferences.salary_min && (
-                                        <Badge variant="outline" className="text-[10px] py-0">${preferences.salary_min / 1000}k+</Badge>
-                                    )}
-                                    {preferences.remote_friendly && (
-                                        <Badge variant="outline" className="text-[10px] py-0">Remote</Badge>
-                                    )}
-                                </div>
-                            )}
                         </div>
                     </div>
                 </header>
 
                 <div className="flex-grow flex overflow-hidden">
                     {/* Left: Master List */}
-                    <aside className="w-full md:w-[400px] lg:w-[450px] border-r overflow-y-auto bg-background/40 p-4 space-y-4">
+                    <aside className="w-full md:w-[350px] lg:w-[380px] border-r overflow-y-auto bg-muted/20 p-3 space-y-3">
+                        {/* Compact Preferences Summary at the top of the list */}
+                        {preferences && (
+                            <div className="p-3 rounded-lg bg-background border shadow-sm space-y-2 mb-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-wider">
+                                        <IconTarget size={12} />
+                                        <span>Target Preferences</span>
+                                    </div>
+                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => (window as any).dispatchGlobalEvent?.('open-preferences')}>
+                                        <IconAdjustmentsHorizontal size={12} />
+                                    </Button>
+                                </div>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {preferences.country && (
+                                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 rounded h-4 bg-primary/10 text-primary border-none">
+                                            {preferences.country}
+                                        </Badge>
+                                    )}
+                                    {preferences.salary_min && (
+                                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 rounded h-4 bg-green-500/10 text-green-700 border-none">
+                                            ${preferences.salary_min / 1000}k+
+                                        </Badge>
+                                    )}
+                                    {preferences.remote_friendly && (
+                                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 rounded h-4 bg-blue-500/10 text-blue-700 border-none">
+                                            Remote
+                                        </Badge>
+                                    )}
+                                    {preferences.visa_sponsorship && (
+                                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 rounded h-4 bg-orange-500/10 text-orange-700 border-none">
+                                            Visa
+                                        </Badge>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         {loading ? (
-                            [...Array(6)].map((_, i) => (
-                                <div key={i} className="h-32 rounded-xl border bg-card animate-pulse" />
+                            [...Array(8)].map((_, i) => (
+                                <div key={i} className="h-20 rounded-lg border bg-card animate-pulse" />
                             ))
                         ) : error ? (
-                            <div className="p-4 text-center text-destructive">{error}</div>
+                            <div className="p-4 text-center text-destructive text-sm font-medium">{error}</div>
                         ) : filteredMatches.length === 0 ? (
-                            <div className="text-center py-20">
+                            <div className="text-center py-20 px-4">
                                 <EmptyJobsState />
-                                <p className="mt-4 text-muted-foreground">No matches found.</p>
+                                <p className="mt-4 text-xs text-muted-foreground font-medium">No matches found.</p>
                             </div>
                         ) : (
                             filteredMatches.map((match) => (

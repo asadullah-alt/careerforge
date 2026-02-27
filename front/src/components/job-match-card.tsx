@@ -36,59 +36,50 @@ export function JobMatchCard({ match, isActive, onClick }: JobMatchCardProps) {
     return (
         <Card
             className={cn(
-                "hover:shadow-md transition-all duration-300 border-primary/10 overflow-hidden flex flex-col h-full cursor-pointer",
+                "hover:shadow-md transition-all duration-200 border-primary/10 overflow-hidden cursor-pointer",
                 isActive ? "ring-2 ring-primary bg-primary/5 shadow-md" : "hover:bg-accent/5"
             )}
             onClick={onClick}
         >
-            <CardHeader className="pb-2">
-                <div className="flex justify-between items-start mb-2">
-                    <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
-                        {job_details.employmentType || "Full-time"}
-                    </Badge>
-                    <div className={`text-xl font-bold ${getMatchColor(percentage)}`}>
-                        {percentage}% Match
+            <div className="p-3 space-y-2">
+                <div className="flex justify-between items-start gap-2">
+                    <div className="space-y-1 flex-grow overflow-hidden">
+                        <CardTitle className="text-sm font-bold line-clamp-1">
+                            {job_details.jobTitle || "Untitled"}
+                        </CardTitle>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <IconBuilding size={12} className="shrink-0" />
+                            <span className="truncate font-medium text-foreground/80">
+                                {job_details.companyProfile?.companyName || "Unknown"}
+                            </span>
+                        </div>
                     </div>
-                </div>
-                <CardTitle className="text-xl line-clamp-2">
-                    {job_details.jobTitle || "Untitled Position"}
-                </CardTitle>
-            </CardHeader>
-
-            <CardContent className="flex-grow space-y-4">
-                <div className="space-y-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                        <IconBuilding size={16} />
-                        <span className="font-medium text-foreground">
-                            {job_details.companyProfile?.companyName || "Unknown Company"}
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <IconMapPin size={16} />
-                        <span className="line-clamp-1">
-                            {[
-                                job_details.location?.city,
-                                job_details.location?.state
-                            ].filter(Boolean).join(", ") || job_details.location?.remoteStatus || "Remote"}
-                        </span>
+                    <div className={cn("text-xs font-black shrink-0 px-2 py-1 rounded bg-accent/10 whitespace-nowrap", getMatchColor(percentage))}>
+                        {percentage}%
                     </div>
                 </div>
 
-                <div className="space-y-1">
-                    <div className="flex justify-between text-xs font-medium">
-                        <span>Match Progress</span>
-                        <span>{percentage}%</span>
+                <div className="flex items-center justify-between gap-4">
+                    <div className="flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                            <IconMapPin size={10} />
+                            <span className="truncate max-w-[120px]">
+                                {[
+                                    job_details.location?.city,
+                                    job_details.location?.state
+                                ].filter(Boolean).join(", ") || job_details.location?.remoteStatus || "Remote"}
+                            </span>
+                        </div>
+                        <Badge variant="outline" className="text-[10px] py-0 h-4 px-1 leading-none font-normal">
+                            {job_details.employmentType || "FT"}
+                        </Badge>
                     </div>
-                    <Progress value={percentage} className="h-2" indicatorClassName={getProgressColor(percentage)} />
-                </div>
-            </CardContent>
 
-            <CardFooter className="pt-2">
-                <Button variant={isActive ? "default" : "outline"} className="w-full group">
-                    View Details
-                    <span className="ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
-                </Button>
-            </CardFooter>
+                    <div className="w-16 shrink-0">
+                        <Progress value={percentage} className="h-1" indicatorClassName={getProgressColor(percentage)} />
+                    </div>
+                </div>
+            </div>
         </Card>
     )
 }
