@@ -8,7 +8,7 @@ import FileUpload from "@/components/file-upload"
 import { usePathname, useRouter } from "next/navigation"
 import { resumesApi } from "@/lib/api"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet"
-import { UploadCloud, Mail, ChevronDown, BookOpenCheck, Download, Briefcase, Settings } from "lucide-react"
+import { UploadCloud, Mail, ChevronDown, BookOpenCheck, Download, Briefcase, Settings, Menu, LogOut } from "lucide-react"
 import { Sun, Moon } from 'lucide-react'
 import { useTheme } from '@/context/theme-context'
 import { userApi } from "@/lib/api"
@@ -315,6 +315,65 @@ export function SiteHeader() {
           </Button>
         </div>
 
+        {/* Mobile-only "More" dropdown — shows all hidden actions */}
+        <div className="ml-2 flex sm:hidden items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="border border-gray-200 dark:border-gray-700 rounded-md px-2">
+                <Menu className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem onClick={() => { handleButtonClick('matches'); router.push('/matches') }}>
+                <Briefcase className="size-4 mr-2" />Matched Jobs
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => { handleButtonClick('upload'); setSheetOpen(true) }}>
+                <UploadCloud className="size-4 mr-2" />Upload Base CV
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => { handleButtonClick('email'); setEmailModalOpen(true) }}>
+                <Mail className="size-4 mr-2" />Connect with Email
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => { handleButtonClick('resumebuilder'); router.push('/dashboard/resumes') }}>
+                <BookOpenCheck className="size-4 mr-2" />Resume Builder
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => { handleButtonClick('extension'); window.open('https://chromewebstore.google.com/detail/bhaikaamdo-streamline-you/cfhjopkjaegoadmcfmepdbnmkikkpjjk', '_blank') }}>
+                <Download className="size-4 mr-2" />Download Extension
+              </DropdownMenuItem>
+
+              {resumes.length > 0 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Active Resume</DropdownMenuLabel>
+                  {resumes.map((resume) => (
+                    <DropdownMenuItem
+                      key={resume.id}
+                      onClick={() => handleSetDefaultResume(resume.id)}
+                      className={selectedResumeId === resume.id ? 'bg-accent' : ''}
+                    >
+                      <span className="text-sm truncate">{getResumeDisplayName(resume)}</span>
+                      {selectedResumeId === resume.id && <span className="ml-auto">✓</span>}
+                    </DropdownMenuItem>
+                  ))}
+                </>
+              )}
+
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => { handleButtonClick('settings'); setPreferencesModalOpen(true) }}>
+                <Settings className="size-4 mr-2" />Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { handleButtonClick('logout'); handleLogout() }} className="text-red-500 focus:text-red-500">
+                <LogOut className="size-4 mr-2" />Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
         {/* Email Modal */}
         <Dialog open={emailModalOpen} onOpenChange={setEmailModalOpen}>
