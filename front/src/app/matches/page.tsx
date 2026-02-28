@@ -341,9 +341,121 @@ export default function MatchesPage() {
                                 )}
                             </div>
                         ) : (
-                            <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
-                                <IconBriefcase size={64} className="opacity-20 mb-4" />
-                                <p>Select a job from the list to see details</p>
+                            <div className="h-full flex flex-col items-center justify-center gap-10 px-8">
+                                <style>{`
+                                    @keyframes cf-orbit {
+                                        from { transform: rotate(0deg) translateX(72px) rotate(0deg); }
+                                        to   { transform: rotate(360deg) translateX(72px) rotate(-360deg); }
+                                    }
+                                    @keyframes cf-orbit2 {
+                                        from { transform: rotate(120deg) translateX(72px) rotate(-120deg); }
+                                        to   { transform: rotate(480deg)  translateX(72px) rotate(-480deg); }
+                                    }
+                                    @keyframes cf-orbit3 {
+                                        from { transform: rotate(240deg) translateX(72px) rotate(-240deg); }
+                                        to   { transform: rotate(600deg)  translateX(72px) rotate(-600deg); }
+                                    }
+                                    @keyframes cf-float {
+                                        0%,100% { transform: translateY(0); }
+                                        50%      { transform: translateY(-10px); }
+                                    }
+                                    @keyframes cf-arrow {
+                                        0%   { transform: translateY(6px);  opacity: 0; }
+                                        50%  { transform: translateY(0);    opacity: 1; }
+                                        100% { transform: translateY(-6px); opacity: 0; }
+                                    }
+                                    @keyframes cf-dot {
+                                        0%,100% { opacity: 0.25; transform: scale(0.8); }
+                                        50%      { opacity: 1;    transform: scale(1.2); }
+                                    }
+                                    @keyframes cf-ping-slow {
+                                        0%   { transform: scale(1);   opacity: 0.5; }
+                                        100% { transform: scale(1.9); opacity: 0; }
+                                    }
+                                `}</style>
+
+                                {selectedResumeId ? (
+                                    /* ── Resume exists – matching in progress ── */
+                                    <>
+                                        <div className="relative w-44 h-44 flex items-center justify-center">
+                                            {/* slow ping ring */}
+                                            <span className="absolute inset-0 rounded-full border border-primary/30"
+                                                style={{ animation: 'cf-ping-slow 2.4s ease-out infinite' }} />
+                                            <span className="absolute inset-0 rounded-full border border-primary/20"
+                                                style={{ animation: 'cf-ping-slow 2.4s ease-out 1.2s infinite' }} />
+
+                                            {/* centre icon */}
+                                            <div className="z-10 w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 flex items-center justify-center shadow-lg"
+                                                style={{ animation: 'cf-float 3s ease-in-out infinite' }}>
+                                                <IconBriefcase size={38} className="text-primary" />
+                                            </div>
+
+                                            {/* 3 orbiting pills */}
+                                            {[
+                                                { anim: 'cf-orbit  3.6s linear infinite', color: 'bg-primary', size: 'w-3   h-3' },
+                                                { anim: 'cf-orbit2 3.6s linear infinite', color: 'bg-primary/60', size: 'w-2.5 h-2.5' },
+                                                { anim: 'cf-orbit3 3.6s linear infinite', color: 'bg-primary/80', size: 'w-2   h-2' },
+                                            ].map((o, i) => (
+                                                <span key={i}
+                                                    className={`absolute rounded-full ${o.color} ${o.size} top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2`}
+                                                    style={{ animation: o.anim }} />
+                                            ))}
+                                        </div>
+
+                                        <div className="text-center space-y-3 max-w-sm">
+                                            <p className="text-xl font-bold text-foreground">Matching in progress</p>
+                                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                                We&apos;re processing your resume against thousands of job postings.
+                                                You&apos;ll get an <span className="font-medium text-foreground">email</span> the moment your personalised matches are ready.
+                                            </p>
+                                            {/* animated loading dots */}
+                                            <div className="flex items-center justify-center gap-1.5 pt-1">
+                                                {[0, 0.4, 0.8].map((delay, i) => (
+                                                    <span key={i}
+                                                        className="w-2 h-2 rounded-full bg-primary/50"
+                                                        style={{ animation: `cf-dot 1.2s ease-in-out ${delay}s infinite` }} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    /* ── No resume – upload prompt ── */
+                                    <>
+                                        <div style={{ animation: 'cf-float 3s ease-in-out infinite' }}>
+                                            <svg width="140" height="110" viewBox="0 0 140 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                {/* cloud body */}
+                                                <path d="M105 70 Q112 70 116 63 Q124 62 124 53 Q124 43 115 40
+                                                         Q113 28 102 25 Q96 12 80 14 Q70 8 58 15
+                                                         Q44 15 40 27 Q28 30 26 42 Q18 45 18 55
+                                                         Q18 64 26 66 Q30 71 36 71 Z"
+                                                    fill="currentColor" className="text-primary/10"
+                                                    stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+
+                                                {/* animated arrow group */}
+                                                <g style={{ animation: 'cf-arrow 1.6s ease-in-out infinite' }}>
+                                                    <line x1="70" y1="95" x2="70" y2="57" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="text-primary" />
+                                                    <polyline points="56,68 70,55 84,68" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-primary" fill="none" />
+                                                </g>
+
+                                                {/* small sparkles */}
+                                                <circle cx="28" cy="30" r="3" fill="currentColor" className="text-primary/30" style={{ animation: 'cf-dot 2s ease-in-out 0s infinite' }} />
+                                                <circle cx="112" cy="26" r="2.5" fill="currentColor" className="text-primary/30" style={{ animation: 'cf-dot 2s ease-in-out 0.7s infinite' }} />
+                                                <circle cx="120" cy="72" r="2" fill="currentColor" className="text-primary/20" style={{ animation: 'cf-dot 2s ease-in-out 1.3s infinite' }} />
+                                            </svg>
+                                        </div>
+
+                                        <div className="text-center space-y-3 max-w-sm">
+                                            <p className="text-xl font-bold text-foreground">Ready to find your dream job?</p>
+                                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                                Upload your CV and we&apos;ll match you against thousands of relevant job openings automatically.
+                                            </p>
+                                            <Button size="sm" className="gap-2 mt-1" onClick={() => setSheetOpen(true)}>
+                                                <IconCloudUpload size={16} />
+                                                Upload your CV
+                                            </Button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         )}
                     </main>
