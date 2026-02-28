@@ -3,10 +3,9 @@
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import AuthGuard from "@/components/auth-guard"
-import { getAuthToken, jobsApi, userApi } from "@/lib/api"
+import { getAuthToken, jobsApi, userApi, resumesApi } from "@/lib/api"
 import { EnrichedMatch } from "@/lib/types"
 import { JobMatchCard } from "@/components/job-match-card"
-import { EmptyJobsState } from "@/components/empty-state"
 import {
     IconSearch,
     IconAdjustmentsHorizontal,
@@ -15,13 +14,19 @@ import {
     IconMapPin,
     IconCalendar,
     IconRosette,
-    IconBriefcase
+    IconBriefcase,
+    IconCloudUpload
 } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badgeTable"
 import { UserPreferences } from "@/lib/api/user"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Separator } from '@/components/ui/separatorInteractive'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet"
+import FileUpload from "@/components/file-upload"
+import { toast } from "sonner"
+import { setCookie } from "@/utils/cookie"
+import { useResumeStore } from "@/store/resume-store"
 
 
 export default function MatchesPage() {
@@ -31,6 +36,8 @@ export default function MatchesPage() {
     const [searchQuery, setSearchQuery] = useState("")
     const [preferences, setPreferences] = useState<UserPreferences | null>(null)
     const [selectedId, setSelectedId] = useState<string | null>(null)
+    const [sheetOpen, setSheetOpen] = useState(false)
+    const { selectedResumeId, setSelectedResumeId } = useResumeStore()
 
     useEffect(() => {
         const fetchMatches = async () => {
@@ -84,6 +91,23 @@ export default function MatchesPage() {
             window.removeEventListener('preferences-updated', handlePrefsUpdated)
         }
     }, [])
+
+    const handleUploadSuccess = async (resume_id: string) => {
+        try {
+            const token = getAuthToken()
+            if (token) {
+                await resumesApi.setDefaultResume(resume_id, token)
+                setSelectedResumeId(resume_id)
+                setCookie('bhaikaamdo_defaultresume', resume_id)
+            }
+        } catch (e) {
+            console.error('Error setting default resume:', e)
+        }
+        toast.success("Resume uploaded successfully!", {
+            description: "Your file has been processed. Refreshing matches…",
+        })
+        setSheetOpen(false)
+    }
 
     const filteredMatches = matches.filter(m => {
         const title = m.job_details.jobTitle?.toLowerCase() || ""
@@ -167,10 +191,42 @@ export default function MatchesPage() {
                         ) : error ? (
                             <div className="p-4 text-center text-destructive text-sm font-medium">{error}</div>
                         ) : filteredMatches.length === 0 ? (
-                            <div className="text-center py-20 px-4">
-                                <EmptyJobsState />
-                                <p className="mt-4 text-xs text-muted-foreground font-medium">No matches found.</p>
-                            </div>
+                            selectedResumeId ? (
+                                // Resume exists — matching is in progress
+                                <div className="flex flex-col items-center justify-center py-16 px-6 text-center space-y-5">
+                                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+                                        <IconBriefcase size={32} className="text-primary" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <p className="text-base font-semibold text-foreground">Matching in progress</p>
+                                        <p className="text-sm text-muted-foreground max-w-[240px]">
+                                            We&apos;re processing your resume against thousands of job postings.
+                                            You&apos;ll receive an email as soon as your personalized matches are ready.
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : (
+                                // No resume — prompt to upload
+                                <div className="flex flex-col items-center justify-center py-16 px-6 text-center space-y-5">
+                                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <IconCloudUpload size={32} className="text-primary" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <p className="text-base font-semibold text-foreground">No matches yet</p>
+                                        <p className="text-sm text-muted-foreground max-w-[220px]">
+                                            Upload your CV so we can find the best job matches for you.
+                                        </p>
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        className="gap-2"
+                                        onClick={() => setSheetOpen(true)}
+                                    >
+                                        <IconCloudUpload size={16} />
+                                        Upload your CV
+                                    </Button>
+                                </div>
+                            )
                         ) : (
                             filteredMatches.map((match) => (
                                 <JobMatchCard
@@ -293,6 +349,23 @@ export default function MatchesPage() {
                     </main>
                 </div>
             </div>
+
+            {/* CV Upload Sheet */}
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+                <SheetContent side="right" className="data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right data-[state=open]:duration-500">
+                    <SheetHeader>
+                        <SheetTitle>Upload Resume</SheetTitle>
+                        <SheetDescription>Upload your resume to start matching with jobs. Supports PDF and DOCX formats.</SheetDescription>
+                    </SheetHeader>
+                    <div className="p-4">
+                        <FileUpload onUploadComplete={handleUploadSuccess} />
+                    </div>
+                    <SheetFooter>
+                        <div className="text-xs text-muted-foreground">Resume will be uploaded and processed by our AI.</div>
+                    </SheetFooter>
+                    <SheetClose />
+                </SheetContent>
+            </Sheet>
         </AuthGuard>
     )
 }
