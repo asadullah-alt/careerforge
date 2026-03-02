@@ -40,41 +40,41 @@ export function JobMatchCard({ match, isActive, onClick }: JobMatchCardProps) {
             )}
             onClick={onClick}
         >
-            <div className="p-3 space-y-2">
+            <div className="p-3 md:p-4 space-y-2 md:space-y-3">
                 <div className="flex justify-between items-start gap-2">
                     <div className="space-y-1 flex-grow overflow-hidden">
-                        <CardTitle className="text-sm font-bold line-clamp-1">
+                        <CardTitle className="text-sm md:text-base font-bold line-clamp-1">
                             {job_details.jobTitle || "Untitled"}
                         </CardTitle>
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <IconBuilding size={12} className="shrink-0" />
+                            <IconBuilding size={14} className="shrink-0" />
                             <span className="truncate font-medium text-foreground/80">
                                 {job_details.companyProfile?.companyName || "Unknown"}
                             </span>
                         </div>
                     </div>
-                    <div className={cn("text-xs font-black shrink-0 px-2 py-1 rounded bg-accent/10 whitespace-nowrap", getMatchColor(percentage))}>
+                    <div className={cn("text-xs md:text-sm font-black shrink-0 px-2 py-1 rounded bg-accent/10 whitespace-nowrap", getMatchColor(percentage))}>
                         {percentage}%
                     </div>
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
-                    <div className="flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-2 text-[10px] md:text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
-                            <IconMapPin size={10} />
-                            <span className="truncate max-w-[120px]">
+                            <IconMapPin size={12} />
+                            <span className="truncate max-w-[100px] md:max-w-[150px]">
                                 {[
                                     job_details.location?.city,
                                     job_details.location?.state
                                 ].filter(Boolean).join(", ") || job_details.location?.remoteStatus || "Remote"}
                             </span>
                         </div>
-                        <Badge variant="outline" className="text-[10px] py-0 h-4 px-1 leading-none font-normal">
+                        <Badge variant="outline" className="text-[10px] md:text-xs py-0 h-4 md:h-5 px-1.5 leading-none font-normal">
                             {job_details.employmentType || "FT"}
                         </Badge>
                     </div>
 
-                    <div className="w-16 shrink-0">
+                    <div className="w-14 md:w-20 shrink-0">
                         <Progress value={percentage} className="h-1" indicatorClassName={getProgressColor(percentage)} />
                     </div>
                 </div>

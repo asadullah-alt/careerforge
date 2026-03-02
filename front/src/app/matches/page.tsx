@@ -122,10 +122,10 @@ export default function MatchesPage() {
         <AuthGuard>
             <div className="h-[calc(100vh-4rem)] flex flex-col bg-background/50">
                 {/* Fixed Header */}
-                <header className="px-6 py-4 border-b bg-background shadow-sm space-y-4">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <header className="px-4 py-4 md:px-6 border-b bg-background shadow-sm space-y-4">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                                 Recommended Matches
                             </h1>
                         </div>
@@ -135,7 +135,7 @@ export default function MatchesPage() {
                                 <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                                 <Input
                                     placeholder="Search jobs..."
-                                    className="pl-10 h-10"
+                                    className="pl-10 h-10 w-full"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
@@ -146,7 +146,7 @@ export default function MatchesPage() {
 
                 <div className="flex-grow flex overflow-hidden">
                     {/* Left: Master List */}
-                    <aside className="w-full md:w-[350px] lg:w-[380px] border-r overflow-y-auto bg-muted/20 p-3 space-y-3">
+                    <aside className="w-full md:w-[350px] lg:w-[380px] md:border-r overflow-y-auto bg-muted/20 p-3 space-y-3">
                         {/* Compact Preferences Summary at the top of the list */}
                         {preferences && (
                             <div className="p-3 rounded-lg bg-background border shadow-sm space-y-2 mb-4">
@@ -228,14 +228,22 @@ export default function MatchesPage() {
                                 </div>
                             )
                         ) : (
-                            filteredMatches.map((match) => (
-                                <JobMatchCard
-                                    key={match.job_details.job_id}
-                                    match={match}
-                                    isActive={selectedId === match.job_details.job_id}
-                                    onClick={() => setSelectedId(match.job_details.job_id)}
-                                />
-                            ))
+                            <div className="space-y-3">
+                                {filteredMatches.map((match) => (
+                                    <JobMatchCard
+                                        key={match.job_details.job_id}
+                                        match={match}
+                                        isActive={selectedId === match.job_details.job_id}
+                                        onClick={() => {
+                                            setSelectedId(match.job_details.job_id)
+                                            // On mobile, navigate to the detail page instead of just selecting it
+                                            if (window.innerWidth < 768) {
+                                                window.location.href = `/matches/${match.job_details.job_id}`
+                                            }
+                                        }}
+                                    />
+                                ))}
+                            </div>
                         )}
                     </aside>
 
