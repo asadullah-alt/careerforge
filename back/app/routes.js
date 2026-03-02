@@ -66,7 +66,7 @@ module.exports = function (app, passport) {
             const verificationCode = generateVerificationCode();
             const expiresAt = new Date();
             expiresAt.setMinutes(expiresAt.getMinutes() + 15);
-
+            passportUser.createdAt = new Date();
             passportUser.verificationCode = {
               code: verificationCode,
               expiresAt

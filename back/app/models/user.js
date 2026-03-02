@@ -28,7 +28,10 @@ let userSchema = mongoose.Schema({
         email: String,
         name: String
     },
-
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
     // verification fields
     isVerified: {
         type: Boolean,
