@@ -46,11 +46,18 @@ export function JobMatchCard({ match, isActive, onClick }: JobMatchCardProps) {
                         <CardTitle className="text-sm md:text-base font-bold line-clamp-1">
                             {job_details.jobTitle || "Untitled"}
                         </CardTitle>
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <IconBuilding size={14} className="shrink-0" />
-                            <span className="truncate font-medium text-foreground/80">
-                                {job_details.companyProfile?.companyName || "Unknown"}
-                            </span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <IconBuilding size={14} className="shrink-0" />
+                                <span className="truncate font-medium text-foreground/80">
+                                    {job_details.companyProfile?.companyName || "Unknown"}
+                                </span>
+                            </div>
+                            {matchInfo.new_matched_job && (
+                                <Badge className="bg-primary text-[10px] h-4 px-1.5 py-0 leading-none font-bold uppercase tracking-wider animate-pulse">
+                                    New
+                                </Badge>
+                            )}
                         </div>
                     </div>
                     <div className={cn("text-xs md:text-sm font-black shrink-0 px-2 py-1 rounded bg-accent/10 whitespace-nowrap", getMatchColor(percentage))}>

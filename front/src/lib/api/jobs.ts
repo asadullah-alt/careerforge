@@ -26,3 +26,43 @@ export async function getEnrichedMatches(token: string) {
     },
   });
 }
+
+/** POST /api/v1/open-jobs/match/seen/{match_id} — mark a match as seen */
+export async function markMatchSeen(matchId: string, token: string) {
+  return apiPost(
+    `${RESUME_API_URL}/api/v1/open-jobs/match/seen/${encodeURIComponent(matchId)}`,
+    {},
+    {
+      headers: {
+        'X-User-Token': token,
+      },
+    },
+  );
+}
+
+/** POST /api/v1/open-jobs/match/applied/{match_id} — mark a match as applied */
+export async function markMatchApplied(matchId: string, token: string) {
+  return apiPost(
+    `${RESUME_API_URL}/api/v1/open-jobs/match/applied/${encodeURIComponent(matchId)}`,
+    {},
+    {
+      headers: {
+        'X-User-Token': token,
+      },
+    },
+  );
+}
+
+/** POST /api/v1/open-jobs/match/clicked/{match_id} — mark a match as clicked */
+export async function markMatchClicked(matchId: string, token: string) {
+  return apiPost(
+    `${RESUME_API_URL}/api/v1/open-jobs/match/clicked/${encodeURIComponent(matchId)}`,
+    {},
+    {
+      headers: {
+        'X-User-Token': token,
+      },
+    },
+  );
+}
+

@@ -36,6 +36,15 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                 if (found) {
                     setMatchData(found)
                     console.log("Job details:", found.job_details)
+
+                    // Mark as seen if it's a new match
+                    if (found.match.new_matched_job) {
+                        try {
+                            jobsApi.markMatchSeen(params.id, token);
+                        } catch (err) {
+                            console.error("Error marking match as seen:", err);
+                        }
+                    }
                 } else {
                     setError("Job match not found.")
                 }
@@ -250,7 +259,21 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                                 </div>
 
                                 <div className="space-y-3">
-                                    <Button className="w-full h-12 text-lg font-bold" size="lg" asChild>
+                                    <Button
+                                        className="w-full h-12 text-lg font-bold"
+                                        size="lg"
+                                        asChild
+                                        onClick={async () => {
+                                            const token = getAuthToken();
+                                            if (token && params.id) {
+                                                try {
+                                                    await jobsApi.markMatchApplied(params.id, token);
+                                                } catch (err) {
+                                                    console.error("Error marking match as applied:", err);
+                                                }
+                                            }
+                                        }}
+                                    >
                                         <a href={job_details.job_url} target="_blank" rel="noopener noreferrer">
                                             Apply Now
                                         </a>

@@ -184,6 +184,9 @@ export interface UserJobMatch {
   job_id: string
   percentage_match: number
   matched_at: string
+  clicked?: boolean
+  clickedOnApplied?: boolean
+  new_matched_job?: boolean
 }
 
 export interface EnrichedMatch {

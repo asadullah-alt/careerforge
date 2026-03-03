@@ -252,8 +252,27 @@ export default function MatchesPage() {
                                             key={matchId}
                                             match={match}
                                             isActive={selectedId === matchId}
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 setSelectedId(matchId)
+
+                                                // If match is new, mark as seen
+                                                if (match.match.new_matched_job) {
+                                                    const token = getAuthToken();
+                                                    if (token) {
+                                                        try {
+                                                            await jobsApi.markMatchSeen(matchId, token);
+                                                            // Update local state to remove "New" badge immediately
+                                                            setMatches(prev => prev.map(m =>
+                                                                m.match._id === matchId
+                                                                    ? { ...m, match: { ...m.match, new_matched_job: false } }
+                                                                    : m
+                                                            ));
+                                                        } catch (err) {
+                                                            console.error("Error marking match as seen:", err);
+                                                        }
+                                                    }
+                                                }
+
                                                 // On mobile, navigate to the detail page instead of just selecting it
                                                 if (typeof window !== 'undefined' && window.innerWidth < 768) {
                                                     router.push(`/matches/${encodeURIComponent(matchId)}`)
@@ -322,7 +341,20 @@ export default function MatchesPage() {
                                 </header>
 
                                 <div className="flex gap-4">
-                                    <Button className="h-11 px-8 font-bold" asChild>
+                                    <Button
+                                        className="h-11 px-8 font-bold"
+                                        asChild
+                                        onClick={async () => {
+                                            const token = getAuthToken();
+                                            if (token && selectedMatch.match._id) {
+                                                try {
+                                                    await jobsApi.markMatchApplied(selectedMatch.match._id, token);
+                                                } catch (err) {
+                                                    console.error("Error marking match as applied:", err);
+                                                }
+                                            }
+                                        }}
+                                    >
                                         <a href={selectedMatch.job_details.job_url} target="_blank" rel="noopener noreferrer">
                                             Apply Now
                                         </a>
