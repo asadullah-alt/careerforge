@@ -43,21 +43,21 @@ export function JobMatchCard({ match, isActive, onClick }: JobMatchCardProps) {
             <div className="p-3 md:p-4 space-y-2 md:space-y-3">
                 <div className="flex justify-between items-start gap-2">
                     <div className="space-y-1 flex-grow overflow-hidden">
-                        <CardTitle className="text-sm md:text-base font-bold line-clamp-1">
-                            {job_details.jobTitle || "Untitled"}
-                        </CardTitle>
-                        <div className="flex items-center gap-2 mt-0.5">
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <IconBuilding size={14} className="shrink-0" />
-                                <span className="truncate font-medium text-foreground/80">
-                                    {job_details.companyProfile?.companyName || "Unknown"}
-                                </span>
-                            </div>
+                        <div className="flex items-center gap-2">
+                            <CardTitle className="text-sm md:text-base font-bold line-clamp-1">
+                                {job_details.jobTitle || "Untitled"}
+                            </CardTitle>
                             {matchInfo.new_matched_job && (
-                                <Badge className="bg-primary text-[10px] h-4 px-1.5 py-0 leading-none font-bold uppercase tracking-wider animate-pulse">
+                                <Badge className="bg-primary text-white text-[10px] h-4 px-1.5 py-0 leading-none font-bold uppercase tracking-wider animate-pulse shrink-0">
                                     New
                                 </Badge>
                             )}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <IconBuilding size={14} className="shrink-0" />
+                            <span className="truncate font-medium text-foreground/80">
+                                {job_details.companyProfile?.companyName || "Unknown"}
+                            </span>
                         </div>
                     </div>
                     <div className={cn("text-xs md:text-sm font-black shrink-0 px-2 py-1 rounded bg-accent/10 whitespace-nowrap", getMatchColor(percentage))}>

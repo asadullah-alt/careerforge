@@ -71,6 +71,7 @@ export default function MatchesPage() {
                 )
 
                 setMatches(sorted)
+                console.log("Fetched enriched matches:", sorted);
                 if (sorted.length > 0) {
                     setSelectedId(sorted[0].match._id || null)
                 }
