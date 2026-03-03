@@ -31,7 +31,7 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                 // In a real production app, there might be a dedicated /matches/enriched/{id} endpoint
                 // but based on the provided backend code, we have /matches/enriched.
                 const data = await jobsApi.getEnrichedMatches(token) as EnrichedMatch[]
-                const found = data.find(m => m.job_details.job_id === params.id)
+                const found = data.find(m => m.match._id === params.id || m.job_details.job_id === params.id)
 
                 if (found) {
                     setMatchData(found)

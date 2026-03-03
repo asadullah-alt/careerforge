@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import AuthGuard from "@/components/auth-guard"
 import { getAuthToken, jobsApi, userApi, resumesApi } from "@/lib/api"
 import { EnrichedMatch } from "@/lib/types"
@@ -38,6 +39,7 @@ export default function MatchesPage() {
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [sheetOpen, setSheetOpen] = useState(false)
     const { selectedResumeId, setSelectedResumeId } = useResumeStore()
+    const router = useRouter()
 
     useEffect(() => {
         const fetchMatches = async () => {
@@ -58,7 +60,7 @@ export default function MatchesPage() {
 
                 setMatches(sorted)
                 if (sorted.length > 0) {
-                    setSelectedId(sorted[0].job_details.job_id)
+                    setSelectedId(sorted[0].match._id || sorted[0].job_details.job_id)
                 }
             } catch (err: unknown) {
                 console.error("Error fetching matches:", err)
@@ -116,7 +118,7 @@ export default function MatchesPage() {
         return title.includes(query) || company.includes(query)
     })
 
-    const selectedMatch = matches.find(m => m.job_details.job_id === selectedId)
+    const selectedMatch = matches.find(m => (m.match._id || m.job_details.job_id) === selectedId)
 
     return (
         <AuthGuard>
@@ -229,20 +231,23 @@ export default function MatchesPage() {
                             )
                         ) : (
                             <div className="space-y-3">
-                                {filteredMatches.map((match) => (
-                                    <JobMatchCard
-                                        key={match.job_details.job_id}
-                                        match={match}
-                                        isActive={selectedId === match.job_details.job_id}
-                                        onClick={() => {
-                                            setSelectedId(match.job_details.job_id)
-                                            // On mobile, navigate to the detail page instead of just selecting it
-                                            if (window.innerWidth < 768) {
-                                                window.location.href = `/matches/${match.job_details.job_id}`
-                                            }
-                                        }}
-                                    />
-                                ))}
+                                {filteredMatches.map((match) => {
+                                    const matchId = match.match._id || match.job_details.job_id;
+                                    return (
+                                        <JobMatchCard
+                                            key={matchId}
+                                            match={match}
+                                            isActive={selectedId === matchId}
+                                            onClick={() => {
+                                                setSelectedId(matchId)
+                                                // On mobile, navigate to the detail page instead of just selecting it
+                                                if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                                                    router.push(`/matches/${encodeURIComponent(matchId)}`)
+                                                }
+                                            }}
+                                        />
+                                    )
+                                })}
                             </div>
                         )}
                     </aside>
@@ -309,7 +314,7 @@ export default function MatchesPage() {
                                         </a>
                                     </Button>
                                     <Button variant="outline" className="h-11 px-8" asChild>
-                                        <Link href={`/matches/${selectedMatch.job_details.job_id}`}>Full Page Mode</Link>
+                                        <Link href={`/matches/${encodeURIComponent(selectedMatch.match._id || selectedMatch.job_details.job_id)}`}>Full Page Mode</Link>
                                     </Button>
                                 </div>
 

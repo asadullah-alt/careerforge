@@ -179,6 +179,7 @@ export interface ProcessedOpenJob {
 
 export interface UserJobMatch {
   id?: string
+  _id?: string
   user_id: string
   job_id: string
   percentage_match: number
