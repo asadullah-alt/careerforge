@@ -53,14 +53,26 @@ export default function MatchesPage() {
 
                 const data = await jobsApi.getEnrichedMatches(token) as EnrichedMatch[]
 
+                // Sanitize IDs: prefer match._id over job_details.job_id (which might be a URL)
+                const sanitized = data.map(m => {
+                    const matchId = m.match._id; // Use match._id strictly if it exists
+                    return {
+                        ...m,
+                        job_details: {
+                            ...m.job_details,
+                            job_id: matchId || m.job_details.job_id // Still map it to job_id for component compatibility, but we will navigate using match._id
+                        }
+                    };
+                });
+
                 // Backend already filters > 30, but let's ensure sorting by percentage desc
-                const sorted = [...data].sort((a, b) =>
+                const sorted = [...sanitized].sort((a, b) =>
                     b.match.percentage_match - a.match.percentage_match
                 )
 
                 setMatches(sorted)
                 if (sorted.length > 0) {
-                    setSelectedId(sorted[0].match._id || sorted[0].job_details.job_id)
+                    setSelectedId(sorted[0].match._id || null)
                 }
             } catch (err: unknown) {
                 console.error("Error fetching matches:", err)
@@ -118,7 +130,7 @@ export default function MatchesPage() {
         return title.includes(query) || company.includes(query)
     })
 
-    const selectedMatch = matches.find(m => (m.match._id || m.job_details.job_id) === selectedId)
+    const selectedMatch = matches.find(m => m.match._id === selectedId)
 
     return (
         <AuthGuard>
@@ -232,7 +244,9 @@ export default function MatchesPage() {
                         ) : (
                             <div className="space-y-3">
                                 {filteredMatches.map((match) => {
-                                    const matchId = match.match._id || match.job_details.job_id;
+                                    const matchId = match.match._id;
+                                    if (!matchId) return null; // Skip if no ID
+
                                     return (
                                         <JobMatchCard
                                             key={matchId}
@@ -314,7 +328,7 @@ export default function MatchesPage() {
                                         </a>
                                     </Button>
                                     <Button variant="outline" className="h-11 px-8" asChild>
-                                        <Link href={`/matches/${encodeURIComponent(selectedMatch.match._id || selectedMatch.job_details.job_id)}`}>Full Page Mode</Link>
+                                        <Link href={`/matches/${encodeURIComponent(selectedMatch.match._id || '')}`}>Full Page Mode</Link>
                                     </Button>
                                 </div>
 
