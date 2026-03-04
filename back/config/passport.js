@@ -7,6 +7,7 @@ let jwt_secret = require('./config');
 let LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 
 let User = require('../app/models/user');
+const { sendSignupNotificationToAdmin } = require('../app/utils/emailService');
 
 module.exports = (passport) => {
 
@@ -29,8 +30,8 @@ module.exports = (passport) => {
         passReqToCallback: true
     },
         async (req, email, password, done) => {
-          console.log("==========email=============", email);
-          console.log("============password===========", password);
+            console.log("==========email=============", email);
+            console.log("============password===========", password);
             try {
                 const user = await User.findOne({ 'local.email': email });
 
@@ -42,6 +43,8 @@ module.exports = (passport) => {
                     newUser.local.email = email;
                     newUser.local.password = newUser.generateHash(password);
                     await newUser.save();
+                    // Notify admin about new signup
+                    sendSignupNotificationToAdmin(newUser).catch(err => console.error('Admin notification error:', err));
                     return done(null, newUser);
                 }
             } catch (err) {
@@ -153,6 +156,8 @@ module.exports = (passport) => {
                         newUser.isVerified = true;
 
                         await newUser.save();
+                        // Notify admin about new signup
+                        sendSignupNotificationToAdmin(newUser).catch(err => console.error('Admin notification error:', err));
                         return done(null, newUser);
                     }
                 } catch (err) {
@@ -188,6 +193,8 @@ module.exports = (passport) => {
                         newUser.isVerified = true;
 
                         await newUser.save();
+                        // Notify admin about new signup
+                        sendSignupNotificationToAdmin(newUser).catch(err => console.error('Admin notification error:', err));
                         return done(null, newUser);
                     }
                 } catch (err) {
@@ -225,6 +232,8 @@ module.exports = (passport) => {
                         newUser.isVerified = true;
 
                         await newUser.save();
+                        // Notify admin about new signup
+                        sendSignupNotificationToAdmin(newUser).catch(err => console.error('Admin notification error:', err));
                         return done(null, newUser);
                     }
                 } catch (err) {

@@ -85,8 +85,46 @@ const sendPasswordResetEmail = async (to, resetToken) => {
   }
 };
 
+// Send notification to admin about new signup
+const sendSignupNotificationToAdmin = async (user) => {
+  try {
+    const signupMethod = user.google?.email ? 'Google' :
+      user.linkedin?.email ? 'LinkedIn' :
+        user.facebook?.email ? 'Facebook' : 'Local (Email)';
+    const userEmail = user.local?.email || user.google?.email || user.linkedin?.email || user.facebook?.email;
+    const userName = user.google?.name || user.linkedin?.name || user.facebook?.name || 'New User';
+
+    const mailOptions = {
+      from: `"Bhai Kaam Do System" <${process.env.EMAIL_USER}>`,
+      to: "asadullahbeg@gmail.com",
+      subject: "New User Signup Notification - Bhai Kaam Do",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px;">
+          <h2 style="color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px;">New User Alert!</h2>
+          <p>A new user has just signed up on <strong>Bhai Kaam Do</strong>.</p>
+          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p><strong>Name:</strong> ${userName}</p>
+            <p><strong>Email:</strong> ${userEmail}</p>
+            <p><strong>Signup Method:</strong> ${signupMethod}</p>
+            <p><strong>Signup Date:</strong> ${new Date().toLocaleString()}</p>
+          </div>
+          <p style="color: #666; font-size: 12px;">This is an automated notification from the CareerForge backend.</p>
+        </div>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Admin signup notification sent: ', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('Error sending admin signup notification: ', error);
+    return false;
+  }
+};
+
 module.exports = {
   generateVerificationCode,
   sendVerificationEmail,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendSignupNotificationToAdmin
 };
