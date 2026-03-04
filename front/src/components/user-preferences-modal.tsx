@@ -107,8 +107,13 @@ export default function UserPreferencesModal({
             if (countryObj) {
                 GetState(countryObj.id).then((states: State[]) => {
                     if (states.length > 0) {
-                        GetCity(countryObj.id, states[0].id).then((result: City[]) => {
-                            setCitiesList(result)
+                        // Fetch cities for ALL states concurrently
+                        Promise.all(
+                            states.map(state => GetCity(countryObj.id, state.id))
+                        ).then((results: City[][]) => {
+                            // Flatten the results and sort alphabetically
+                            const allCities = results.flat().sort((a, b) => a.name.localeCompare(b.name))
+                            setCitiesList(allCities)
                         })
                     } else {
                         setCitiesList([])
