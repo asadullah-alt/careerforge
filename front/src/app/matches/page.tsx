@@ -41,48 +41,47 @@ export default function MatchesPage() {
     const { selectedResumeId, setSelectedResumeId } = useResumeStore()
     const router = useRouter()
 
-    useEffect(() => {
-        const fetchMatches = async () => {
-            try {
-                const token = getAuthToken()
-                if (!token) {
-                    setError("Session expired. Please log in again.")
-                    setLoading(false)
-                    return
-                }
-
-                const data = await jobsApi.getEnrichedMatches(token) as EnrichedMatch[]
-
-                // Sanitize IDs: prefer match._id over job_details.job_id (which might be a URL)
-                const sanitized = data.map(m => {
-                    const matchId = m.match._id; // Use match._id strictly if it exists
-                    return {
-                        ...m,
-                        job_details: {
-                            ...m.job_details,
-                            job_id: matchId || m.job_details.job_id // Still map it to job_id for component compatibility, but we will navigate using match._id
-                        }
-                    };
-                });
-
-                // Backend already filters > 30, but let's ensure sorting by percentage desc
-                const sorted = [...sanitized].sort((a, b) =>
-                    b.match.percentage_match - a.match.percentage_match
-                )
-
-                setMatches(sorted)
-                console.log("Fetched enriched matches:", sorted);
-                if (sorted.length > 0) {
-                    setSelectedId(sorted[0].match._id || null)
-                }
-            } catch (err: unknown) {
-                console.error("Error fetching matches:", err)
-                setError(err instanceof Error ? err.message : "Failed to load matches. Please try again later.")
-            } finally {
+    const fetchMatches = async () => {
+        try {
+            const token = getAuthToken()
+            if (!token) {
+                setError("Session expired. Please log in again.")
                 setLoading(false)
+                return
             }
-        }
 
+            const data = await jobsApi.getEnrichedMatches(token) as EnrichedMatch[]
+
+            // Sanitize IDs: prefer match._id over job_details.job_id (which might be a URL)
+            const sanitized = data.map(m => {
+                const matchId = m.match._id;
+                return {
+                    ...m,
+                    job_details: {
+                        ...m.job_details,
+                        job_id: matchId || m.job_details.job_id
+                    }
+                };
+            });
+
+            // Backend already filters > 30, but let's ensure sorting by percentage desc
+            const sorted = [...sanitized].sort((a, b) =>
+                b.match.percentage_match - a.match.percentage_match
+            )
+
+            setMatches(sorted)
+            if (sorted.length > 0 && !selectedId) {
+                setSelectedId(sorted[0].match._id || null)
+            }
+        } catch (err: unknown) {
+            console.error("Error fetching matches:", err)
+            setError(err instanceof Error ? err.message : "Failed to load matches. Please try again later.")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
         const fetchPreferences = async () => {
             try {
                 const token = getAuthToken()
@@ -98,12 +97,20 @@ export default function MatchesPage() {
             fetchPreferences()
         }
 
+        const handleResumeUploaded = () => {
+            console.log("Resume uploaded event received, refreshing matches...")
+            setLoading(true)
+            fetchMatches()
+        }
+
         fetchMatches()
         fetchPreferences()
 
         window.addEventListener('preferences-updated', handlePrefsUpdated)
+        window.addEventListener('resume-uploaded', handleResumeUploaded)
         return () => {
             window.removeEventListener('preferences-updated', handlePrefsUpdated)
+            window.removeEventListener('resume-uploaded', handleResumeUploaded)
         }
     }, [])
 
@@ -122,6 +129,7 @@ export default function MatchesPage() {
             description: "Your file has been processed. Refreshing matches…",
         })
         setSheetOpen(false)
+        fetchMatches()
     }
 
     const filteredMatches = matches.filter(m => {
@@ -136,7 +144,6 @@ export default function MatchesPage() {
     return (
         <AuthGuard>
             <div className="h-[calc(100vh-4rem)] flex flex-col bg-background/50">
-                {/* Fixed Header */}
                 <header className="px-4 py-4 md:px-6 border-b bg-background shadow-sm space-y-4">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
@@ -160,9 +167,7 @@ export default function MatchesPage() {
                 </header>
 
                 <div className="flex-grow flex overflow-hidden">
-                    {/* Left: Master List */}
                     <aside className="w-full md:w-[350px] lg:w-[380px] md:border-r overflow-y-auto bg-muted/20 p-3 space-y-3">
-                        {/* Compact Preferences Summary at the top of the list */}
                         {preferences && (
                             <div className="p-3 rounded-lg bg-background border shadow-sm space-y-2 mb-4">
                                 <div className="flex items-center justify-between">
@@ -217,7 +222,6 @@ export default function MatchesPage() {
                             <div className="p-4 text-center text-destructive text-sm font-medium">{error}</div>
                         ) : filteredMatches.length === 0 ? (
                             selectedResumeId ? (
-                                // Resume exists — matching is in progress
                                 <div className="flex flex-col items-center justify-center py-16 px-6 text-center space-y-5">
                                     <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
                                         <IconBriefcase size={32} className="text-primary" />
@@ -231,7 +235,6 @@ export default function MatchesPage() {
                                     </div>
                                 </div>
                             ) : (
-                                // No resume — prompt to upload
                                 <div className="flex flex-col items-center justify-center py-16 px-6 text-center space-y-5">
                                     <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                                         <IconCloudUpload size={32} className="text-primary" />
@@ -256,7 +259,7 @@ export default function MatchesPage() {
                             <div className="space-y-3">
                                 {filteredMatches.map((match) => {
                                     const matchId = match.match._id;
-                                    if (!matchId) return null; // Skip if no ID
+                                    if (!matchId) return null;
 
                                     return (
                                         <JobMatchCard
@@ -266,13 +269,11 @@ export default function MatchesPage() {
                                             onClick={async () => {
                                                 setSelectedId(matchId)
 
-                                                // If match is new, mark as seen
                                                 if (match.match.new_matched_job) {
                                                     const token = getAuthToken();
                                                     if (token) {
                                                         try {
                                                             await jobsApi.markMatchSeen(matchId, token);
-                                                            // Update local state to remove "New" badge immediately
                                                             setMatches(prev => prev.map(m =>
                                                                 m.match._id === matchId
                                                                     ? { ...m, match: { ...m.match, new_matched_job: false } }
@@ -284,7 +285,6 @@ export default function MatchesPage() {
                                                     }
                                                 }
 
-                                                // On mobile, navigate to the detail page instead of just selecting it
                                                 if (typeof window !== 'undefined' && window.innerWidth < 768) {
                                                     router.push(`/matches/${encodeURIComponent(matchId)}`)
                                                 }
@@ -296,7 +296,6 @@ export default function MatchesPage() {
                         )}
                     </aside>
 
-                    {/* Right: Detailed View */}
                     <main className="hidden md:block flex-grow overflow-y-auto bg-background p-8">
                         {selectedMatch ? (
                             <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -445,22 +444,18 @@ export default function MatchesPage() {
                                 `}</style>
 
                                 {selectedResumeId ? (
-                                    /* ── Resume exists – matching in progress ── */
                                     <>
                                         <div className="relative w-44 h-44 flex items-center justify-center">
-                                            {/* slow ping ring */}
                                             <span className="absolute inset-0 rounded-full border border-primary/30"
                                                 style={{ animation: 'cf-ping-slow 2.4s ease-out infinite' }} />
                                             <span className="absolute inset-0 rounded-full border border-primary/20"
                                                 style={{ animation: 'cf-ping-slow 2.4s ease-out 1.2s infinite' }} />
 
-                                            {/* centre icon */}
                                             <div className="z-10 w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 flex items-center justify-center shadow-lg"
                                                 style={{ animation: 'cf-float 3s ease-in-out infinite' }}>
                                                 <IconBriefcase size={38} className="text-primary" />
                                             </div>
 
-                                            {/* 3 orbiting pills */}
                                             {[
                                                 { anim: 'cf-orbit  3.6s linear infinite', color: 'bg-primary', size: 'w-3   h-3' },
                                                 { anim: 'cf-orbit2 3.6s linear infinite', color: 'bg-primary/60', size: 'w-2.5 h-2.5' },
@@ -478,7 +473,6 @@ export default function MatchesPage() {
                                                 We&apos;re processing your resume against thousands of job postings.
                                                 You&apos;ll get an <span className="font-medium text-foreground">email</span> the moment your personalised matches are ready.
                                             </p>
-                                            {/* animated loading dots */}
                                             <div className="flex items-center justify-center gap-1.5 pt-1">
                                                 {[0, 0.4, 0.8].map((delay, i) => (
                                                     <span key={i}
@@ -489,11 +483,9 @@ export default function MatchesPage() {
                                         </div>
                                     </>
                                 ) : (
-                                    /* ── No resume – upload prompt ── */
                                     <>
                                         <div style={{ animation: 'cf-float 3s ease-in-out infinite' }}>
                                             <svg width="140" height="110" viewBox="0 0 140 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                {/* cloud body */}
                                                 <path d="M105 70 Q112 70 116 63 Q124 62 124 53 Q124 43 115 40
                                                          Q113 28 102 25 Q96 12 80 14 Q70 8 58 15
                                                          Q44 15 40 27 Q28 30 26 42 Q18 45 18 55
@@ -501,13 +493,11 @@ export default function MatchesPage() {
                                                     fill="currentColor" className="text-primary/10"
                                                     stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
 
-                                                {/* animated arrow group */}
                                                 <g style={{ animation: 'cf-arrow 1.6s ease-in-out infinite' }}>
                                                     <line x1="70" y1="95" x2="70" y2="57" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="text-primary" />
                                                     <polyline points="56,68 70,55 84,68" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-primary" fill="none" />
                                                 </g>
 
-                                                {/* small sparkles */}
                                                 <circle cx="28" cy="30" r="3" fill="currentColor" className="text-primary/30" style={{ animation: 'cf-dot 2s ease-in-out 0s infinite' }} />
                                                 <circle cx="112" cy="26" r="2.5" fill="currentColor" className="text-primary/30" style={{ animation: 'cf-dot 2s ease-in-out 0.7s infinite' }} />
                                                 <circle cx="120" cy="72" r="2" fill="currentColor" className="text-primary/20" style={{ animation: 'cf-dot 2s ease-in-out 1.3s infinite' }} />
@@ -532,7 +522,6 @@ export default function MatchesPage() {
                 </div>
             </div>
 
-            {/* CV Upload Sheet */}
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
                 <SheetContent side="right" className="data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right data-[state=open]:duration-500">
                     <SheetHeader>

@@ -47,24 +47,35 @@ const buttonAnimationStyle = `
 `
 
 export function SiteHeader() {
+  const router = useRouter()
   const pathname = usePathname() || "/"
   const isLifecycle = pathname.startsWith("/lifecycle")
   const title = isLifecycle ? "Lifecycle" : "Dashboard"
 
   const [sheetOpen, setSheetOpen] = useState(false)
-  const handleUploadSuccess = (resume_id: string) => {
-    // 1. Show the toast immediately
-    handleSetDefaultResume(resume_id);
+  const { selectedResumeId, setSelectedResumeId } = useResumeStore()
+
+  const handleUploadSuccess = async (resume_id: string) => {
+    // 1. Set default resume (using existing function)
+    await handleSetDefaultResume(resume_id);
+
+    // 2. Show the toast
     toast.success("Resume uploaded successfully!", {
-      description: "Your file has been processed successfully.",
+      description: "Refreshing matches…",
     });
 
-    // 2. Close the sheet
+    // 3. Refresh or Navigate
+    if (pathname === '/matches') {
+      window.dispatchEvent(new CustomEvent('resume-uploaded'));
+    } else {
+      router.push('/matches');
+    }
+
+    // 4. Close the sheet
     setSheetOpen(false);
   };
   const [emailModalOpen, setEmailModalOpen] = useState(false)
   const [resumes, setResumes] = useState<Array<{ id: string; resume_name?: string }>>([])
-  const { selectedResumeId, setSelectedResumeId } = useResumeStore()
   const [loadingResumes, setLoadingResumes] = useState(false)
   const [blinkingButton, setBlinkingButton] = useState<string | null>(null)
   const [preferencesModalOpen, setPreferencesModalOpen] = useState(false)
@@ -196,7 +207,6 @@ export function SiteHeader() {
     return () => window.removeEventListener('open-preferences', handleOpenPrefs)
   }, [])
 
-  const router = useRouter()
 
   function handleLogout() {
     // Clear cf_auth cookie by setting it to expired
