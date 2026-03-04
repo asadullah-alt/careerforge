@@ -23,6 +23,27 @@ import {
 import { userApi, getAuthToken } from "@/lib/api"
 import { toast } from "sonner"
 import { UserPreferences } from "@/lib/api/user"
+import {
+    GetCountries,
+    GetState,
+    GetCity,
+} from "react-country-state-city"
+
+interface Country {
+    id: number;
+    name: string;
+    emoji: string;
+}
+
+interface State {
+    id: number;
+    name: string;
+}
+
+interface City {
+    id: number;
+    name: string;
+}
 
 interface UserPreferencesModalProps {
     open: boolean
@@ -31,21 +52,6 @@ interface UserPreferencesModalProps {
     initialData?: UserPreferences | null
 }
 
-const COUNTRIES = [
-    "United States",
-    "United Kingdom",
-    "Canada",
-    "Australia",
-    "Germany",
-    "France",
-    "Pakistan",
-    "India",
-    "United Arab Emirates",
-    "Saudi Arabia",
-    "Singapore",
-    "Other",
-]
-
 export default function UserPreferencesModal({
     open,
     onOpenChange,
@@ -53,13 +59,23 @@ export default function UserPreferencesModal({
     initialData,
 }: UserPreferencesModalProps) {
     const [loading, setLoading] = useState(false)
+    const [countriesList, setCountriesList] = useState<Country[]>([])
+    const [citiesList, setCitiesList] = useState<City[]>([])
     const [formData, setFormData] = useState<UserPreferences>({
         salary_min: null,
         salary_max: null,
         visa_sponsorship: false,
         remote_friendly: false,
         country: "",
+        city: "",
+        experience: null,
     })
+
+    useEffect(() => {
+        GetCountries().then((result: Country[]) => {
+            setCountriesList(result)
+        })
+    }, [])
 
     useEffect(() => {
         if (open && initialData) {
@@ -69,18 +85,40 @@ export default function UserPreferencesModal({
                 visa_sponsorship: initialData.visa_sponsorship ?? false,
                 remote_friendly: initialData.remote_friendly ?? false,
                 country: initialData.country ?? "",
+                city: initialData.city ?? "",
+                experience: initialData.experience ?? null,
             })
         } else if (open && !initialData) {
-            // Reset to defaults if opening for onboarding
             setFormData({
                 salary_min: null,
                 salary_max: null,
                 visa_sponsorship: false,
                 remote_friendly: false,
                 country: "",
+                city: "",
+                experience: null,
             })
         }
     }, [open, initialData])
+
+    useEffect(() => {
+        if (formData.country) {
+            const countryObj = countriesList.find(c => c.name === formData.country)
+            if (countryObj) {
+                GetState(countryObj.id).then((states: State[]) => {
+                    if (states.length > 0) {
+                        GetCity(countryObj.id, states[0].id).then((result: City[]) => {
+                            setCitiesList(result)
+                        })
+                    } else {
+                        setCitiesList([])
+                    }
+                })
+            }
+        } else {
+            setCitiesList([])
+        }
+    }, [formData.country, countriesList])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -115,6 +153,8 @@ export default function UserPreferencesModal({
         setFormData((prev) => ({ ...prev, [field]: value }))
     }
 
+    const availableCities = ["Remote", ...citiesList.map(c => c.name)]
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
@@ -147,24 +187,62 @@ export default function UserPreferencesModal({
                             />
                         </div>
                     </div>
+
                     <div className="grid gap-2">
-                        <Label htmlFor="country">Country</Label>
-                        <Select
-                            value={formData.country ?? ""}
-                            onValueChange={(value) => handleChange("country", value)}
-                        >
-                            <SelectTrigger id="country">
-                                <SelectValue placeholder="Select a country" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {COUNTRIES.map((country) => (
-                                    <SelectItem key={country} value={country}>
-                                        {country}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <Label htmlFor="experience">Years of Experience</Label>
+                        <Input
+                            id="experience"
+                            type="number"
+                            step="0.5"
+                            placeholder="e.g. 2.5"
+                            value={formData.experience ?? ""}
+                            onChange={(e) => handleChange("experience", e.target.value ? parseFloat(e.target.value) : null)}
+                        />
                     </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="country">Country</Label>
+                            <Select
+                                value={formData.country ?? ""}
+                                onValueChange={(value) => {
+                                    handleChange("country", value)
+                                    handleChange("city", "")
+                                }}
+                            >
+                                <SelectTrigger id="country">
+                                    <SelectValue placeholder="Select Country" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {countriesList.map((country) => (
+                                        <SelectItem key={country.id} value={country.name}>
+                                            {country.emoji} {country.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="city">City</Label>
+                            <Select
+                                value={formData.city ?? ""}
+                                onValueChange={(value) => handleChange("city", value)}
+                                disabled={!formData.country && formData.city !== "Remote"}
+                            >
+                                <SelectTrigger id="city">
+                                    <SelectValue placeholder="Select City" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {availableCities.map((city) => (
+                                        <SelectItem key={city} value={city}>
+                                            {city}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
                     <div className="flex items-center space-x-2">
                         <Checkbox
                             id="visa_sponsorship"

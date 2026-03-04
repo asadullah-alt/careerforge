@@ -159,9 +159,11 @@ export function SiteHeader() {
         const isMinSalaryNotSet = prefs.salary_min === null || prefs.salary_min === 0;
         const isMaxSalaryNotSet = prefs.salary_max === null || prefs.salary_max === 0;
         const isCountryNotSet = !prefs.country;
+        const isCityNotSet = !prefs.city;
+        const isExperienceNotSet = prefs.experience === null;
 
-        // If all three main identity/matching fields are basically unset, show prompt
-        if (isMinSalaryNotSet && isMaxSalaryNotSet && isCountryNotSet) {
+        // If most main identity/matching fields are basically unset, show prompt
+        if (isMinSalaryNotSet && isMaxSalaryNotSet && isCountryNotSet && isCityNotSet && isExperienceNotSet) {
           // Add a small delay for better UX
           setTimeout(() => {
             if (mounted) setPreferencesModalOpen(true)

@@ -1,4 +1,4 @@
-import { BACKEND_URL, apiGet, apiPatch, RESUME_API_URL } from './client';
+import { apiGet, apiPatch, RESUME_API_URL } from './client';
 
 export interface UserPreferences {
     salary_min: number | null;
@@ -6,6 +6,8 @@ export interface UserPreferences {
     visa_sponsorship: boolean | null;
     remote_friendly: boolean | null;
     country: string | null;
+    city: string | null;
+    experience: number | null;
 }
 
 export interface UserPreferencesUpdate extends Partial<UserPreferences> {

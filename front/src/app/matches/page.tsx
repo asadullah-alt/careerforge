@@ -190,6 +190,16 @@ export default function MatchesPage() {
                                             Remote
                                         </Badge>
                                     )}
+                                    {preferences.city && (
+                                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 rounded h-4 bg-purple-500/10 text-purple-700 border-none">
+                                            {preferences.city}
+                                        </Badge>
+                                    )}
+                                    {preferences.experience !== null && (
+                                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 rounded h-4 bg-yellow-500/10 text-yellow-700 border-none">
+                                            {preferences.experience}y exp
+                                        </Badge>
+                                    )}
                                     {preferences.visa_sponsorship && (
                                         <Badge variant="secondary" className="text-[10px] px-1.5 py-0 rounded h-4 bg-orange-500/10 text-orange-700 border-none">
                                             Visa

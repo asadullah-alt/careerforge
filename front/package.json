@@ -47,6 +47,7 @@
     "quill": "^2.0.3",
     "quill-to-pdf": "^1.0.7",
     "react": "19.1.0",
+    "react-country-state-city": "^1.1.12",
     "react-dom": "19.1.0",
     "react-gauge-component": "^1.2.64",
     "react-hook-form": "^7.63.0",
