@@ -61,6 +61,8 @@ export default function UserPreferencesModal({
     const [loading, setLoading] = useState(false)
     const [countriesList, setCountriesList] = useState<Country[]>([])
     const [citiesList, setCitiesList] = useState<City[]>([])
+    const [citiesLoading, setCitiesLoading] = useState(false)
+    const [citiesCache, setCitiesCache] = useState<Record<string, City[]>>({})
     const [formData, setFormData] = useState<UserPreferences>({
         salary_min: null,
         salary_max: null,
@@ -102,27 +104,39 @@ export default function UserPreferencesModal({
     }, [open, initialData])
 
     useEffect(() => {
-        if (formData.country) {
-            const countryObj = countriesList.find(c => c.name === formData.country)
+        const countryName = formData.country
+        if (countryName) {
+            // Check cache first
+            if (citiesCache[countryName]) {
+                setCitiesList(citiesCache[countryName])
+                setCitiesLoading(false)
+                return
+            }
+
+            const countryObj = countriesList.find(c => c.name === countryName)
             if (countryObj) {
+                setCitiesLoading(true)
                 GetState(countryObj.id).then((states: State[]) => {
                     if (states.length > 0) {
-                        // Fetch cities for ALL states concurrently
                         Promise.all(
                             states.map(state => GetCity(countryObj.id, state.id))
                         ).then((results: City[][]) => {
-                            // Flatten the results and sort alphabetically
                             const allCities = results.flat().sort((a, b) => a.name.localeCompare(b.name))
+                            setCitiesCache(prev => ({ ...prev, [countryName as string]: allCities }))
                             setCitiesList(allCities)
-                        })
+                            setCitiesLoading(false)
+                        }).catch(() => setCitiesLoading(false))
                     } else {
                         setCitiesList([])
+                        setCitiesLoading(false)
                     }
-                })
+                }).catch(() => setCitiesLoading(false))
             }
         } else {
             setCitiesList([])
+            setCitiesLoading(false)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formData.country, countriesList])
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -235,14 +249,20 @@ export default function UserPreferencesModal({
                                 disabled={!formData.country && formData.city !== "Remote"}
                             >
                                 <SelectTrigger id="city">
-                                    <SelectValue placeholder="Select City" />
+                                    <SelectValue placeholder={citiesLoading ? "Loading..." : "Select City"} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {availableCities.map((city) => (
-                                        <SelectItem key={city} value={city}>
-                                            {city}
-                                        </SelectItem>
-                                    ))}
+                                    {citiesLoading ? (
+                                        <div className="flex items-center justify-center p-4">
+                                            <span className="text-sm text-muted-foreground animate-pulse">Loading cities...</span>
+                                        </div>
+                                    ) : (
+                                        availableCities.map((city) => (
+                                            <SelectItem key={city} value={city}>
+                                                {city}
+                                            </SelectItem>
+                                        ))
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>
