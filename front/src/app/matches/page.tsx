@@ -52,7 +52,6 @@ export default function MatchesPage() {
     const [analysisResult, setAnalysisResult] = useState<{
         original_score: number;
         new_score: number;
-        similarity_comparison: number;
         skill_comparison: Array<{
             skill: string;
             resume_mentions: number;
@@ -600,11 +599,11 @@ export default function MatchesPage() {
                                                                     ]
                                                                 }}
                                                                 pointer={{ type: "blob", animationDelay: 0 }}
-                                                                value={Math.round(analysisResult.similarity_comparison * 100)}
+                                                                value={Math.round(analysisResult.original_score * 100)}
                                                             />
                                                             <div className="text-center mt-4">
                                                                 <p className="text-sm font-medium">Resume Score</p>
-                                                                <p className="text-2xl font-bold">{Math.round(analysisResult.similarity_comparison * 100)}%</p>
+                                                                <p className="text-2xl font-bold">{Math.round(analysisResult.original_score * 100)}%</p>
                                                             </div>
                                                         </div>
 
