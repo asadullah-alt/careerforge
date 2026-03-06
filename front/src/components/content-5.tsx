@@ -9,7 +9,7 @@ export default function ContentSection() {
                 <Image
                     className="rounded-(--radius) grayscale"
                     src="/team.tiff"
-                    alt="team image"
+                    alt="Bhai Kaam Do founding team collaborating"
                     height={400}
                     width={800}
                     loading="lazy"

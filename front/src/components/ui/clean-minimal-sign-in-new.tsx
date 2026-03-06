@@ -134,7 +134,7 @@ const SignIn2 = () => {
         >
           <Image
             src="/google-color.svg"
-            alt="Google"
+            alt="Google Sign In icon"
             className="w-6 h-6"
             width={24}
             height={24}
@@ -143,7 +143,7 @@ const SignIn2 = () => {
         <button className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow">
           <Image
             src="/facebook.svg"
-            alt="Facebook"
+            alt="Facebook Sign In icon"
             className="w-6 h-6"
             width={24}
             height={24}
@@ -152,7 +152,7 @@ const SignIn2 = () => {
         <button className="flex items-center justify-center w-12 h-12 rounded-xl border bg-white hover:bg-gray-100 transition grow">
           <Image
             src="/apple-173.svg"
-            alt="Apple"
+            alt="Apple Sign In icon"
             className="w-6 h-6"
             width={24}
             height={24}

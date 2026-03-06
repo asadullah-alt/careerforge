@@ -168,7 +168,7 @@ const SignInForm = () => {
         >
           <Image
             src="/google-color.svg"
-            alt="Google"
+            alt="Google Sign In icon"
             className="w-6 h-6"
             width={24}
             height={24}
