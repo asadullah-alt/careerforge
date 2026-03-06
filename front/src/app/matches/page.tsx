@@ -520,9 +520,9 @@ export default function MatchesPage() {
 
                                 <Separator />
 
-                                {/* Application Progress / Resume Analysis */}
+                                {/* Resume Analysis & Cover Letter inside Match Score Card */}
                                 <section className="space-y-4">
-                                    <h2 className="text-2xl font-bold">Application Progress</h2>
+                                    <h2 className="text-2xl font-bold">Resume Analysis</h2>
                                     <div className="bg-card rounded-lg p-6 border shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/50">
                                         <div className="flex flex-col">
                                             {analyzing ? (
@@ -553,7 +553,7 @@ export default function MatchesPage() {
                                                             value={Math.round(analysisResult.original_score * 100)}
                                                         />
                                                         <div className="text-center mt-4">
-                                                            <p className="text-sm font-medium">Match Score</p>
+                                                            <p className="text-sm font-medium">Resume Score</p>
                                                             <p className="text-2xl font-bold">{Math.round(analysisResult.original_score * 100)}%</p>
                                                         </div>
                                                     </div>

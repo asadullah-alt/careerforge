@@ -465,15 +465,10 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                                         }
                                     })()}
                                 </div>
-                            </CardContent>
-                        </Card>
 
-                        {/* Application Progress / Resume Analysis Card */}
-                        <Card className="border shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/50 hover:-translate-y-0.5">
-                            <CardHeader>
-                                <CardTitle>Application Progress</CardTitle>
-                            </CardHeader>
-                            <CardContent>
+                                <Separator />
+
+                                {/* Resume Analysis & Cover Letter */}
                                 <div className="flex flex-col">
                                     {analyzing ? (
                                         <div className="space-y-4">
@@ -503,7 +498,7 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                                                     value={Math.round(analysisResult.original_score * 100)}
                                                 />
                                                 <div className="text-center mt-4">
-                                                    <p className="text-sm font-medium">Match Score</p>
+                                                    <p className="text-sm font-medium">Resume Score</p>
                                                     <p className="text-2xl font-bold">{Math.round(analysisResult.original_score * 100)}%</p>
                                                 </div>
                                             </div>
@@ -551,7 +546,7 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                                     )}
                                 </div>
                                 <Button
-                                    className="w-full mt-6"
+                                    className="w-full"
                                     size="lg"
                                     onClick={analyzeResume}
                                     disabled={analyzing}
@@ -570,7 +565,7 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                                 </Button>
 
                                 <Button
-                                    className="w-full mt-4"
+                                    className="w-full"
                                     variant="outline"
                                     size="lg"
                                     onClick={() => setIsCoverLetterModalOpen(true)}
