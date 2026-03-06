@@ -425,11 +425,47 @@ export default function MatchesPage() {
                                         )}
                                     </div>
 
-                                    <div className="flex justify-between items-start gap-4">
-                                        <h1 className="text-4xl font-bold tracking-tight">{selectedMatch.job_details.jobTitle}</h1>
-                                        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/20 text-center min-w-[120px]">
+                                    <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
+                                        <h1 className="text-2xl lg:text-4xl font-bold tracking-tight">{selectedMatch.job_details.jobTitle}</h1>
+                                        <div className="bg-primary/5 p-5 rounded-2xl border border-primary/20 text-center w-full lg:min-w-[180px] lg:w-auto space-y-3">
                                             <div className="text-xs font-bold text-muted-foreground uppercase mb-1">Match Score</div>
                                             <div className="text-4xl font-black text-primary">{Math.round(selectedMatch.match.percentage_match)}%</div>
+                                            <div className="flex flex-col gap-2 pt-2">
+                                                <Button
+                                                    size="sm"
+                                                    className="w-full"
+                                                    onClick={analyzeResume}
+                                                    disabled={analyzing}
+                                                >
+                                                    {analyzing ? (
+                                                        <>
+                                                            <div className="animate-spin mr-2 h-3 w-3 border-2 border-current border-t-transparent rounded-full"></div>
+                                                            Analyzing...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <IconChartBar className="mr-1.5 h-3.5 w-3.5" />
+                                                            {analysisResult ? 'Analyze Again' : 'Analyze Resume'}
+                                                        </>
+                                                    )}
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="w-full"
+                                                    onClick={() => setIsCoverLetterModalOpen(true)}
+                                                >
+                                                    <FileText className="mr-1.5 h-3.5 w-3.5" />
+                                                    Cover Letter
+                                                </Button>
+                                            </div>
+                                            {selectedMatch.match._id && (
+                                                <OpenJobCoverLetterModal
+                                                    isOpen={isCoverLetterModalOpen}
+                                                    onClose={() => setIsCoverLetterModalOpen(false)}
+                                                    matchId={selectedMatch.match._id}
+                                                />
+                                            )}
                                         </div>
                                     </div>
 
@@ -518,126 +554,89 @@ export default function MatchesPage() {
                                     </section>
                                 )}
 
-                                <Separator />
-
-                                {/* Resume Analysis & Cover Letter inside Match Score Card */}
-                                <section className="space-y-4">
-                                    <h2 className="text-2xl font-bold">Resume Analysis</h2>
-                                    <div className="bg-card rounded-lg p-6 border shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/50">
-                                        <div className="flex flex-col">
-                                            {analyzing ? (
-                                                <div className="space-y-4">
-                                                    <div className="flex flex-col items-center">
+                                {/* Resume Analysis Results (shown after analysis) */}
+                                {(analyzing || analysisResult) && (
+                                    <>
+                                        <Separator />
+                                        <section className="space-y-4">
+                                            <h2 className="text-2xl font-bold">Resume Analysis</h2>
+                                            <div className="bg-card rounded-lg p-6 border shadow-sm">
+                                                {analyzing ? (
+                                                    <div className="flex flex-col items-center py-4">
                                                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
                                                         <p className="text-sm text-muted-foreground text-center">
                                                             Analyzing your resume against this job posting...
                                                         </p>
                                                     </div>
-                                                </div>
-                                            ) : analysisResult && (
-                                                <div className="space-y-6">
-                                                    <div className="flex flex-col items-center">
-                                                        <GaugeComponent
-                                                            type="semicircle"
-                                                            arc={{
-                                                                colorArray: ['#FF2121', '#FFA500', '#00FF15'],
-                                                                padding: 0.02,
-                                                                width: 0.2,
-                                                                subArcs: [
-                                                                    { limit: 40 },
-                                                                    { limit: 60 },
-                                                                    { limit: 100 }
-                                                                ]
-                                                            }}
-                                                            pointer={{ type: "blob", animationDelay: 0 }}
-                                                            value={Math.round(analysisResult.original_score * 100)}
-                                                        />
-                                                        <div className="text-center mt-4">
-                                                            <p className="text-sm font-medium">Resume Score</p>
-                                                            <p className="text-2xl font-bold">{Math.round(analysisResult.original_score * 100)}%</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="space-y-4">
-                                                        <div className="bg-muted/20 rounded-lg p-4">
-                                                            <h4 className="font-medium mb-2">Skill Analysis</h4>
-                                                            <div className="grid grid-cols-2 gap-2">
-                                                                {analysisResult.skill_comparison.map((skill, index) => (
-                                                                    skill.resume_mentions > 0 && (
-                                                                        <Badge key={index} variant="secondary" className="justify-between">
-                                                                            {skill.skill}
-                                                                            <span className="ml-2 text-xs">{skill.resume_mentions}✓</span>
-                                                                        </Badge>
-                                                                    )
-                                                                ))}
+                                                ) : analysisResult && (
+                                                    <div className="space-y-6">
+                                                        <div className="flex flex-col items-center">
+                                                            <GaugeComponent
+                                                                type="semicircle"
+                                                                arc={{
+                                                                    colorArray: ['#FF2121', '#FFA500', '#00FF15'],
+                                                                    padding: 0.02,
+                                                                    width: 0.2,
+                                                                    subArcs: [
+                                                                        { limit: 40 },
+                                                                        { limit: 60 },
+                                                                        { limit: 100 }
+                                                                    ]
+                                                                }}
+                                                                pointer={{ type: "blob", animationDelay: 0 }}
+                                                                value={Math.round(analysisResult.original_score * 100)}
+                                                            />
+                                                            <div className="text-center mt-4">
+                                                                <p className="text-sm font-medium">Resume Score</p>
+                                                                <p className="text-2xl font-bold">{Math.round(analysisResult.original_score * 100)}%</p>
                                                             </div>
                                                         </div>
 
-                                                        <div>
-                                                            <h4 className="font-medium mb-2">Missing Skills</h4>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                {analysisResult.skill_comparison.map((skill, index) => (
-                                                                    skill.resume_mentions === 0 && (
-                                                                        <Badge key={index} variant="outline" className="border-red-200 text-red-500">
-                                                                            {skill.skill}
-                                                                        </Badge>
-                                                                    )
-                                                                ))}
-                                                            </div>
-                                                        </div>
-
-                                                        {analysisResult.improvements && (
-                                                            <div>
-                                                                <h4 className="font-medium mb-2">Suggested Improvements</h4>
-                                                                <ul className="list-disc pl-4 space-y-1 text-sm text-muted-foreground">
-                                                                    {analysisResult.improvements.slice(0, 3).map((imp, index) => (
-                                                                        <li key={index}>{imp.suggestion}</li>
+                                                        <div className="space-y-4">
+                                                            <div className="bg-muted/20 rounded-lg p-4">
+                                                                <h4 className="font-medium mb-2">Skill Analysis</h4>
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    {analysisResult.skill_comparison.map((skill, index) => (
+                                                                        skill.resume_mentions > 0 && (
+                                                                            <Badge key={index} variant="secondary" className="justify-between">
+                                                                                {skill.skill}
+                                                                                <span className="ml-2 text-xs">{skill.resume_mentions}✓</span>
+                                                                            </Badge>
+                                                                        )
                                                                     ))}
-                                                                </ul>
+                                                                </div>
                                                             </div>
-                                                        )}
+
+                                                            <div>
+                                                                <h4 className="font-medium mb-2">Missing Skills</h4>
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {analysisResult.skill_comparison.map((skill, index) => (
+                                                                        skill.resume_mentions === 0 && (
+                                                                            <Badge key={index} variant="outline" className="border-red-200 text-red-500">
+                                                                                {skill.skill}
+                                                                            </Badge>
+                                                                        )
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+
+                                                            {analysisResult.improvements && (
+                                                                <div>
+                                                                    <h4 className="font-medium mb-2">Suggested Improvements</h4>
+                                                                    <ul className="list-disc pl-4 space-y-1 text-sm text-muted-foreground">
+                                                                        {analysisResult.improvements.slice(0, 3).map((imp, index) => (
+                                                                            <li key={index}>{imp.suggestion}</li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <Button
-                                            className="w-full mt-6"
-                                            size="lg"
-                                            onClick={analyzeResume}
-                                            disabled={analyzing}
-                                        >
-                                            {analyzing ? (
-                                                <>
-                                                    <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
-                                                    Analyzing Resume...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <IconChartBar className="mr-2 h-4 w-4" />
-                                                    {analysisResult ? 'Analyze Again' : 'Analyze Resume'}
-                                                </>
-                                            )}
-                                        </Button>
-
-                                        <Button
-                                            className="w-full mt-4"
-                                            variant="outline"
-                                            size="lg"
-                                            onClick={() => setIsCoverLetterModalOpen(true)}
-                                        >
-                                            <FileText className="mr-2 h-4 w-4" />
-                                            Generate Cover Letter
-                                        </Button>
-
-                                        {selectedMatch.match._id && (
-                                            <OpenJobCoverLetterModal
-                                                isOpen={isCoverLetterModalOpen}
-                                                onClose={() => setIsCoverLetterModalOpen(false)}
-                                                matchId={selectedMatch.match._id}
-                                            />
-                                        )}
-                                    </div>
-                                </section>
+                                                )}
+                                            </div>
+                                        </section>
+                                    </>
+                                )}
                             </div>
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center gap-10 px-8">

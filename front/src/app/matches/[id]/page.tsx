@@ -277,7 +277,7 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Info Column */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <div className="lg:col-span-2 space-y-8 order-2 lg:order-1">
                         <header className="space-y-4">
                             <div className="flex flex-wrap gap-2">
                                 <Badge variant="secondary" className="px-3 py-1">
@@ -295,7 +295,7 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                                 )}
                             </div>
 
-                            <h1 className="text-4xl font-bold tracking-tight">{job_details.jobTitle}</h1>
+                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">{job_details.jobTitle}</h1>
 
                             <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-muted-foreground">
                                 <div className="flex items-center gap-2">
@@ -391,16 +391,16 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                         )}
                     </div>
 
-                    {/* Sidebar Column */}
-                    <div className="space-y-6">
-                        <Card className="sticky top-8 border-primary/20 shadow-xl overflow-hidden">
+                    {/* Sidebar Column — shown first on mobile */}
+                    <div className="space-y-6 order-1 lg:order-2">
+                        <Card className="lg:sticky lg:top-8 border-primary/20 shadow-xl overflow-hidden">
                             <div className="h-2 bg-gradient-to-r from-primary to-primary/40" />
                             <CardHeader className="pb-0">
                                 <CardTitle className="text-center text-sm font-medium uppercase tracking-wider text-muted-foreground">
                                     Match Score
                                 </CardTitle>
-                                <div className="text-center py-6">
-                                    <span className="text-6xl font-black text-primary">
+                                <div className="text-center py-4 lg:py-6">
+                                    <span className="text-5xl lg:text-6xl font-black text-primary">
                                         {Math.round(match.percentage_match)}%
                                     </span>
                                 </div>
@@ -506,7 +506,7 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                                             <div className="space-y-4">
                                                 <div className="bg-muted/20 rounded-lg p-4">
                                                     <h4 className="font-medium mb-2">Skill Analysis</h4>
-                                                    <div className="grid grid-cols-2 gap-2">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                         {analysisResult.skill_comparison.map((skill, index) => (
                                                             skill.resume_mentions > 0 && (
                                                                 <Badge key={index} variant="secondary" className="justify-between">
