@@ -491,7 +491,7 @@ export default function MatchesPage() {
                                         </div>
 
                                         {/* Right: Score Card */}
-                                        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/20 text-center min-w-[160px] space-y-2 shrink-0">
+                                        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/20 text-center min-w-[220px] space-y-2 shrink-0">
                                             <div className="text-xs font-bold text-muted-foreground uppercase">Match Score</div>
                                             <div className="text-3xl font-black text-primary">{Math.round(selectedMatch.match.percentage_match)}%</div>
                                             <div className="flex flex-col gap-1.5 pt-1">
