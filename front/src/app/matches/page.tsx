@@ -89,14 +89,9 @@ export default function MatchesPage() {
                 };
             });
 
-            // Backend already filters > 30, but let's ensure sorting by percentage desc
-            const sorted = [...sanitized].sort((a, b) =>
-                b.match.percentage_match - a.match.percentage_match
-            )
-
-            setMatches(sorted)
-            if (sorted.length > 0 && !selectedId) {
-                setSelectedId(sorted[0].match._id || null)
+            setMatches(sanitized)
+            if (sanitized.length > 0 && !selectedId) {
+                setSelectedId(sanitized[0].match._id || null)
             }
         } catch (err: unknown) {
             console.error("Error fetching matches:", err)
