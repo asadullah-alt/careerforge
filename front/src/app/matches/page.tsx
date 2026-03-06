@@ -16,7 +16,8 @@ import {
     IconCalendar,
     IconRosette,
     IconBriefcase,
-    IconCloudUpload
+    IconCloudUpload,
+    IconChartBar
 } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badgeTable"
 import { UserPreferences } from "@/lib/api/user"
@@ -26,8 +27,13 @@ import { Separator } from '@/components/ui/separatorInteractive'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet"
 import FileUpload from "@/components/file-upload"
 import { toast } from "sonner"
-import { setCookie } from "@/utils/cookie"
+import { setCookie, getCfAuthCookie } from "@/utils/cookie"
 import { useResumeStore } from "@/store/resume-store"
+import { FileText } from "lucide-react"
+import { OpenJobCoverLetterModal } from "@/components/open-job-cover-letter-modal"
+import dynamic from "next/dynamic"
+
+const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false })
 
 
 export default function MatchesPage() {
@@ -40,6 +46,25 @@ export default function MatchesPage() {
     const [sheetOpen, setSheetOpen] = useState(false)
     const { selectedResumeId, setSelectedResumeId } = useResumeStore()
     const router = useRouter()
+
+    // Resume analysis state
+    const [analyzing, setAnalyzing] = useState(false)
+    const [analysisResult, setAnalysisResult] = useState<{
+        original_score: number;
+        new_score: number;
+        skill_comparison: Array<{
+            skill: string;
+            resume_mentions: number;
+            job_mentions: number;
+        }>;
+        improvements: Array<{
+            suggestion: string;
+            lineNumber: string;
+        }>;
+        updated_resume_markdown?: string;
+    } | null>(null)
+    const [resumeId, setResumeId] = useState<string | null>(null)
+    const [isCoverLetterModalOpen, setIsCoverLetterModalOpen] = useState(false)
 
     const fetchMatches = async () => {
         try {
@@ -113,6 +138,90 @@ export default function MatchesPage() {
             window.removeEventListener('resume-uploaded', handleResumeUploaded)
         }
     }, [])
+
+    // Fetch resumes to determine resumeId
+    useEffect(() => {
+        const fetchResumes = async () => {
+            try {
+                const token = getCfAuthCookie()
+                const resumesResponse = await fetch(
+                    `https://resume.bhaikaamdo.com/api/v1/resumes/getAllUserResumes?token=${token}`
+                )
+                const resumesData = await resumesResponse.json()
+
+                if (
+                    !resumesData.data ||
+                    !resumesData.data.resumes ||
+                    !Array.isArray(resumesData.data.resumes) ||
+                    resumesData.data.resumes.length === 0
+                ) {
+                    console.error('No resumes found')
+                    return
+                }
+
+                const defaultResumeId = resumesData.data.default_resume
+                const userResumes = resumesData.data.resumes
+                let targetResumeId = userResumes[0].id
+
+                if (defaultResumeId) {
+                    const defaultResumeExists = userResumes.find((r: { id: string }) => r.id === defaultResumeId)
+                    if (defaultResumeExists) {
+                        targetResumeId = defaultResumeId
+                    }
+                }
+
+                setResumeId(targetResumeId)
+            } catch (error) {
+                console.error('Error fetching resumes:', error)
+            }
+        }
+
+        fetchResumes()
+    }, [])
+
+    // Reset analysis when selected match changes
+    useEffect(() => {
+        setAnalysisResult(null)
+        setAnalyzing(false)
+    }, [selectedId])
+
+    const analyzeResume = async () => {
+        const token = getCfAuthCookie()
+        if (!resumeId || !selectedId) {
+            console.error('Resume ID or Match ID not available')
+            return
+        }
+
+        try {
+            setAnalyzing(true)
+
+            const payload: Record<string, unknown> = {
+                match_id: selectedId,
+                resume_id: resumeId,
+                token: token
+            }
+
+            if (analysisResult) {
+                payload.analysis_again = true
+            }
+
+            const analysisResponse = await fetch('https://resume.bhaikaamdo.com/api/v1/resumes/improveOpenJob', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+
+            const analysisData = await analysisResponse.json()
+            console.log('Analysis Result:', analysisData.data)
+            setAnalysisResult(analysisData.data)
+        } catch (error) {
+            console.error('Error analyzing resume:', error)
+        } finally {
+            setAnalyzing(false)
+        }
+    }
 
     const handleUploadSuccess = async (resume_id: string) => {
         try {
@@ -408,6 +517,127 @@ export default function MatchesPage() {
                                         </div>
                                     </section>
                                 )}
+
+                                <Separator />
+
+                                {/* Application Progress / Resume Analysis */}
+                                <section className="space-y-4">
+                                    <h2 className="text-2xl font-bold">Application Progress</h2>
+                                    <div className="bg-card rounded-lg p-6 border shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/50">
+                                        <div className="flex flex-col">
+                                            {analyzing ? (
+                                                <div className="space-y-4">
+                                                    <div className="flex flex-col items-center">
+                                                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                                                        <p className="text-sm text-muted-foreground text-center">
+                                                            Analyzing your resume against this job posting...
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ) : analysisResult && (
+                                                <div className="space-y-6">
+                                                    <div className="flex flex-col items-center">
+                                                        <GaugeComponent
+                                                            type="semicircle"
+                                                            arc={{
+                                                                colorArray: ['#FF2121', '#FFA500', '#00FF15'],
+                                                                padding: 0.02,
+                                                                width: 0.2,
+                                                                subArcs: [
+                                                                    { limit: 40 },
+                                                                    { limit: 60 },
+                                                                    { limit: 100 }
+                                                                ]
+                                                            }}
+                                                            pointer={{ type: "blob", animationDelay: 0 }}
+                                                            value={Math.round(analysisResult.original_score * 100)}
+                                                        />
+                                                        <div className="text-center mt-4">
+                                                            <p className="text-sm font-medium">Match Score</p>
+                                                            <p className="text-2xl font-bold">{Math.round(analysisResult.original_score * 100)}%</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-4">
+                                                        <div className="bg-muted/20 rounded-lg p-4">
+                                                            <h4 className="font-medium mb-2">Skill Analysis</h4>
+                                                            <div className="grid grid-cols-2 gap-2">
+                                                                {analysisResult.skill_comparison.map((skill, index) => (
+                                                                    skill.resume_mentions > 0 && (
+                                                                        <Badge key={index} variant="secondary" className="justify-between">
+                                                                            {skill.skill}
+                                                                            <span className="ml-2 text-xs">{skill.resume_mentions}✓</span>
+                                                                        </Badge>
+                                                                    )
+                                                                ))}
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <h4 className="font-medium mb-2">Missing Skills</h4>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {analysisResult.skill_comparison.map((skill, index) => (
+                                                                    skill.resume_mentions === 0 && (
+                                                                        <Badge key={index} variant="outline" className="border-red-200 text-red-500">
+                                                                            {skill.skill}
+                                                                        </Badge>
+                                                                    )
+                                                                ))}
+                                                            </div>
+                                                        </div>
+
+                                                        {analysisResult.improvements && (
+                                                            <div>
+                                                                <h4 className="font-medium mb-2">Suggested Improvements</h4>
+                                                                <ul className="list-disc pl-4 space-y-1 text-sm text-muted-foreground">
+                                                                    {analysisResult.improvements.slice(0, 3).map((imp, index) => (
+                                                                        <li key={index}>{imp.suggestion}</li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <Button
+                                            className="w-full mt-6"
+                                            size="lg"
+                                            onClick={analyzeResume}
+                                            disabled={analyzing}
+                                        >
+                                            {analyzing ? (
+                                                <>
+                                                    <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
+                                                    Analyzing Resume...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <IconChartBar className="mr-2 h-4 w-4" />
+                                                    {analysisResult ? 'Analyze Again' : 'Analyze Resume'}
+                                                </>
+                                            )}
+                                        </Button>
+
+                                        <Button
+                                            className="w-full mt-4"
+                                            variant="outline"
+                                            size="lg"
+                                            onClick={() => setIsCoverLetterModalOpen(true)}
+                                        >
+                                            <FileText className="mr-2 h-4 w-4" />
+                                            Generate Cover Letter
+                                        </Button>
+
+                                        {selectedMatch.match._id && (
+                                            <OpenJobCoverLetterModal
+                                                isOpen={isCoverLetterModalOpen}
+                                                onClose={() => setIsCoverLetterModalOpen(false)}
+                                                matchId={selectedMatch.match._id}
+                                            />
+                                        )}
+                                    </div>
+                                </section>
                             </div>
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center gap-10 px-8">

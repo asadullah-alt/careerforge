@@ -2,13 +2,19 @@
 
 import React, { use, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { IconArrowLeft, IconMapPin, IconBuilding, IconCalendar, IconBriefcase, IconRosette } from '@tabler/icons-react'
+import { IconArrowLeft, IconMapPin, IconBuilding, IconCalendar, IconBriefcase, IconRosette, IconChartBar } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separatorInteractive'
 import { Badge } from '@/components/ui/badgeTable'
 import { getAuthToken, jobsApi } from '@/lib/api'
 import { EnrichedMatch } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getCfAuthCookie } from '@/utils/cookie'
+import { FileText } from 'lucide-react'
+import { OpenJobCoverLetterModal } from '@/components/open-job-cover-letter-modal'
+import dynamic from 'next/dynamic'
+
+const GaugeComponent = dynamic(() => import('react-gauge-component'), { ssr: false })
 
 export default function MatchDetailPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
     const params = use(paramsPromise)
@@ -16,6 +22,177 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
     const [matchData, setMatchData] = useState<EnrichedMatch | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
+
+    // Resume analysis state
+    const [analyzing, setAnalyzing] = useState(false)
+    const [analysisResult, setAnalysisResult] = useState<{
+        original_score: number;
+        new_score: number;
+        skill_comparison: Array<{
+            skill: string;
+            resume_mentions: number;
+            job_mentions: number;
+        }>;
+        improvements: Array<{
+            suggestion: string;
+            lineNumber: string;
+        }>;
+        updated_resume_markdown?: string;
+    } | null>(null)
+    const [resumeId, setResumeId] = useState<string | null>(null)
+    const [isCoverLetterModalOpen, setIsCoverLetterModalOpen] = useState(false)
+
+    // Fetch resumes on mount to determine resumeId
+    useEffect(() => {
+        const fetchResumes = async () => {
+            try {
+                const token = getCfAuthCookie()
+                const resumesResponse = await fetch(
+                    `https://resume.bhaikaamdo.com/api/v1/resumes/getAllUserResumes?token=${token}`
+                )
+                const resumesData = await resumesResponse.json()
+
+                if (
+                    !resumesData.data ||
+                    !resumesData.data.resumes ||
+                    !Array.isArray(resumesData.data.resumes) ||
+                    resumesData.data.resumes.length === 0
+                ) {
+                    console.error('No resumes found')
+                    return
+                }
+
+                const defaultResumeId = resumesData.data.default_resume
+                const userResumes = resumesData.data.resumes
+                let targetResumeId = userResumes[0].id
+
+                if (defaultResumeId) {
+                    const defaultResumeExists = userResumes.find((r: { id: string }) => r.id === defaultResumeId)
+                    if (defaultResumeExists) {
+                        targetResumeId = defaultResumeId
+                    }
+                }
+
+                setResumeId(targetResumeId)
+            } catch (error) {
+                console.error('Error fetching resumes:', error)
+            }
+        }
+
+        fetchResumes()
+    }, [])
+
+    const analyzeResume = async () => {
+        const token = getCfAuthCookie()
+        if (!resumeId) {
+            console.error('Resume ID not available')
+            return
+        }
+
+        try {
+            setAnalyzing(true)
+
+            const payload: Record<string, unknown> = {
+                match_id: params.id,
+                resume_id: resumeId,
+                token: token
+            }
+
+            if (analysisResult) {
+                payload.analysis_again = true
+            }
+
+            const analysisResponse = await fetch('https://resume.bhaikaamdo.com/api/v1/resumes/improveOpenJob', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+
+            const analysisData = await analysisResponse.json()
+            console.log('Analysis Result:', analysisData.data)
+            setAnalysisResult(analysisData.data)
+        } catch (error) {
+            console.error('Error analyzing resume:', error)
+        } finally {
+            setAnalyzing(false)
+        }
+    }
+
+    // Manage tab title animations while analyzing
+    useEffect(() => {
+        const originalTitle = 'Bhai Kaam Do'
+        const marqueeBase = 'Bhai Kaam Do - Analyzing your Resume   '
+        const marqueeSpeed = 250
+        const flashSpeed = 600
+
+        let marqueeInterval: number | null = null
+        let flashInterval: number | null = null
+        let currentMarquee = marqueeBase
+
+        const startMarquee = () => {
+            document.title = currentMarquee
+            marqueeInterval = window.setInterval(() => {
+                currentMarquee = currentMarquee.slice(1) + currentMarquee.charAt(0)
+                document.title = currentMarquee
+            }, marqueeSpeed)
+        }
+
+        const startFlashing = () => {
+            let show = false
+            flashInterval = window.setInterval(() => {
+                document.title = show ? '● Analyzing...' : originalTitle
+                show = !show
+            }, flashSpeed)
+        }
+
+        const stopAll = () => {
+            if (marqueeInterval !== null) {
+                clearInterval(marqueeInterval)
+                marqueeInterval = null
+            }
+            if (flashInterval !== null) {
+                clearInterval(flashInterval)
+                flashInterval = null
+            }
+            document.title = originalTitle
+            currentMarquee = marqueeBase
+        }
+
+        const handleVisibility = () => {
+            if (!analyzing) return
+            if (!document.hidden) {
+                if (flashInterval !== null) {
+                    clearInterval(flashInterval)
+                    flashInterval = null
+                }
+                if (marqueeInterval === null) startMarquee()
+            } else {
+                if (marqueeInterval !== null) {
+                    clearInterval(marqueeInterval)
+                    marqueeInterval = null
+                }
+                if (flashInterval === null) startFlashing()
+            }
+        }
+
+        if (analyzing) {
+            if (document.hidden) {
+                startFlashing()
+            } else {
+                startMarquee()
+            }
+            document.addEventListener('visibilitychange', handleVisibility)
+            window.addEventListener('focus', handleVisibility)
+        }
+
+        return () => {
+            stopAll()
+            document.removeEventListener('visibilitychange', handleVisibility)
+            window.removeEventListener('focus', handleVisibility)
+        }
+    }, [analyzing])
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -27,9 +204,6 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                     return
                 }
 
-                // We fetch all enriched matches and find the specific one. 
-                // In a real production app, there might be a dedicated /matches/enriched/{id} endpoint
-                // but based on the provided backend code, we have /matches/enriched.
                 const data = await jobsApi.getEnrichedMatches(token) as EnrichedMatch[]
                 const found = data.find(m => m.match._id === params.id)
 
@@ -37,7 +211,6 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                     setMatchData(found)
                     console.log("Job details:", found.job_details)
 
-                    // Mark as seen if it's a new match
                     if (found.match.new_matched_job) {
                         try {
                             jobsApi.markMatchSeen(params.id, token);
@@ -292,6 +465,125 @@ export default function MatchDetailPage({ params: paramsPromise }: { params: Pro
                                         }
                                     })()}
                                 </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Application Progress / Resume Analysis Card */}
+                        <Card className="border shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/50 hover:-translate-y-0.5">
+                            <CardHeader>
+                                <CardTitle>Application Progress</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex flex-col">
+                                    {analyzing ? (
+                                        <div className="space-y-4">
+                                            <div className="flex flex-col items-center">
+                                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                                                <p className="text-sm text-muted-foreground text-center">
+                                                    Analyzing your resume against this job posting...
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ) : analysisResult && (
+                                        <div className="space-y-6">
+                                            <div className="flex flex-col items-center">
+                                                <GaugeComponent
+                                                    type="semicircle"
+                                                    arc={{
+                                                        colorArray: ['#FF2121', '#FFA500', '#00FF15'],
+                                                        padding: 0.02,
+                                                        width: 0.2,
+                                                        subArcs: [
+                                                            { limit: 40 },
+                                                            { limit: 60 },
+                                                            { limit: 100 }
+                                                        ]
+                                                    }}
+                                                    pointer={{ type: "blob", animationDelay: 0 }}
+                                                    value={Math.round(analysisResult.original_score * 100)}
+                                                />
+                                                <div className="text-center mt-4">
+                                                    <p className="text-sm font-medium">Match Score</p>
+                                                    <p className="text-2xl font-bold">{Math.round(analysisResult.original_score * 100)}%</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <div className="bg-muted/20 rounded-lg p-4">
+                                                    <h4 className="font-medium mb-2">Skill Analysis</h4>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        {analysisResult.skill_comparison.map((skill, index) => (
+                                                            skill.resume_mentions > 0 && (
+                                                                <Badge key={index} variant="secondary" className="justify-between">
+                                                                    {skill.skill}
+                                                                    <span className="ml-2 text-xs">{skill.resume_mentions}✓</span>
+                                                                </Badge>
+                                                            )
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <h4 className="font-medium mb-2">Missing Skills</h4>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {analysisResult.skill_comparison.map((skill, index) => (
+                                                            skill.resume_mentions === 0 && (
+                                                                <Badge key={index} variant="outline" className="border-red-200 text-red-500">
+                                                                    {skill.skill}
+                                                                </Badge>
+                                                            )
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {analysisResult.improvements && (
+                                                    <div>
+                                                        <h4 className="font-medium mb-2">Suggested Improvements</h4>
+                                                        <ul className="list-disc pl-4 space-y-1 text-sm text-muted-foreground">
+                                                            {analysisResult.improvements.slice(0, 3).map((imp, index) => (
+                                                                <li key={index}>{imp.suggestion}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <Button
+                                    className="w-full mt-6"
+                                    size="lg"
+                                    onClick={analyzeResume}
+                                    disabled={analyzing}
+                                >
+                                    {analyzing ? (
+                                        <>
+                                            <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
+                                            Analyzing Resume...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <IconChartBar className="mr-2 h-4 w-4" />
+                                            {analysisResult ? 'Analyze Again' : 'Analyze Resume'}
+                                        </>
+                                    )}
+                                </Button>
+
+                                <Button
+                                    className="w-full mt-4"
+                                    variant="outline"
+                                    size="lg"
+                                    onClick={() => setIsCoverLetterModalOpen(true)}
+                                >
+                                    <FileText className="mr-2 h-4 w-4" />
+                                    Generate Cover Letter
+                                </Button>
+
+                                <OpenJobCoverLetterModal
+                                    isOpen={isCoverLetterModalOpen}
+                                    onClose={() => setIsCoverLetterModalOpen(false)}
+                                    matchId={params.id}
+                                />
                             </CardContent>
                         </Card>
 
