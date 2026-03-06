@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import AuthGuard from "@/components/auth-guard"
@@ -223,6 +223,16 @@ export default function MatchesPage() {
         }
     }
 
+    // Ref for smooth scrolling to analysis results
+    const analysisRef = useRef<HTMLDivElement>(null)
+
+    // Scroll to analysis section when analysis completes
+    useEffect(() => {
+        if (analysisResult && !analyzing && analysisRef.current) {
+            analysisRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+    }, [analysisResult, analyzing])
+
     const handleUploadSuccess = async (resume_id: string) => {
         try {
             const token = getAuthToken()
@@ -408,7 +418,7 @@ export default function MatchesPage() {
                     <main className="hidden md:block flex-grow overflow-y-auto bg-background p-8">
                         {selectedMatch ? (
                             <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                                <header className="space-y-4">
+                                <header className="space-y-3">
                                     <div className="flex flex-wrap gap-2">
                                         <Badge variant="secondary" className="px-3 py-1">
                                             {selectedMatch.job_details.employmentType}
@@ -425,26 +435,80 @@ export default function MatchesPage() {
                                         )}
                                     </div>
 
-                                    <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
-                                        <h1 className="text-2xl lg:text-4xl font-bold tracking-tight">{selectedMatch.job_details.jobTitle}</h1>
-                                        <div className="bg-primary/5 p-5 rounded-2xl border border-primary/20 text-center w-full lg:min-w-[180px] lg:w-auto space-y-3">
-                                            <div className="text-xs font-bold text-muted-foreground uppercase mb-1">Match Score</div>
-                                            <div className="text-4xl font-black text-primary">{Math.round(selectedMatch.match.percentage_match)}%</div>
-                                            <div className="flex flex-col gap-2 pt-2">
+                                    <div className="flex justify-between items-start gap-6">
+                                        {/* Left: Title + Company + Location + Buttons */}
+                                        <div className="flex-1 space-y-3">
+                                            <h1 className="text-2xl lg:text-4xl font-bold tracking-tight">{selectedMatch.job_details.jobTitle}</h1>
+
+                                            <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-muted-foreground text-sm">
+                                                <div className="flex items-center gap-1.5">
+                                                    <IconBuilding size={16} className="text-primary" />
+                                                    <span className="font-semibold text-foreground">
+                                                        {selectedMatch.job_details.companyProfile?.companyName}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <IconMapPin size={16} />
+                                                    <span>
+                                                        {[
+                                                            selectedMatch.job_details.location?.city,
+                                                            selectedMatch.job_details.location?.state,
+                                                            selectedMatch.job_details.location?.country
+                                                        ].filter(Boolean).join(", ") || selectedMatch.job_details.location?.remoteStatus}
+                                                    </span>
+                                                </div>
+                                                {selectedMatch.job_details.datePosted && (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <IconCalendar size={16} />
+                                                        <span>Posted {selectedMatch.job_details.datePosted}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="flex gap-3 pt-1">
+                                                <Button
+                                                    className="h-9 px-6 font-bold"
+                                                    asChild
+                                                    onClick={async () => {
+                                                        const token = getAuthToken();
+                                                        if (token && selectedMatch.match._id) {
+                                                            try {
+                                                                await jobsApi.markMatchApplied(selectedMatch.match._id, token);
+                                                            } catch (err) {
+                                                                console.error("Error marking match as applied:", err);
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    <a href={selectedMatch.job_details.job_url} target="_blank" rel="noopener noreferrer">
+                                                        Apply Now
+                                                    </a>
+                                                </Button>
+                                                <Button variant="outline" className="h-9 px-6" asChild>
+                                                    <Link href={`/matches/${encodeURIComponent(selectedMatch.match._id || '')}`}>Full Page Mode</Link>
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {/* Right: Score Card */}
+                                        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/20 text-center min-w-[160px] space-y-2 shrink-0">
+                                            <div className="text-xs font-bold text-muted-foreground uppercase">Match Score</div>
+                                            <div className="text-3xl font-black text-primary">{Math.round(selectedMatch.match.percentage_match)}%</div>
+                                            <div className="flex flex-col gap-1.5 pt-1">
                                                 <Button
                                                     size="sm"
-                                                    className="w-full"
+                                                    className="w-full h-8 text-xs"
                                                     onClick={analyzeResume}
                                                     disabled={analyzing}
                                                 >
                                                     {analyzing ? (
                                                         <>
-                                                            <div className="animate-spin mr-2 h-3 w-3 border-2 border-current border-t-transparent rounded-full"></div>
+                                                            <div className="animate-spin mr-1.5 h-3 w-3 border-2 border-current border-t-transparent rounded-full"></div>
                                                             Analyzing...
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <IconChartBar className="mr-1.5 h-3.5 w-3.5" />
+                                                            <IconChartBar className="mr-1 h-3 w-3" />
                                                             {analysisResult ? 'Analyze Again' : 'Analyze Resume'}
                                                         </>
                                                     )}
@@ -452,10 +516,10 @@ export default function MatchesPage() {
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
-                                                    className="w-full"
+                                                    className="w-full h-8 text-xs"
                                                     onClick={() => setIsCoverLetterModalOpen(true)}
                                                 >
-                                                    <FileText className="mr-1.5 h-3.5 w-3.5" />
+                                                    <FileText className="mr-1 h-3 w-3" />
                                                     Cover Letter
                                                 </Button>
                                             </div>
@@ -468,56 +532,7 @@ export default function MatchesPage() {
                                             )}
                                         </div>
                                     </div>
-
-                                    <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-muted-foreground">
-                                        <div className="flex items-center gap-2">
-                                            <IconBuilding size={20} className="text-primary" />
-                                            <span className="font-semibold text-foreground text-lg">
-                                                {selectedMatch.job_details.companyProfile?.companyName}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <IconMapPin size={20} />
-                                            <span>
-                                                {[
-                                                    selectedMatch.job_details.location?.city,
-                                                    selectedMatch.job_details.location?.state,
-                                                    selectedMatch.job_details.location?.country
-                                                ].filter(Boolean).join(", ") || selectedMatch.job_details.location?.remoteStatus}
-                                            </span>
-                                        </div>
-                                        {selectedMatch.job_details.datePosted && (
-                                            <div className="flex items-center gap-2">
-                                                <IconCalendar size={20} />
-                                                <span>Posted {selectedMatch.job_details.datePosted}</span>
-                                            </div>
-                                        )}
-                                    </div>
                                 </header>
-
-                                <div className="flex gap-4">
-                                    <Button
-                                        className="h-11 px-8 font-bold"
-                                        asChild
-                                        onClick={async () => {
-                                            const token = getAuthToken();
-                                            if (token && selectedMatch.match._id) {
-                                                try {
-                                                    await jobsApi.markMatchApplied(selectedMatch.match._id, token);
-                                                } catch (err) {
-                                                    console.error("Error marking match as applied:", err);
-                                                }
-                                            }
-                                        }}
-                                    >
-                                        <a href={selectedMatch.job_details.job_url} target="_blank" rel="noopener noreferrer">
-                                            Apply Now
-                                        </a>
-                                    </Button>
-                                    <Button variant="outline" className="h-11 px-8" asChild>
-                                        <Link href={`/matches/${encodeURIComponent(selectedMatch.match._id || '')}`}>Full Page Mode</Link>
-                                    </Button>
-                                </div>
 
                                 <Separator />
 
@@ -558,7 +573,7 @@ export default function MatchesPage() {
                                 {(analyzing || analysisResult) && (
                                     <>
                                         <Separator />
-                                        <section className="space-y-4">
+                                        <section ref={analysisRef} className="space-y-4 scroll-mt-4">
                                             <h2 className="text-2xl font-bold">Resume Analysis</h2>
                                             <div className="bg-card rounded-lg p-6 border shadow-sm">
                                                 {analyzing ? (
